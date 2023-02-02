@@ -22,7 +22,7 @@ ALL_TOKENS = [
 def check_tokens(tokens: list) -> None:
     """Проверяет доступность токенов."""
     logger.debug('Try to check the availability of tokens.')
-    if all(ALL_TOKENS):
+    if all(tokens):
         logger.debug('Tokens check succeed.')
         return
     logger.critical(f'Tokens check failed!')
@@ -47,7 +47,7 @@ def check_telegram_bot_response(token: str) -> None:
 
 def check_vk_response(token: str) -> vk_api.VkApi.method:
     """Проверяет доступность методов VK API."""
-    session: vk_api.VkApi = vk_api.VkApi(token=app_data.VK_TOKEN)
+    session: vk_api.VkApi = vk_api.VkApi(token=token)
     vk: vk_api.VkApi.method = session.get_api()
     try:
         vk.status.get(user_id=app_data.VK_USER_ME)
@@ -62,7 +62,7 @@ def main():
     logger.info('Program is running.')
     check_tokens(tokens=ALL_TOKENS)
     check_telegram_bot_response(token=app_data.TELEGRAM_BOT_TOKEN)
-    vk = check_vk_response(token=app_data.VK_TOKEN)
+    vk: vk_api.VkApi.method = check_vk_response(token=app_data.VK_TOKEN)
     telegram_bot: telegram.Bot = telegram.Bot(token=app_data.TELEGRAM_BOT_TOKEN)
     logger.info('All check passed successfully!')
 
