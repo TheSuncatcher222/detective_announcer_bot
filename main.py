@@ -62,7 +62,7 @@ def main():
     logger.info('Program is running.')
     check_tokens(tokens=ALL_TOKENS)
     check_telegram_bot_response(token=app_data.TELEGRAM_BOT_TOKEN)
-    vk: vk_api.VkApi.method = check_vk_response(token=app_data.VK_TOKEN)
+    vk: vk_api.VkApi.method = check_vk_response(token=app_data.VK_TOKEN_ADMIN)
     telegram_bot: telegram.Bot = telegram.Bot(token=app_data.TELEGRAM_BOT_TOKEN)
     logger.info('All check passed successfully!')
 
