@@ -4,9 +4,12 @@ from http import HTTPStatus
 import logging
 from re import findall
 import requests
+from requests.exceptions import ConnectionError
 import sys
 import telegram
+from telegram import TelegramError
 import vk_api
+from vk_api.exceptions import ApiError
 from time import sleep
 
 
@@ -35,39 +38,38 @@ next_game_teammates = 5
 
 def check_env(data: list) -> None:
     """Проверяет доступность переменных окружения."""
-    logger.debug('Try to check the availability of tokens.')
-    if all(data):
-        logger.debug('Tokens check succeed.')
-        return
-    logger.critical('Tokens check failed!')
-    sys.exit()
+    if not all(data):
+        raise SystemExit
 
 
 def check_telegram_bot_response(token: str) -> None:
-    """Проверяет ответ TELEGRAM BOT API."""
-    logger.debug('Try to connect to telegram API with given token.')
+    """Проверяет ответ telegram BOT API."""
     response: requests.Response = requests.get(
         f'https://api.telegram.org/bot{token}/getMe')
     status: int = response.status_code
     if status == HTTPStatus.OK:
-        logger.debug('Bot is available.')
         return
     if status == HTTPStatus.UNAUTHORIZED:
-        logger.critical('Bot is unavailable! Invalid token!')
+        logger.critical('Telegram bot token is invalid!')
+        raise SystemExit
     else:
-        logger.warning('Telegram API is unavailable!')
-    sys.exit()
+        logger.warning(
+            f'Telegram API is unavailable with status {status}! '
+            'Try to reconnect in 5 minutes.'
+        )
+        sleep(300)
+        check_telegram_bot_response(token=token)
 
 
 def check_vk_response(token: str) -> vk_api.VkApi.method:
-    """Проверяет доступность методов VK API."""
+    """Проверяет доступность методов VK API. Создает сессию."""
     session: vk_api.VkApi = vk_api.VkApi(token=token)
     vk: vk_api.VkApi.method = session.get_api()
     try:
         vk.status.get(user_id=app_data.VK_USER_ME)
     except vk_api.exceptions.ApiError:
         logger.critical('VK is unavailable! Invalid token!')
-        sys.exit()
+        raise SystemExit
     return vk
 
 
@@ -79,32 +81,50 @@ def check_vk_response(token: str) -> vk_api.VkApi.method:
 def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
     """Определяет, есть ли в таргет-группе VK новый пост."""
     post: dict = {}
-    logger.debug('Try to receive data from VK group wall.')
-    wall: dict = vk.wall.get(
-        owner_id=f'-{app_data.VK_GROUP_TARGET}',
-        count=2
-    )
-    for num in (app_data.NON_PINNED_POST, app_data.NON_PINNED_POST):
-        if wall['items'][num]['id'] > last_id:
-            post = wall['items'][num]
-            break
+    try:
+        wall: dict = vk.wall.get(
+            owner_id=f'-{app_data.VK_GROUP_TARGET}',
+            count=2
+        )
+    except ApiError:
+        logger.critical('VK group ID is invalid!')
+        raise SystemExit
+    for num in (app_data.NON_PINNED_POST, app_data.PINNED_POST):
+        try:
+            if wall['items'][num]['id'] > last_id:
+                post = wall['items'][num]
+                break
+        except IndexError:
+            pass
+        except KeyError:
+            logger.warning("Post's json from VK wall has unknown structure!")
+            logger.error(exc_info=True)
+            raise Exception
     return post
 
 
 def recognize_post_topic(post: dict) -> str:
     """Определяет тематику поста."""
-    post_text: str = post['text']
+    try:
+        post_text: str = post['text']
+    except KeyError:
+        logger.warning("Post's json from VK wall has unknown structure!")
+        logger.error(exc_info=True)
+        raise Exception
     for key_tag in app_data.POST_TOPICS:
         if key_tag in post_text:
-            logger.info(f'Topic is: {app_data.POST_TOPICS[key_tag]}')
             return app_data.POST_TOPICS[key_tag]
-    logger.info('Topic is: other')
     return 'other'
 
 
 def parse_post(post: dict, post_topic: str) -> dict:
     """Производит структурный анализ и разделяет пост на составные части."""
-    post_id: int = post['id']
+    try:
+        post_id: int = post['id']
+    except KeyError:
+        logger.warning("Post's json from VK wall has unknown structure!")
+        logger.error(exc_info=True)
+        raise Exception
     post_text: str = None
     if post_topic == 'stop-list':
         post_text = ['Вы в белом списке регистрации на эту игру!']
@@ -114,16 +134,31 @@ def parse_post(post: dict, post_topic: str) -> dict:
         if app_data.TEAM_NAME in pdf_text:
             post_text = ['Команда уже была на представленной серии игр!']
     else:
-        fixed_text: str = post['text'].replace('\n \n', '\n\n')
+        try:
+            unfixed_text: str = post['text']
+            if not isinstance(unfixed_text, str):
+                raise KeyError
+        except KeyError:
+            logger.warning("Post's json from VK wall has unknown structure!")
+            logger.error(exc_info=True)
+            raise Exception
+        fixed_text: str = unfixed_text.replace('\n \n', '\n\n')
         fixed_text = fixed_text.replace('\n', '\n\n')
         splitted_text: list = fixed_text.split('\n\n')
         try:
             while 1:
                 splitted_text.remove('')
-        except Exception:
+        except ValueError:
             pass
     if post_topic not in ('photos', 'prize_results'):
-        post_image_url = post['attachments'][0]['photo']['sizes'][4]['url']
+        try:
+            post_image_url = post['attachments'][0]['photo']['sizes'][4]['url']
+            if 'http' not in post_image_url:
+                raise Exception
+        except Exception:
+            logger.warning("Post's json from VK wall has unknown structure!")
+            logger.error(exc_info=True)
+            raise Exception
     if post_topic == 'preview':
         post_text = splitted_text[:3]
         game_dates: list = findall(
@@ -148,6 +183,17 @@ def parse_post(post: dict, post_topic: str) -> dict:
         post_text += (splitted_text[len(splitted_text)-7:len(splitted_text)-1])
     if post_topic == 'prize_results':
         post_text = splitted_text[:len(splitted_text)-1]
+        try:
+            response = requests.get(app_data.VK_GROUP_TARGET_LOGO)
+        except ConnectionError:
+            logger.warning("Post's json from VK wall has unknown structure!")
+            logger.error(exc_info=True)
+            raise Exception
+        if response.status_code != HTTPStatus.OK:
+            logger.warning(
+                "Post's picture URL is unavaliable with "
+                f"status {response.status_code}!")
+            raise Exception
         post_image_url = app_data.VK_GROUP_TARGET_LOGO
     if post_topic == 'photos':
         post_text_1 = ['📷 Фотографии 📷']
@@ -172,22 +218,26 @@ def parse_post(post: dict, post_topic: str) -> dict:
 
 def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> bool:
     """Отправляет полученные данные с ВК в телеграм."""
-    NL: str = '\n'
     output_text: str = ''
     for paragraph in parsed_post['post_text']:
-        output_text += (paragraph + 2*NL)
-    telegram_bot.send_photo(
-        chat_id=app_data.TELEGRAM_ME,
-        photo=parsed_post['post_image_url'],
-        caption=output_text)
-    if 'game_dates' in parsed_post:
-        output_text = ''
-        for button in parsed_post['game_dates']:
-            output_text += (button + NL)
-        telegram_bot.send_message(
+        output_text += (paragraph + 2*'\n')
+    try:
+        telegram_bot.send_photo(
             chat_id=app_data.TELEGRAM_ME,
-            text=output_text
-        )
+            photo=parsed_post['post_image_url'],
+            caption=output_text)
+        if 'game_dates' in parsed_post:
+            output_text = ''
+            for button in parsed_post['game_dates']:
+                output_text += (button + '\n')
+            telegram_bot.send_message(
+                chat_id=app_data.TELEGRAM_ME,
+                text=output_text
+            )
+    except TelegramError:
+        text: str = ("Bot can't send the message")
+        logger.error(text, exc_info=True)
+        raise Exception
     return True
 
 
@@ -200,33 +250,36 @@ def main():
     """Основная логика работы бота."""
     logger.info('Program is running.')
     check_env(data=ALL_DATA)
+    logger.debug('Data check succeed.')
     check_telegram_bot_response(token=app_data.TELEGRAM_BOT_TOKEN)
+    logger.debug('Bot is available.')
     vk: vk_api.VkApi.method = check_vk_response(token=app_data.VK_TOKEN_ADMIN)
+    logger.debug('VK is available.')
     telegram_bot: telegram.Bot = telegram.Bot(token=app_data.TELEGRAM_BOT_TOKEN)
-    logger.info('All check passed successfully!')
     # Это надо получать из JSON
     last_vk_wall_id = 0
-
+    logger.info('All check passed successfully! Start polling.')
     while 1:
-        update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
-        # update = vk_wall_json_example.preview
-        if update:
-            logger.debug('New post available!')
-            logger.debug('Try recognize post topic.')
-            topic = recognize_post_topic(post=update)
-            logger.debug('Recognition of post topic successful!')
-            parsed_post = parse_post(post=update, post_topic=topic)
-            logger.debug('Post parsed!')
-            if parsed_post['post_text']:
-                send_update(telegram_bot=telegram_bot, parsed_post=parsed_post)
-                logger.info('Message sent!')
+        try:
+            logger.debug('Try to receive data from VK group wall.')
+            update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
+            # update = vk_wall_json_example.photos
+            if update:
+                logger.debug('New post available!')
+                topic = recognize_post_topic(post=update)
+                parsed_post = parse_post(post=update, post_topic=topic)
+                if parsed_post['post_text']:
+                    send_update(telegram_bot=telegram_bot, parsed_post=parsed_post)
+                    logger.info('Message sent!')
             else:
-                logger.info('No need send message.')
-        else:
-            logger.debug(
-                'No updates available. '
-                f'Sleep for {app_data.API_UPDATE} sec.'
-            )
+                logger.debug('No updates available.')
+        except SystemExit:
+            # Отправить сообщение
+            sys.exit()
+        except Exception:
+            # Отправить сообщение
+            pass
+        logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
         sleep(app_data.API_UPDATE)
         # break
 
