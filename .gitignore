@@ -130,3 +130,6 @@ dmypy.json
 
 # ToDo list
 todo
+
+# VK json example
+vk_wall_json_example.py
