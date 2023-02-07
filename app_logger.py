@@ -5,7 +5,7 @@ FORMATTER: str = (
     + '(%(lineno)d) - %(message)s'
 )
 
-logging.basicConfig(level=logging.DEBUG, format=FORMATTER)
+logging.basicConfig(level=logging.INFO, format=FORMATTER)
 
 
 def get_logger(name: str) -> logging.Logger:
