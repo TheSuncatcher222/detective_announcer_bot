@@ -1,10 +1,11 @@
 # -*- coding: UTF-8 -*-
 
 from http import HTTPStatus
+import json
+from json.decoder import JSONDecodeError
 import logging
 from re import findall
 import requests
-from requests.exceptions import ConnectionError
 import sys
 import telegram
 from telegram import TelegramError
@@ -12,10 +13,8 @@ import vk_api
 from vk_api.exceptions import ApiError
 from time import sleep
 
-
 import app_data
 import app_logger
-import vk_wall_json_example
 
 logger: logging.Logger = app_logger.get_logger(__name__)
 
@@ -28,8 +27,6 @@ ALL_DATA = [
     app_data.VK_GROUP_TARGET,
     app_data.TEAM_NAME
 ]
-
-next_game_teammates = 5
 
 """
 Общий функционал.
@@ -55,8 +52,7 @@ def check_telegram_bot_response(token: str) -> None:
     else:
         logger.warning(
             f'Telegram API is unavailable with status {status}! '
-            'Try to reconnect in 5 minutes.'
-        )
+            'Try to reconnect in 5 minutes.')
         sleep(300)
         check_telegram_bot_response(token=token)
 
@@ -73,6 +69,23 @@ def check_vk_response(token: str) -> vk_api.VkApi.method:
     return vk
 
 
+def json_data_read(file_name: str, key: str):
+    try:
+        with open(file_name) as read_file:
+            data = json.load(read_file)
+            return data[key]
+    except FileNotFoundError:
+        logger.info(f"JSON '{file_name}' doesn't exists. Creating new one.")
+    except JSONDecodeError:
+        logger.info(f"JSON doesn't contain key '{key}'")
+    return None
+
+
+def json_data_write(file_name: str, data: dict):
+    with open(file_name, 'w') as write_file:
+        json.dump(data, write_file)
+
+
 """
 Функционал на стороне VK API.
 """
@@ -82,10 +95,7 @@ def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
     """Определяет, есть ли в таргет-группе VK новый пост."""
     post: dict = {}
     try:
-        wall: dict = vk.wall.get(
-            owner_id=f'-{app_data.VK_GROUP_TARGET}',
-            count=2
-        )
+        wall: dict = vk.wall.get(owner_id=f'-{app_data.VK_GROUP_TARGET}', count=2)
     except ApiError:
         logger.critical('VK group ID is invalid!')
         raise SystemExit
@@ -163,17 +173,15 @@ def parse_post(post: dict, post_topic: str) -> dict:
         post_text = splitted_text[:3]
         game_dates: list = findall(
             r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
-            fixed_text
-        )
+            fixed_text)
         post_text += splitted_text[len(splitted_text)-3:len(splitted_text)-2]
-    if post_topic == 'checkin' and next_game_teammates >= 4:
+    if post_topic == 'checkin':
         post_text_1 = splitted_text[:1]
         post_text_2 = splitted_text[len(splitted_text)-5:len(splitted_text)-3]
         post_text_3 = [
             'Действует розыгрыш бесплатного входа на всю команду! '
             'Чтобы принять в нем участие, нужно вступить в группу и сделать '
-            'репост этой записи:'
-        ]
+            'репост этой записи:']
         post_link = [app_data.VK_POST_LINK.format(app_data.VK_GROUP_TARGET, post_id)]
         post_text = post_text_1 + post_text_2 + post_text_3 + post_link
     if post_topic == 'teams':
@@ -183,24 +191,21 @@ def parse_post(post: dict, post_topic: str) -> dict:
         post_text += (splitted_text[len(splitted_text)-7:len(splitted_text)-1])
     if post_topic == 'prize_results':
         post_text = splitted_text[:len(splitted_text)-1]
-        try:
-            response = requests.get(app_data.VK_GROUP_TARGET_LOGO)
-        except ConnectionError:
-            logger.warning("Post's json from VK wall has unknown structure!")
-            logger.error(exc_info=True)
-            raise Exception
+        response = requests.get(app_data.VK_GROUP_TARGET_LOGO)
         if response.status_code != HTTPStatus.OK:
             logger.warning(
-                "Post's picture URL is unavaliable with "
+                "Group main picture URL is unavaliable with "
                 f"status {response.status_code}!")
             raise Exception
         post_image_url = app_data.VK_GROUP_TARGET_LOGO
     if post_topic == 'photos':
         post_text_1 = ['📷 Фотографии 📷']
         post_text_2 = splitted_text[:len(splitted_text)-2]
-        post_link = [app_data.VK_POST_LINK.format(app_data.VK_GROUP_TARGET, post_id)]
+        post_link = [
+            app_data.VK_POST_LINK.format(app_data.VK_GROUP_TARGET, post_id)]
         post_text = post_text_1 + post_text_2 + post_link
-        post_image_url = post['attachments'][0]['album']['thumb']['sizes'][3]['url']
+        post_image_url = (
+            post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
     if post_topic == 'other':
         if '#detectitspb' in splitted_text[len(splitted_text)-1]:
             post_text = splitted_text[:len(splitted_text)-1]
@@ -209,8 +214,7 @@ def parse_post(post: dict, post_topic: str) -> dict:
     parsed_post: dict = {
         'post_id': post_id,
         'post_image_url': post_image_url,
-        'post_text': post_text,
-    }
+        'post_text': post_text}
     if 'game_dates' in locals():
         parsed_post['game_dates'] = game_dates
     return parsed_post
@@ -255,33 +259,44 @@ def main():
     logger.debug('Bot is available.')
     vk: vk_api.VkApi.method = check_vk_response(token=app_data.VK_TOKEN_ADMIN)
     logger.debug('VK is available.')
-    telegram_bot: telegram.Bot = telegram.Bot(token=app_data.TELEGRAM_BOT_TOKEN)
-    # Это надо получать из JSON
-    last_vk_wall_id = 0
+    telegram_bot: telegram.Bot = telegram.Bot(
+        token=app_data.TELEGRAM_BOT_TOKEN)
+    last_vk_wall_id = json_data_read(
+        file_name='last_vk_wall_id.json',
+        key='last_vk_wall_id')
+    if not last_vk_wall_id:
+        last_vk_wall_id = 0
+        json_data_write(
+            file_name='last_vk_wall_id.json',
+            data={'last_vk_wall_id': 0})
     logger.info('All check passed successfully! Start polling.')
+    print(last_vk_wall_id)
     while 1:
         try:
             logger.debug('Try to receive data from VK group wall.')
             update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
-            # update = vk_wall_json_example.photos
             if update:
                 logger.debug('New post available!')
                 topic = recognize_post_topic(post=update)
                 parsed_post = parse_post(post=update, post_topic=topic)
-                if parsed_post['post_text']:
-                    send_update(telegram_bot=telegram_bot, parsed_post=parsed_post)
+                message: bool = send_update(
+                    telegram_bot=telegram_bot,
+                    parsed_post=parsed_post)
+                logger.info(f'Message value is: {message}')
+                if message:
                     logger.info('Message sent!')
+                    last_vk_wall_id = parsed_post['post_id']
+                    json_data_write(
+                        file_name='last_vk_wall_id.json',
+                        data={'last_vk_wall_id': last_vk_wall_id})
             else:
                 logger.debug('No updates available.')
         except SystemExit:
-            # Отправить сообщение
             sys.exit()
         except Exception:
-            # Отправить сообщение
             pass
         logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
         sleep(app_data.API_UPDATE)
-        # break
 
 
 if __name__ == '__main__':
