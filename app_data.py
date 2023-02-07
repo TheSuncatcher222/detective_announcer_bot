@@ -18,7 +18,7 @@ VK_GROUP_TARGET_LOGO: str = (
 
 VK_POST_LINK: str = 'https://vk.com/detectit_spb?w=wall-{}_{}'
 
-API_UPDATE: int = 300
+API_UPDATE: int = 1
 
 PINNED_POST: int = 0
 NON_PINNED_POST: int = 1
