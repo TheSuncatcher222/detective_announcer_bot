@@ -82,9 +82,13 @@ def parse_post(post: dict, post_topic: str) -> dict:
         raise Exception
     post_text: str = None
     if post_topic == 'stop-list':
-        post_text = ['Вы в белом списке регистрации на эту игру!']
-        response = requests.get(
-            post['attachments'][1]['doc']['url'])
+        try:
+            response = requests.get(
+                post['attachments'][1]['doc']['url'])
+        except Exception:
+            logger.warning("Post's json from VK wall has unknown structure!")
+            logger.error(exc_info=True)
+            raise Exception
         filename = 'stop-list.pdf'
         open(filename, 'wb').write(response.content)
         reader = PdfReader(filename)
@@ -178,6 +182,8 @@ def parse_post(post: dict, post_topic: str) -> dict:
 
 def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
     """Отправляет полученные данные с ВК в телеграм чат."""
+    if not parsed_post['post_text']:
+        return True
     output_text: str = ''
     for paragraph in parsed_post['post_text']:
         output_text += (paragraph + 2*'\n')
@@ -187,7 +193,7 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
             photo=parsed_post['post_image_url'],
             caption=output_text)
         if 'game_dates' in parsed_post:
-            send_message_dates(parsed_post['game_dates'])
+            send_message_dates(game_dates = parsed_post['game_dates'])
     except TelegramError:
         text: str = ("Bot can't send the message")
         logger.error(text, exc_info=True)
@@ -200,12 +206,12 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
 """
 
 
-def send_message_dates(message_id: int = None):
+def send_message_dates(game_dates: list, message_id: int = None):
     """
     Отправляет сообщение с датами игр и участниками.
     Если указан message_id - редактирует раннее отправленное сообщение.
     """
-    pass
+    print(game_dates)
 
 
 def send_message(bot: telegram.Bot, message: str) -> True:
@@ -301,11 +307,12 @@ def main():
             file_name='last_vk_wall_id.json',
             data={'last_vk_wall_id': 0})
     logger.info('All check passed successfully! Start polling.')
-    print(last_vk_wall_id)
     while 1:
         try:
             logger.debug('Try to receive data from VK group wall.')
             update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
+            import vk_wall_json_example
+            update = vk_wall_json_example.preview
             if update:
                 logger.info('New post available!')
                 topic = recognize_post_topic(post=update)
@@ -314,7 +321,7 @@ def main():
                     telegram_bot=telegram_bot,
                     parsed_post=parsed_post)
                 if message:
-                    logger.info('Message sent!')
+                    logger.info('Sending update complete!')
                     last_vk_wall_id = parsed_post['post_id']
                     json_data_write(
                         file_name='last_vk_wall_id.json',
@@ -327,6 +334,7 @@ def main():
             pass
         logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
         sleep(app_data.API_UPDATE)
+        sys.exit()
 
 
 if __name__ == '__main__':
