@@ -23,7 +23,7 @@ API_UPDATE: int = 1
 PINNED_POST: int = 0
 NON_PINNED_POST: int = 1
 
-POST_TOPICS: dict = {
+POST_TOPICS: dict[str, str] = {
     '#detectit_preview': 'preview',
     'Stop-list': 'stop-list',
     '#detectit_checkin': 'checkin',
@@ -34,13 +34,13 @@ POST_TOPICS: dict = {
     '#detectit_photos': 'photos',
 }
 
-LOCATIONS: dict = {
+LOCATIONS: dict[str, str] = {
     'Горьковской': 'ParkKing" (Александровский Парк, 4, ст.м. Горьковская)',
     'Чернышевской': '"Дворец «Олимпия»" (Литейный пр., д. 14, ст.м. Чернышевская)',
     'Василеостровской': '"Цинь" (16-я лин. B.O., 83, ст.м. Василеостровская)',
 }
 
-TEAMMATES = {
+TEAMMATES: dict[int, str] = {
     602516446: os.getenv('PLAYER_602516446'),
     354986248: os.getenv('PLAYER_354986248'),
     897453301: os.getenv('PLAYER_897453301'),
@@ -48,10 +48,16 @@ TEAMMATES = {
     124478813: os.getenv('PLAYER_124478813')
 }
 
-EMOJI_NUMBERS: dict = {
+EMOJI_NUMBERS: dict[int, str] = {
     1: '1️⃣',
     2: '2️⃣',
     3: '3️⃣',
     4: '4️⃣',
     5: '5️⃣',
+}
+
+MEDALS: dict[int, list[str]] = {
+    -2: ['#detectit_medal #detectit_gold_medal'],
+    -4: ['#detectit_medal #detectit_silver_medal'],
+    -6: ['#detectit_medal #detectit_bronze_medal'],
 }
