@@ -141,6 +141,10 @@ def parse_post(post: dict, post_topic: str) -> dict:
     if post_topic == 'game_results' and app_data.TEAM_NAME in fixed_text:
         post_text = splitted_text[:2]
         post_text += (splitted_text[len(splitted_text)-7:len(splitted_text)-1])
+        for paragraph, medal in app_data.MEDALS.items():
+            if app_data.TEAM_NAME in post_text[paragraph]:
+                post_text += medal
+                break
     if post_topic == 'prize_results':
         post_text = splitted_text[:len(splitted_text)-1]
         response = requests.get(app_data.VK_GROUP_TARGET_LOGO)
@@ -163,7 +167,7 @@ def parse_post(post: dict, post_topic: str) -> dict:
             post_text = splitted_text[:len(splitted_text)-1]
         else:
             post_text = splitted_text
-    parsed_post: dict = {
+    parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
         'post_text': post_text}
