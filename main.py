@@ -4,6 +4,8 @@ from http import HTTPStatus
 import json
 from json.decoder import JSONDecodeError
 import logging
+import os
+from PyPDF2 import PdfReader
 from re import findall
 import requests
 import sys
@@ -138,11 +140,17 @@ def parse_post(post: dict, post_topic: str) -> dict:
     post_text: str = None
     if post_topic == 'stop-list':
         post_text = ['Вы в белом списке регистрации на эту игру!']
-        pdf_text: str = ''
-        # https://www.youtube.com/watch?v=RULkvM7AdzY&themeRefresh=1
-        # https://pypi.org/project/PyPDF2/
-        if app_data.TEAM_NAME in pdf_text:
-            post_text = ['Команда уже была на представленной серии игр!']
+        response = requests.get(
+            post['attachments'][1]['doc']['url'])
+        filename = 'stop-list.pdf'
+        open(filename, 'wb').write(response.content)
+        reader = PdfReader(filename)
+        pages_count = len(reader.pages)
+        for i in range(pages_count):
+            if app_data.TEAM_NAME in reader.pages[i].extract_text():
+                post_text = ['Команда уже была на представленной серии игр!']
+                break
+        os.remove(filename)
     else:
         try:
             unfixed_text: str = post['text']
@@ -220,8 +228,8 @@ def parse_post(post: dict, post_topic: str) -> dict:
     return parsed_post
 
 
-def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> bool:
-    """Отправляет полученные данные с ВК в телеграм."""
+def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
+    """Отправляет полученные данные с ВК в телеграм чат."""
     output_text: str = ''
     for paragraph in parsed_post['post_text']:
         output_text += (paragraph + 2*'\n')
@@ -231,13 +239,7 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> bool:
             photo=parsed_post['post_image_url'],
             caption=output_text)
         if 'game_dates' in parsed_post:
-            output_text = ''
-            for button in parsed_post['game_dates']:
-                output_text += (button + '\n')
-            telegram_bot.send_message(
-                chat_id=app_data.TELEGRAM_ME,
-                text=output_text
-            )
+            send_message_dates(parsed_post['game_dates'])
     except TelegramError:
         text: str = ("Bot can't send the message")
         logger.error(text, exc_info=True)
@@ -248,6 +250,25 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> bool:
 """
 Функционал на стороне TELEGRAM API.
 """
+
+def send_message_dates():
+    """Отправляет сообщение с датами игр и участниками."""
+    pass
+
+
+def send_message(bot: telegram.Bot, message: str) -> True:
+    """Отправляет сообщение в Telegram."""
+    try:
+        logger.debug('Bot try to sent message.')
+        bot.send_message(
+            chat_id=app_data.TELEGRAM_TEAM_CHAT,
+            text=message
+        )
+    except TelegramError:
+        text: str = ("Bot can't send the message")
+        logger.error(text, exc_info=True)
+    logger.debug('Message sent.')
+    return True
 
 
 def main():
@@ -276,13 +297,12 @@ def main():
             logger.debug('Try to receive data from VK group wall.')
             update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
             if update:
-                logger.debug('New post available!')
+                logger.info('New post available!')
                 topic = recognize_post_topic(post=update)
                 parsed_post = parse_post(post=update, post_topic=topic)
                 message: bool = send_update(
                     telegram_bot=telegram_bot,
                     parsed_post=parsed_post)
-                logger.info(f'Message value is: {message}')
                 if message:
                     logger.info('Message sent!')
                     last_vk_wall_id = parsed_post['post_id']
