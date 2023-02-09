@@ -31,64 +31,6 @@ ALL_DATA = [
 ]
 
 """
-Общий функционал.
-"""
-
-
-def check_env(data: list) -> None:
-    """Проверяет доступность переменных окружения."""
-    if not all(data):
-        raise SystemExit
-
-
-def check_telegram_bot_response(token: str) -> None:
-    """Проверяет ответ telegram BOT API."""
-    response: requests.Response = requests.get(
-        f'https://api.telegram.org/bot{token}/getMe')
-    status: int = response.status_code
-    if status == HTTPStatus.OK:
-        return
-    if status == HTTPStatus.UNAUTHORIZED:
-        logger.critical('Telegram bot token is invalid!')
-        raise SystemExit
-    else:
-        logger.warning(
-            f'Telegram API is unavailable with status {status}! '
-            'Try to reconnect in 5 minutes.')
-        sleep(300)
-        check_telegram_bot_response(token=token)
-
-
-def check_vk_response(token: str) -> vk_api.VkApi.method:
-    """Проверяет доступность методов VK API. Создает сессию."""
-    session: vk_api.VkApi = vk_api.VkApi(token=token)
-    vk: vk_api.VkApi.method = session.get_api()
-    try:
-        vk.status.get(user_id=app_data.VK_USER_ME)
-    except vk_api.exceptions.ApiError:
-        logger.critical('VK is unavailable! Invalid token!')
-        raise SystemExit
-    return vk
-
-
-def json_data_read(file_name: str, key: str):
-    try:
-        with open(file_name) as read_file:
-            data = json.load(read_file)
-            return data[key]
-    except FileNotFoundError:
-        logger.info(f"JSON '{file_name}' doesn't exists. Creating new one.")
-    except JSONDecodeError:
-        logger.info(f"JSON doesn't contain key '{key}'")
-    return None
-
-
-def json_data_write(file_name: str, data: dict):
-    with open(file_name, 'w') as write_file:
-        json.dump(data, write_file)
-
-
-"""
 Функционал на стороне VK API.
 """
 
@@ -97,7 +39,8 @@ def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
     """Определяет, есть ли в таргет-группе VK новый пост."""
     post: dict = {}
     try:
-        wall: dict = vk.wall.get(owner_id=f'-{app_data.VK_GROUP_TARGET}', count=2)
+        wall: dict = vk.wall.get(
+            owner_id=f'-{app_data.VK_GROUP_TARGET}', count=2)
     except ApiError:
         logger.critical('VK group ID is invalid!')
         raise SystemExit
@@ -190,7 +133,8 @@ def parse_post(post: dict, post_topic: str) -> dict:
             'Действует розыгрыш бесплатного входа на всю команду! '
             'Чтобы принять в нем участие, нужно вступить в группу и сделать '
             'репост этой записи:']
-        post_link = [app_data.VK_POST_LINK.format(app_data.VK_GROUP_TARGET, post_id)]
+        post_link = [app_data.VK_POST_LINK.format(
+            app_data.VK_GROUP_TARGET, post_id)]
         post_text = post_text_1 + post_text_2 + post_text_3 + post_link
     if post_topic == 'teams':
         post_text = ['🖇Списки команд🖇']
@@ -251,8 +195,12 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
 Функционал на стороне TELEGRAM API.
 """
 
-def send_message_dates():
-    """Отправляет сообщение с датами игр и участниками."""
+
+def send_message_dates(message_id: int = None):
+    """
+    Отправляет сообщение с датами игр и участниками.
+    Если указан message_id - редактирует раннее отправленное сообщение.
+    """
     pass
 
 
@@ -269,6 +217,64 @@ def send_message(bot: telegram.Bot, message: str) -> True:
         logger.error(text, exc_info=True)
     logger.debug('Message sent.')
     return True
+
+
+"""
+Общий функционал.
+"""
+
+
+def check_env(data: list) -> None:
+    """Проверяет доступность переменных окружения."""
+    if not all(data):
+        raise SystemExit
+
+
+def check_telegram_bot_response(token: str) -> None:
+    """Проверяет ответ telegram BOT API."""
+    response: requests.Response = requests.get(
+        f'https://api.telegram.org/bot{token}/getMe')
+    status: int = response.status_code
+    if status == HTTPStatus.OK:
+        return
+    if status == HTTPStatus.UNAUTHORIZED:
+        logger.critical('Telegram bot token is invalid!')
+        raise SystemExit
+    else:
+        logger.warning(
+            f'Telegram API is unavailable with status {status}! '
+            'Try to reconnect in 5 minutes.')
+        sleep(300)
+        check_telegram_bot_response(token=token)
+
+
+def check_vk_response(token: str) -> vk_api.VkApi.method:
+    """Проверяет доступность методов VK API. Создает сессию."""
+    session: vk_api.VkApi = vk_api.VkApi(token=token)
+    vk: vk_api.VkApi.method = session.get_api()
+    try:
+        vk.status.get(user_id=app_data.VK_USER_ME)
+    except vk_api.exceptions.ApiError:
+        logger.critical('VK is unavailable! Invalid token!')
+        raise SystemExit
+    return vk
+
+
+def json_data_read(file_name: str, key: str):
+    try:
+        with open(file_name) as read_file:
+            data = json.load(read_file)
+            return data[key]
+    except FileNotFoundError:
+        logger.info(f"JSON '{file_name}' doesn't exists. Creating new one.")
+    except JSONDecodeError:
+        logger.info(f"JSON doesn't contain key '{key}'")
+    return None
+
+
+def json_data_write(file_name: str, data: dict):
+    with open(file_name, 'w') as write_file:
+        json.dump(data, write_file)
 
 
 def main():
