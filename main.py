@@ -193,7 +193,9 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
             photo=parsed_post['post_image_url'],
             caption=output_text)
         if 'game_dates' in parsed_post:
-            send_message_dates(game_dates = parsed_post['game_dates'])
+            send_message_dates(
+                bot = telegram_bot,
+                game_dates = parsed_post['game_dates'])
     except TelegramError:
         text: str = ("Bot can't send the message")
         logger.error(text, exc_info=True)
@@ -206,12 +208,34 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
 """
 
 
-def send_message_dates(game_dates: list, message_id: int = None):
+def send_message_dates(bot: telegram.Bot, game_dates: list, message_id: int = None):
     """
     Отправляет сообщение с датами игр и участниками.
     Если указан message_id - редактирует раннее отправленное сообщение.
     """
-    print(game_dates)
+    count: str = 0
+    message: str = ''
+    # Брать из результатов!
+    total_tem = 8
+    for date in game_dates:
+        count += 1
+        date_split = date.split(' — ')
+        message += (
+            '————————————\n'
+            f'{app_data.EMOJI_NUMBERS[count]}  {date_split[0]}'
+            f' | {app_data.LOCATIONS[date_split[1]]}'
+            f' | {total_tem}'
+            '\n————————————\n'
+        )
+    message += (
+            '————————————\n'
+            f'{app_data.EMOJI_NUMBERS[0]}  Не смогу быть | {total_tem}'
+            '\n————————————\n'
+        )
+    bot.send_message(
+        chat_id=app_data.TELEGRAM_ME,
+        text=message
+    )
 
 
 def send_message(bot: telegram.Bot, message: str) -> True:
@@ -311,8 +335,6 @@ def main():
         try:
             logger.debug('Try to receive data from VK group wall.')
             update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
-            import vk_wall_json_example
-            update = vk_wall_json_example.preview
             if update:
                 logger.info('New post available!')
                 topic = recognize_post_topic(post=update)
@@ -334,7 +356,6 @@ def main():
             pass
         logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
         sleep(app_data.API_UPDATE)
-        sys.exit()
 
 
 if __name__ == '__main__':
