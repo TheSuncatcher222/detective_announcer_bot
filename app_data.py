@@ -65,3 +65,10 @@ MEDALS: dict[int, list[str]] = {
     -4: ['#detectit_medal #detectit_silver_medal'],
     -6: ['#detectit_medal #detectit_bronze_medal'],
 }
+
+DATE_HEADLIGHT: str = (
+    '————————————\n{number}  {date} | {location} | {count}\n————————————\n'
+)
+DATE_HEADLIGHT_X: str = (
+    '————————————\n{number}  Не смогу быть | {count}\n————————————\n'
+)
