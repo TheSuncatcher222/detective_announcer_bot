@@ -132,5 +132,6 @@ dmypy.json
 todo
 
 # json files
-vk_wall_json_example.py
+game_dates.json
 last_vk_wall_id.json
+vk_wall_json_example.py
