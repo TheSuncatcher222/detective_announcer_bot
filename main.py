@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+from datetime import datetime
 from http import HTTPStatus
 import json
 from json.decoder import JSONDecodeError
@@ -30,10 +31,6 @@ ALL_DATA = [
     app_data.TEAM_NAME
 ]
 
-"""
-Функционал на стороне VK API.
-"""
-
 
 def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
     """Определяет, есть ли в таргет-группе VK новый пост."""
@@ -42,8 +39,7 @@ def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
         wall: dict = vk.wall.get(
             owner_id=f'-{app_data.VK_GROUP_TARGET}', count=2)
     except ApiError:
-        logger.critical('VK group ID is invalid!')
-        raise SystemExit
+        raise SystemExit('VK group ID is invalid!')
     for num in (app_data.NON_PINNED_POST, app_data.PINNED_POST):
         try:
             if wall['items'][num]['id'] > last_id:
@@ -52,9 +48,10 @@ def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
         except IndexError:
             pass
         except KeyError:
-            logger.warning("Post's json from VK wall has unknown structure!")
             logger.error(exc_info=True)
-            raise Exception
+            raise Exception(
+                "Post's json from VK wall has unknown structure!"
+                f"Try ['items'][{num}]['id'].")
     return post
 
 
@@ -62,33 +59,64 @@ def recognize_post_topic(post: dict) -> str:
     """Определяет тематику поста."""
     try:
         post_text: str = post['text']
+        if not isinstance(post_text, str):
+            raise ValueError
     except KeyError:
-        logger.warning("Post's json from VK wall has unknown structure!")
         logger.error(exc_info=True)
-        raise Exception
+        raise Exception(
+                "Post's json from VK wall has unknown structure!"
+                "Try ['items'][0]['text'].")
+    except ValueError:
+        raise Exception(
+            "Post's json from VK wall has unknown structure!"
+            f"Try ['items'][0]['text']: data type is {type(post_text)}, but"
+            "but str was expected.")
     for key_tag in app_data.POST_TOPICS:
         if key_tag in post_text:
             return app_data.POST_TOPICS[key_tag]
     return 'other'
 
 
+def game_dates_add_weekday(game_dates: list) -> list:
+    """Добавляет к входящим датам день недели."""
+    # проверку на дату
+    now = datetime.now()
+    now_month = now.month
+    now_year = now.year
+    dates_with_weekday = []
+    for date in game_dates:
+        date_split = date.split(' — ')
+        date_time, location = date_split[0], app_data.LOCATIONS[date_split[1]]
+        date_time_split = date_time.split(', ')
+        date = date_time_split[0].split(' ')  # Возможно я тут сломал, скобки были пустые
+        month = app_data.MONTHS[date[1]]
+        if month >= now_month:
+            year = now_year
+        else:
+            year = now_year + 1
+        weekday = datetime(year, month, int(date[0])).weekday()
+        dates_with_weekday.append(
+            f'{date_time} ({app_data.WEEKDAYS[weekday]}) — {location}')
+    return dates_with_weekday
+
+
+def game_dates_json_update(telegram_id: int):
+    pass
+
+
 def parse_post(post: dict, post_topic: str) -> dict:
     """Производит структурный анализ и разделяет пост на составные части."""
-    try:
-        post_id: int = post['id']
-    except KeyError:
-        logger.warning("Post's json from VK wall has unknown structure!")
-        logger.error(exc_info=True)
-        raise Exception
+    post_id: int = post['id']
     post_text: str = None
     if post_topic == 'stop-list':
         try:
             response = requests.get(
                 post['attachments'][1]['doc']['url'])
         except Exception:
-            logger.warning("Post's json from VK wall has unknown structure!")
             logger.error(exc_info=True)
-            raise Exception
+            raise Exception(
+                "Post's json from VK wall has unknown structure!"
+                "Try ['items'][0]['attachments'][1]['doc']['url'].")
         filename = 'stop-list.pdf'
         open(filename, 'wb').write(response.content)
         reader = PdfReader(filename)
@@ -99,14 +127,7 @@ def parse_post(post: dict, post_topic: str) -> dict:
                 break
         os.remove(filename)
     else:
-        try:
-            unfixed_text: str = post['text']
-            if not isinstance(unfixed_text, str):
-                raise KeyError
-        except KeyError:
-            logger.warning("Post's json from VK wall has unknown structure!")
-            logger.error(exc_info=True)
-            raise Exception
+        unfixed_text: str = post['text']
         fixed_text: str = unfixed_text.replace('\n \n', '\n\n')
         fixed_text = fixed_text.replace('\n', '\n\n')
         splitted_text: list = fixed_text.split('\n\n')
@@ -119,16 +140,18 @@ def parse_post(post: dict, post_topic: str) -> dict:
         try:
             post_image_url = post['attachments'][0]['photo']['sizes'][4]['url']
             if 'http' not in post_image_url:
-                raise Exception
-        except Exception:
-            logger.warning("Post's json from VK wall has unknown structure!")
-            logger.error(exc_info=True)
-            raise Exception
+                raise ValueError
+        except ValueError:
+            raise Exception(
+                "Post's json from VK wall has unknown structure!"
+                "Try ['items'][0]['attachments'][0]['photo']['sizes'][4]"
+                "['url']: data does not contain 'http' link.")
     if post_topic == 'preview':
         post_text = splitted_text[:3]
         game_dates: list = findall(
             r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
             fixed_text)
+        game_dates = game_dates_add_weekday(game_dates=game_dates)
         post_text += splitted_text[len(splitted_text)-3:len(splitted_text)-2]
     if post_topic == 'checkin':
         post_text_1 = splitted_text[:1]
@@ -153,10 +176,9 @@ def parse_post(post: dict, post_topic: str) -> dict:
         post_text = splitted_text[:len(splitted_text)-1]
         response = requests.get(app_data.VK_GROUP_TARGET_LOGO)
         if response.status_code != HTTPStatus.OK:
-            logger.warning(
-                "Group main picture URL is unavaliable with "
-                f"status {response.status_code}!")
-            raise Exception
+            raise Exception(
+                'Group main picture URL is unavaliable with '
+                f'status: {response.status_code}!')
         post_image_url = app_data.VK_GROUP_TARGET_LOGO
     if post_topic == 'photos':
         post_text_1 = ['📷 Фотографии 📷']
@@ -193,49 +215,96 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
             photo=parsed_post['post_image_url'],
             caption=output_text)
         if 'game_dates' in parsed_post:
-            send_message_dates(
-                bot = telegram_bot,
-                game_dates = parsed_post['game_dates'])
-    except TelegramError:
-        text: str = ("Bot can't send the message")
-        logger.error(text, exc_info=True)
-        raise Exception
+            game_dates = rebuild_game_dates_json(
+                new_game=parsed_post['game_dates'])
+            game_dates_message = get_game_dates_json(data=game_dates)
+            send_message(
+                bot=telegram_bot, message=game_dates_message)
+    except TelegramError as err:
+        raise Exception(f"Bot can't send the message! Error message: {err}")
     return True
 
-
-"""
-Функционал на стороне TELEGRAM API.
-"""
-
-
-def send_message_dates(bot: telegram.Bot, game_dates: list, message_id: int = None):
-    """
-    Отправляет сообщение с датами игр и участниками.
-    Если указан message_id - редактирует раннее отправленное сообщение.
-    """
-    count: str = 0
+def get_game_dates_json(data: dict) -> str:
+    """Преобразует записи из game_dates.json в текстовое сообщение."""
     message: str = ''
-    # Брать из результатов!
-    total_tem = 8
-    for date in game_dates:
-        count += 1
-        date_split = date.split(' — ')
-        message += (
-            '————————————\n'
-            f'{app_data.EMOJI_NUMBERS[count]}  {date_split[0]}'
-            f' | {app_data.LOCATIONS[date_split[1]]}'
-            f' | {total_tem}'
-            '\n————————————\n'
-        )
-    message += (
-            '————————————\n'
-            f'{app_data.EMOJI_NUMBERS[0]}  Не смогу быть | {total_tem}'
-            '\n————————————\n'
-        )
-    bot.send_message(
-        chat_id=app_data.TELEGRAM_ME,
-        text=message
-    )
+    for game in data['games'].values():
+        message += (game['date'] + str(game['total_teammates']) + '\n')
+        for teammate in game['teammates']:
+            message += 'teammate' + '\n'
+            i = 1
+            while i != game['teammates']['teammate']:
+                message += f'{teammate} (гость)' + '\n'
+    return message
+            
+
+def rebuild_game_dates_json(
+    game_num: int = None,
+    teammate: int = None,
+    teammate_action: int = None,
+    message_id: int = None,
+    new_game = None) -> dict:
+    """Направляет запрос на перезапись данных в game_dates.json.
+    При получении номера игры и id участника или получении id сообщения:
+    перезапись существующих данных. При получении данных о новой игре:
+    формирование новых данных (количество и описание доступных игровых дней).
+    """
+    if new_game is None:
+        file_name = 'game_dates.json'
+        data = json_data_read(file_name=file_name)
+        if data is None:
+            raise SystemExit(
+                f'{file_name} is damaged and must be checked!')
+    if all((game_num, teammate, teammate_action)):
+        if teammate_action not in (-1, 1):
+            raise SystemExit(
+                f"Teammate action has wrong data! Got '{teammate_action}', but"
+                "'-1' or '1' expected.")
+        selected_game = data['games'][str(game_num)]
+        if str(teammate) not in selected_game['teammates']:
+            if teammate_action == -1:
+                return
+            elif teammate_action == 1:
+                selected_game['teammates'][str(teammate)] = 1
+                selected_game['total_teammates'] += 1
+        else:
+            if teammate_action == 1:
+                selected_game['teammates'][str(teammate)] += 1
+                selected_game['total_teammates'] += 1
+            else:
+                teammate_current = selected_game['teammates'][str(teammate)]
+                if teammate_current <= 1:
+                    del selected_game['teammates'][str(teammate)]
+                    selected_game['total_teammates'] -= 1
+                else:
+                    selected_game['teammates'][str(teammate)] -= 1
+                    selected_game['total_teammates'] -= 1
+        data['games'][str(game_num)] = selected_game
+    elif message_id:
+        data['message_id'] = message_id
+    elif new_game:
+        count: str = 0
+        data = {
+            'message_id': None,
+            'games': {}}
+        for date in new_game:
+            count += 1
+            date_split = date.split(' — ')
+            date = app_data.DATE_HEADLIGHT.format(
+                number=app_data.EMOJI_NUMBERS[count],
+                date=date_split[0],
+                location=date_split[1],
+                count=0)
+            data['games'][count] = {
+                'total_teammates': 0,
+                'date': date,
+                'teammates': {}}
+    else:
+        raise SystemExit(
+            'Something is wrong with input data in rebuild_game_dates_json!'
+            f'Got: game_num = {game_num}, teammate = {teammate}, '
+            f'teammate_action = {teammate_action}, message_id = {message_id}, '
+            f'new_game = {new_game}')
+    return data
 
 
 def send_message(bot: telegram.Bot, message: str) -> True:
@@ -243,9 +312,8 @@ def send_message(bot: telegram.Bot, message: str) -> True:
     try:
         logger.debug('Bot try to sent message.')
         bot.send_message(
-            chat_id=app_data.TELEGRAM_TEAM_CHAT,
-            text=message
-        )
+            chat_id=app_data.TELEGRAM_ME,
+            text=message)
     except TelegramError:
         text: str = ("Bot can't send the message")
         logger.error(text, exc_info=True)
@@ -253,15 +321,10 @@ def send_message(bot: telegram.Bot, message: str) -> True:
     return True
 
 
-"""
-Общий функционал.
-"""
-
-
 def check_env(data: list) -> None:
     """Проверяет доступность переменных окружения."""
     if not all(data):
-        raise SystemExit
+        raise SystemExit('Env data is unavaliable!')
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -272,8 +335,7 @@ def check_telegram_bot_response(token: str) -> None:
     if status == HTTPStatus.OK:
         return
     if status == HTTPStatus.UNAUTHORIZED:
-        logger.critical('Telegram bot token is invalid!')
-        raise SystemExit
+        raise SystemExit('Telegram bot token is invalid!')
     else:
         logger.warning(
             f'Telegram API is unavailable with status {status}! '
@@ -289,24 +351,28 @@ def check_vk_response(token: str) -> vk_api.VkApi.method:
     try:
         vk.status.get(user_id=app_data.VK_USER_ME)
     except vk_api.exceptions.ApiError:
-        logger.critical('VK is unavailable! Invalid token!')
-        raise SystemExit
+        raise SystemExit('VK is unavailable! Invalid token!')
     return vk
 
 
-def json_data_read(file_name: str, key: str):
+def json_data_read(file_name: str, key: str = None):
+    """Читает указанный json и возвращает данные из него.
+    Опционально - если известно, что json будет содержать в себе тип данных
+    dict - возвращает данные под переданным в функцию ключом."""
     try:
         with open(file_name) as read_file:
             data = json.load(read_file)
+        if key:
             return data[key]
+        return data
     except FileNotFoundError:
-        logger.info(f"JSON '{file_name}' doesn't exists. Creating new one.")
+        logger.info(f"JSON '{file_name}' doesn't exists.")
     except JSONDecodeError:
-        logger.info(f"JSON doesn't contain key '{key}'")
-    return None
+        logger.info(f"JSON doesn't contain key '{key}'.")
 
 
-def json_data_write(file_name: str, data: dict):
+def json_data_write(file_name: str, data: dict) -> None:
+    """Записывает данные в указанный json."""
     with open(file_name, 'w') as write_file:
         json.dump(data, write_file)
 
@@ -339,10 +405,10 @@ def main():
                 logger.info('New post available!')
                 topic = recognize_post_topic(post=update)
                 parsed_post = parse_post(post=update, post_topic=topic)
-                message: bool = send_update(
+                sended_update: bool = send_update(
                     telegram_bot=telegram_bot,
                     parsed_post=parsed_post)
-                if message:
+                if sended_update:
                     logger.info('Sending update complete!')
                     last_vk_wall_id = parsed_post['post_id']
                     json_data_write(
@@ -350,9 +416,18 @@ def main():
                         data={'last_vk_wall_id': last_vk_wall_id})
             else:
                 logger.debug('No updates available.')
-        except SystemExit:
-            sys.exit()
-        except Exception:
+        except SystemExit as err:
+            """Ошибка происходит по причине отсутствия переменных окружения или
+            недоработки в коде. Невозможно продолжить функционирование без
+            вмешательств разработчика!"""
+            logger.critical(err)
+            pass
+        except Exception as err:
+            """Ошибка происходит по причине неполадок сторонних API.
+            Разработчик должен быть уведомлен о сбое. Функционирование
+            программы будет продолжено."""
+            # last_warning: str = None
+            logger.warning(err)
             pass
         logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
         sleep(app_data.API_UPDATE)
