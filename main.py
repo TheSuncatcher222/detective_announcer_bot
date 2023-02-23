@@ -224,6 +224,7 @@ def send_update(telegram_bot: telegram.Bot, parsed_post: dict) -> True:
         raise Exception(f"Bot can't send the message! Error message: {err}")
     return True
 
+
 def get_game_dates_json(data: dict) -> str:
     """Преобразует записи из game_dates.json в текстовое сообщение."""
     message: str = ''
@@ -421,14 +422,14 @@ def main():
             недоработки в коде. Невозможно продолжить функционирование без
             вмешательств разработчика!"""
             logger.critical(err)
-            pass
+            raise
         except Exception as err:
             """Ошибка происходит по причине неполадок сторонних API.
             Разработчик должен быть уведомлен о сбое. Функционирование
             программы будет продолжено."""
             # last_warning: str = None
             logger.warning(err)
-            pass
+            raise
         logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
         sleep(app_data.API_UPDATE)
 
