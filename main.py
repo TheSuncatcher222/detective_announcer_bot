@@ -5,14 +5,17 @@ from json.decoder import JSONDecodeError
 import logging
 from time import sleep
 
-import project.data.app_data as app_data # ВЕСЬ??
+import project.data.app_data as app_data
 import project.app_logger as app_logger
 from project.app_telegram import (
     check_telegram_bot_response,
     init_telegram_bot)
-from project.app_vk import(
+from project.app_vk import (
+    define_post_topic,
+    get_vk_wall_update,
     init_vk_bot,
-    get_vk_wall_update)
+    parse_post,
+    send_update)
 
 
 ALL_DATA: tuple[str] = (
@@ -20,11 +23,11 @@ ALL_DATA: tuple[str] = (
     app_data.TELEGRAM_TEAM_CHAT,
     app_data.TELEGRAM_ME,
     app_data.VK_TOKEN_ADMIN,
-    app_data.VK_USER_ME,
+    app_data.VK_USER,
     app_data.VK_GROUP_TARGET,
     app_data.TEAM_NAME)
 
-logger: logging.Logger = app_logger.get_logger(__name__)
+logger: logging.Logger = app_logger.get_logger(__name__)  # На дебаг все убрал
 
 
 def check_env(data: list) -> None:
@@ -64,7 +67,7 @@ def main():
     check_env(data=ALL_DATA)
     check_telegram_bot_response(token=app_data.TELEGRAM_BOT_TOKEN)
     vk_bot = init_vk_bot(
-        token=app_data.VK_TOKEN_ADMIN, user_id=app_data.VK_USER_ME)
+        token=app_data.VK_TOKEN_ADMIN, user_id=app_data.VK_USER)
     telegram_bot = init_telegram_bot(token=app_data.TELEGRAM_BOT_TOKEN)
     last_vk_wall_id: int = json_data_read(
         file_name='last_vk_wall_id.json', key='last_vk_wall_id')
@@ -81,6 +84,14 @@ def main():
                 vk_bot=vk_bot,
                 vk_group_id=app_data.VK_GROUP_TARGET,
                 last_vk_wall_id=last_vk_wall_id)
+            if update:
+                logger.info('New post available!')
+                topic = define_post_topic(post=update)
+                parsed_post = parse_post(post=update, post_topic=topic)
+                sended_update: bool = send_update(
+                    telegram_bot=telegram_bot,
+                    parsed_post=parsed_post)
+
         except SystemExit as err:
             """Error in code.
             Program execution is not possible."""
@@ -89,16 +100,15 @@ def main():
         except Exception as err:
             """Error on the API side.
             The program will continue to run normally."""
-            last_api_error: str = json_data_read(file_name=last_api_error)
+            # last_api_error: str = json_data_read(file_name=last_api_error)
             # if err != last_api_error:
             #     pass
             logger.warning(err)
             pass
         logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
-        sleep(app_data.API_UPDATE)  
+        sleep(app_data.API_UPDATE)
         break
 
 
 if __name__ == '__main__':
     main()
-    
