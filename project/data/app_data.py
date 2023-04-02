@@ -8,22 +8,19 @@ TELEGRAM_BOT_TOKEN: str = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_ME: str = os.getenv('TELEGRAM_ME')
 TELEGRAM_TEAM_CHAT: str = os.getenv('TELEGRAM_TEAM_CHAT')
 VK_TOKEN_ADMIN: str = os.getenv('VK_TOKEN_ADMIN')
-VK_USER_ME: str = os.getenv('VK_USER_ME')
+VK_USER: str = os.getenv('VK_USER')
 VK_GROUP_TARGET: int = 40914100
 VK_GROUP_TARGET_LOGO: str = (
-    'https://sun9-58.userapi.com/impg/jHCjJnuHFU2eulxgvuUG3UJ8WomEiT7ahhir-'
-    'A/bfK5YYS9vNU.jpg?size=591x591&quality=96&sign='
-    '43a3b5e57c5a40dd2c9155323fc69804&type=album'
-)
+    'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
+    'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
+    'e8310f98da4ff095adb5e46ba20eef2d&type=album')
 
 API_UPDATE: int = 1
 
 DATE_HEADLIGHT: str = (
-    '————————————\n{number}  {date} | {location} | {count}\n————————————\n'
-)
+    '————————————\n{number}  {date} | {location} | {count}\n————————————\n')
 DATE_HEADLIGHT_X: str = (
-    '————————————\n{number}  Не смогу быть | {count}\n————————————\n'
-)
+    '————————————\n{number}  Не смогу быть | {count}\n————————————\n')
 
 EMOJI_NUMBERS: dict[int, str] = {
     0: '🚫',
@@ -31,8 +28,7 @@ EMOJI_NUMBERS: dict[int, str] = {
     2: '2️⃣',
     3: '3️⃣',
     4: '4️⃣',
-    5: '5️⃣',
-}
+    5: '5️⃣'}
 
 LOCATIONS: dict[str, str] = {
     'секретное место на Горьковской': (
@@ -40,14 +36,12 @@ LOCATIONS: dict[str, str] = {
     'секретное место на Чернышевской': (
         'Дворец «Олимпия» (Литейный пр., д. 14, ст.м. Чернышевская)'),
     'секретное место на Василеостровской': (
-        'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)'),
-}
+        'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)'),}
 
 MEDALS: dict[int, list[str]] = {
-    -2: ['#detectit_medal #detectit_gold_medal'],
-    -4: ['#detectit_medal #detectit_silver_medal'],
-    -6: ['#detectit_medal #detectit_bronze_medal'],
-}
+    -2: ['#alibi_medal #alibi_gold_medal'],
+    -4: ['#alibi_medal #alibi_silver_medal'],
+    -6: ['#alibi_medal #alibi_bronze_medal'],}
 
 MONTHS = {
     'января': 1,
@@ -61,8 +55,7 @@ MONTHS = {
     'сентября': 9,
     'октября': 10,
     'ноября': 11,
-    'декабря': 12
-}
+    'декабря': 12}
 WEEKDAYS = {
     0: 'пн',
     1: 'вт',
@@ -70,29 +63,21 @@ WEEKDAYS = {
     3: 'чт',
     4: 'пт',
     5: 'сб',
-    6: 'вс'
-}
+    6: 'вс'}
 
 PINNED_POST_ID: int = 0
 NON_PINNED_POST_ID: int = 1
 
 POST_TOPICS: dict[str, str] = {
-    '#detectit_preview': 'preview',
-    'Stop-list': 'stop-list',
-    '#detectit_checkin': 'checkin',
-    '#detectit_teams': 'teams',
-    '#detectit_results': 'game_results',
-    'Результаты розыгрыша': 'prize_results',
+    'Анонс': 'preview',
+    'Регистрация': 'checkin',
     'Итоги розыгрыша': 'prize_results',
-    '#detectit_photos': 'photos',
-}
+    'alibispb_results': 'game_results',
+    'Списки команд': 'teams'}
+"""Нет данных для категорий:
+    None: 'stop-list'
+    None: 'photos'
+    None: 'rating'
+"""
 
-TEAMMATES: dict[int, str] = {
-    602516446: os.getenv('PLAYER_602516446'),
-    354986248: os.getenv('PLAYER_354986248'),
-    897453301: os.getenv('PLAYER_897453301'),
-    1257617401: os.getenv('PLAYER_1257617401'),
-    124478813: os.getenv('PLAYER_124478813')
-}
-
-VK_POST_LINK: str = 'https://vk.com/detectit_spb?w=wall-{}_{}'
+VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-{}_{}'
