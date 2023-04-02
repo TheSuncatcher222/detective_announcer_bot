@@ -4,7 +4,7 @@ import requests
 import telegram
 from time import sleep
 
-import app_logger
+import project.app_logger as app_logger
 
 logger: logging.Logger = app_logger.get_logger(__name__)
 

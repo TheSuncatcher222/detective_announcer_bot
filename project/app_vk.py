@@ -1,5 +1,13 @@
+import logging
 import vk_api
+from vk_api.exceptions import ApiError
 
+from data.app_data import(
+    NON_PINNED_POST_ID,
+    PINNED_POST_ID)
+import project.app_logger as app_logger
+
+logger: logging.Logger = app_logger.get_logger(__name__)
 # from datetime import datetime
 # from http import HTTPStatus
 # import json
@@ -15,11 +23,9 @@ import vk_api
 # from telegram.ext import CommandHandler
 # from telegram.ext import MessageHandler
 # from telegram.ext import Updater
-# 
-# from vk_api.exceptions import ApiError
-# from time import sleep
 
-def init_vk_bot_response(token: str, user_id: int) -> any:
+
+def init_vk_bot(token: str, user_id: int) -> any:
     """Check VK API. Create a session."""
     session = vk_api.VkApi(token=token)
     vk = session.get_api()
@@ -30,28 +36,30 @@ def init_vk_bot_response(token: str, user_id: int) -> any:
     return vk
 
 
-
-# def get_vk_wall_update(vk: vk_api.VkApi.method, last_id: int) -> dict:
-#     """Определяет, есть ли в таргет-группе VK новый пост."""
-#     post: dict = {}
-#     try:
-#         wall: dict = vk.wall.get(
-#             owner_id=f'-{app_data.VK_GROUP_TARGET}', count=2)
-#     except ApiError:
-#         raise SystemExit('VK group ID is invalid!')
-#     for num in (app_data.NON_PINNED_POST, app_data.PINNED_POST):
-#         try:
-#             if wall['items'][num]['id'] > last_id:
-#                 post = wall['items'][num]
-#                 break
-#         except IndexError:
-#             pass
-#         except KeyError:
-#             logger.error(exc_info=True)
-#             raise Exception(
-#                 "Post's json from VK wall has unknown structure!"
-#                 f"Try ['items'][{num}]['id'].")
-#     return post
+def get_vk_wall_update(
+        vk_bot: vk_api.VkApi.method,
+        vk_group_id: int,
+        last_vk_wall_id: int) -> dict:
+    """Check for a new post in VK group."""
+    try:
+        wall: dict = vk_bot.wall.get(
+            owner_id=f'-{vk_group_id}', count=2)
+    except ApiError:
+        raise SystemExit('VK group ID is invalid!')
+    update: dict = {}
+    for num in (NON_PINNED_POST_ID, PINNED_POST_ID):
+        try:
+            if wall['items'][num]['id'] > last_vk_wall_id:
+                update = wall['items'][num]
+                break
+        except IndexError:
+            pass
+        except KeyError:
+            logger.error(exc_info=True)
+            raise Exception(
+                "Post's json from VK wall has unknown structure!"
+                f"Try ['items'][{num}]['id'].")
+    return update
 
 
 # def recognize_post_topic(post: dict) -> str:
@@ -360,32 +368,17 @@ def init_vk_bot_response(token: str, user_id: int) -> any:
 #         logger.info(f"JSON doesn't contain key '{key}'.")
 
 
-# def json_data_write(file_name: str, data: dict) -> None:
-#     """Записывает данные в указанный json."""
-#     with open(file_name, 'w') as write_file:
-#         json.dump(data, write_file)
 
 
 
-    
-    # 
-    # 
-    # 
-    # last_vk_wall_id = json_data_read(
-    #     file_name='last_vk_wall_id.json',
-    #     key='last_vk_wall_id')
-    # if not last_vk_wall_id:
-    #     last_vk_wall_id = 0
-    #     json_data_write(
-    #         file_name='last_vk_wall_id.json',
-    #         data={'last_vk_wall_id': 0})
+
+    #####################################################
     # updater = Updater(token=app_data.TELEGRAM_BOT_TOKEN)
     # dispatcher = updater.dispatcher
     # dispatcher.add_handler(CommandHandler('start', send_message(bot=telegram_bot, message='Привет!')))
-    # logger.info('All check passed successfully! Start polling.')
+
     # while 1:
     #     try:
-    #         logger.debug('Try to receive data from VK group wall.')
     #         update = get_vk_wall_update(vk=vk, last_id=last_vk_wall_id)
     #         if update:
     #             logger.info('New post available!')
@@ -404,20 +397,8 @@ def init_vk_bot_response(token: str, user_id: int) -> any:
     #             logger.debug('No updates available.')
     #         updater.start_polling(poll_interval=1.0)
     #         updater.idle()
-    #     except SystemExit as err:
-    #         """Ошибка происходит по причине отсутствия переменных окружения или
-    #         недоработки в коде. Невозможно продолжить функционирование без
-    #         вмешательств разработчика!"""
-    #         logger.critical(err)
-    #         raise
-    #     except Exception as err:
-    #         """Ошибка происходит по причине неполадок сторонних API.
-    #         Разработчик должен быть уведомлен о сбое. Функционирование
-    #         программы будет продолжено."""
-    #         # last_warning: str = None
-    #         logger.warning(err)
-    #         pass
+
     #     logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
     #     updater.start_polling(poll_interval=1.0)
     #     updater.idle()
-    #     sleep(app_data.API_UPDATE)
+

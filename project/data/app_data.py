@@ -73,8 +73,8 @@ WEEKDAYS = {
     6: 'вс'
 }
 
-PINNED_POST: int = 0
-NON_PINNED_POST: int = 1
+PINNED_POST_ID: int = 0
+NON_PINNED_POST_ID: int = 1
 
 POST_TOPICS: dict[str, str] = {
     '#detectit_preview': 'preview',
