@@ -1,13 +1,10 @@
-import logging
 import vk_api
 from vk_api.exceptions import ApiError
 
 from data.app_data import(
     NON_PINNED_POST_ID,
     PINNED_POST_ID)
-import project.app_logger as app_logger
 
-logger: logging.Logger = app_logger.get_logger(__name__)
 # from datetime import datetime
 # from http import HTTPStatus
 # import json
@@ -55,7 +52,6 @@ def get_vk_wall_update(
         except IndexError:
             pass
         except KeyError:
-            logger.error(exc_info=True)
             raise Exception(
                 "Post's json from VK wall has unknown structure!"
                 f"Try ['items'][{num}]['id'].")
