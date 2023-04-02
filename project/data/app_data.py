@@ -5,11 +5,12 @@ load_dotenv()
 
 TEAM_NAME: str = os.getenv('TEAM_NAME')
 TELEGRAM_BOT_TOKEN: str = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_ME: str = os.getenv('TELEGRAM_ME')
 TELEGRAM_TEAM_CHAT: str = os.getenv('TELEGRAM_TEAM_CHAT')
+TELEGRAM_USER: str = os.getenv('TELEGRAM_USER')
 VK_TOKEN_ADMIN: str = os.getenv('VK_TOKEN_ADMIN')
 VK_USER: str = os.getenv('VK_USER')
 VK_GROUP_TARGET: int = 40914100
+VK_GROUP_TARGET_HASHTAG: str = '#alibigames'
 VK_GROUP_TARGET_LOGO: str = (
     'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
     'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
