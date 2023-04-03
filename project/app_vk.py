@@ -93,10 +93,10 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
 
 # ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def split_post_text(text: str) -> list:
-    """."""
+    """Split text into paragraphs."""
     # Тут появились какие-то \u3000
-    fixed_text = sub(r'(\n\s*\n)+', '\n', text.strip())
-    splitted_text = [s for s in fixed_text.split('\n')]
+    fixed_text: str = sub(r'(\n\s*\n)+', '\n', text.strip())
+    splitted_text: list = [s for s in fixed_text.split('\n')]
     return splitted_text
 
 
