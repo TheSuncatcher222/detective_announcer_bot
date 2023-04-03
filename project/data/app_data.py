@@ -73,15 +73,16 @@ PINNED_POST_ID: int = 0
 NON_PINNED_POST_ID: int = 1
 
 POST_TOPICS: dict[str, str] = {
-    'Анонс': 'preview',
     'Регистрация': 'checkin',
     'Итоги розыгрыша': 'prize_results',
-    'alibispb_results': 'game_results',
+    'Анонс': 'preview',
+    '#ГонорарДетектива': 'rating',
+    '#alibispb_results': 'results',
     'Списки команд': 'teams'}
-"""Нет данных для категорий:
+"""
+Нет данных для категорий:
     None: 'stop-list'
     None: 'photos'
-    None: 'rating'
 """
 
 VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-{}_{}'
