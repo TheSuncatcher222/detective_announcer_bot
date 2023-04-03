@@ -47,27 +47,6 @@ MEDALS: dict[int, list[str]] = {
     -4: ['#alibi_medal #alibi_silver_medal'],
     -6: ['#alibi_medal #alibi_bronze_medal']}
 
-MONTHS = {
-    'января': 1,
-    'февраля': 2,
-    'марта': 3,
-    'апреля': 4,
-    'мая': 5,
-    'июня': 6,
-    'июля': 7,
-    'августа': 8,
-    'сентября': 9,
-    'октября': 10,
-    'ноября': 11,
-    'декабря': 12}
-WEEKDAYS = {
-    0: 'пн',
-    1: 'вт',
-    2: 'ср',
-    3: 'чт',
-    4: 'пт',
-    5: 'сб',
-    6: 'вс'}
 
 PINNED_POST_ID: int = 0
 NON_PINNED_POST_ID: int = 1
