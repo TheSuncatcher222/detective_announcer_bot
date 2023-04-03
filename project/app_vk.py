@@ -8,9 +8,9 @@ import vk_api
 from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
-    LOCATIONS, MEDALS, MONTHS, NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS,
+    LOCATIONS, MEDALS, NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS,
     TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_HASHTAG, VK_GROUP_TARGET_LOGO,
-    VK_POST_LINK, WEEKDAYS)
+    VK_POST_LINK)
 
 
 def init_vk_bot(token: str, user_id: int) -> any:
@@ -24,17 +24,18 @@ def init_vk_bot(token: str, user_id: int) -> any:
     return vk
 
 
+# ФУНКЦИЯ НЕ НУЖДАЕТСЯ В ТЕСТИРОВАНИИ
 def get_vk_wall_update(
+        last_vk_wall_id: int,
         vk_bot: vk_api.VkApi.method,
-        vk_group_id: int,
-        last_vk_wall_id: int) -> dict:
+        vk_group_id: int) -> dict:
     """Check for a new post in VK group."""
     try:
         wall: dict = vk_bot.wall.get(
             owner_id=f'-{vk_group_id}', count=2)
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
-    update: dict = {}
+    update: dict = None
     for num in (NON_PINNED_POST_ID, PINNED_POST_ID):
         try:
             if wall['items'][num]['id'] > last_vk_wall_id:
@@ -49,47 +50,51 @@ def get_vk_wall_update(
     return update
 
 
+# ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def define_post_topic(post: dict) -> str:
     """Define the topic of the given post."""
-    # Возможно стоит прямо тут текст и разобрать на составные части?
     try:
         post_text: str = post['text']
     except KeyError:
         raise Exception(
             "Post's json from VK wall has unknown structure!"
             "Try ['items'][0]['text'].")
-    # оптимизация: нам же не весь текст нужен?
     for key_tag in POST_TOPICS:
         if key_tag in post_text:
             return POST_TOPICS[key_tag]
     return 'other'
 
 
-def game_dates_add_weekday(game_dates: list) -> list:
-    """Добавляет к входящим датам день недели."""
-    now = datetime.now()
-    now_month = now.month
-    now_year = now.year
-    dates_with_weekday = []
-    for date in game_dates:
-        date_split = date.split(' — ')
-        date_time, location = date_split[0], LOCATIONS[date_split[1]]
-        date_time_split = date_time.split(', ')
-        # Возможно я тут сломал, скобки были пустые
-        date = date_time_split[0].split(' ')
-        month = MONTHS[date[1]]
-        if month >= now_month:
-            year = now_year
-        else:
-            year = now_year + 1
-        weekday = datetime(year, month, int(date[0])).weekday()
-        dates_with_weekday.append(
-            f'{date_time} ({WEEKDAYS[weekday]}) — {location}')
-    return dates_with_weekday
+# ФУНКЦИЯ ПРОТЕСТИРОВАНАs
+def game_dates_add_weekday_place(game_dates: list) -> list:
+    """Add day of the week to each date and formate location."""
+    DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
+    MONTH_NUM: tuple[str] = (
+        None, 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля',
+        'августа', 'сентября', 'октября', 'ноября', 'декабря')
+    today: datetime = datetime.now()
+    today_month: int = today.month
+    today_year: int = today.year
+    game_dates_format: list[str] = []
+    for date_location in game_dates:
+        date_time, location = date_location.split(' — ')
+        date, time = date_time.split(', ')
+        day, month = date.split()
+        month: int = MONTH_NUM.index(month)
+        year: int = today_year
+        if month < today_month:
+            year += 1
+        date_digits: str = f'{day} {month} {year}'
+        date_obj: datetime = datetime.strptime(date_digits, "%d %m %Y")
+        day_name: str = DAYS_WEEK[date_obj.weekday()]
+        location = LOCATIONS.get(location, location)
+        game_dates_format.append(f'{date} ({day_name}), {time} — {location}')
+    return game_dates_format
 
 
 def fix_post_text(text: str) -> list:
     """."""
+    # Тут появились какие-то \u3000
     unfixed_text: str = text
     fixed_text: str = unfixed_text.replace('\n \n', '\n\n')
     fixed_text = fixed_text.replace('\n', '\n\n')
@@ -158,7 +163,7 @@ def parse_post_checkin(splitted_text: str, post_id: int):
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:']
-    post_link = [VK_POST_LINK.format(VK_GROUP_TARGET, post_id)]
+    post_link = [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
     post_text = post_text_1 + post_text_2 + post_text_3 + post_link
     return post_text
 
@@ -178,7 +183,7 @@ def parse_post_photos(splitted_text: list, post_id: int):
     """."""
     post_text_1 = ['📷 Фотографии 📷']
     post_text_2 = splitted_text[:len(splitted_text)-2]
-    post_link = [VK_POST_LINK.format(VK_GROUP_TARGET, post_id)]
+    post_link = [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id})']
     post_text = post_text_1 + post_text_2 + post_link
     return post_text
 
