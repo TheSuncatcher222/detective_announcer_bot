@@ -55,7 +55,7 @@ def json_data_read(file_name: str, key: str = None) -> any:
         logger.info(f"JSON doesn't contain key '{key}'.")
     return 0
 
-
+# ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def json_data_write(file_name: str, write_data: dict) -> None:
     """Write given data to json file. Create new if not exists."""
     with open(APP_JSON_FOLDER.format(file_name), 'w') as write_file:
@@ -101,27 +101,27 @@ def main():
     last_vk_wall_id: int = json_data_read(
         file_name='last_vk_wall_id.json', key='last_vk_wall_id')
     logger.info('Data check succeed. All API are available. Start polling.')
-    # while 1:
-    #     try:
-    #         vk_listener(
-    #             last_vk_wall_id=last_vk_wall_id,
-    #             telegram_bot=telegram_bot,
-    #             vk_bot=vk_bot)
-    #         telegram_listener()
-    #     except SystemExit as err:
-    #         """Error in code.
-    #         Program execution is not possible."""
-    #         logger.critical(err)
-    #         raise
-    #     except Exception as err:
-    #         """Error on the API side.
-    #         The program will continue to run normally."""
-    #         # last_api_error: str = json_data_read(file_name=last_api_error)
-    #         # if err != last_api_error:
-    #         #     pass
-    #         logger.warning(err)
-    #         pass
-    #     break
+    while 1:
+        try:
+            vk_listener(
+                last_vk_wall_id=last_vk_wall_id,
+                telegram_bot=telegram_bot,
+                vk_bot=vk_bot)
+            # telegram_listener()
+        except SystemExit as err:
+            """Error in code.
+            Program execution is not possible."""
+            logger.critical(err)
+            raise
+        except Exception as err:
+            """Error on the API side.
+            The program will continue to run normally."""
+            # last_api_error: str = json_data_read(file_name=last_api_error)
+            # if err != last_api_error:
+            #     pass
+            logger.warning(err)
+            pass
+        break
 
 
 if __name__ == '__main__':
