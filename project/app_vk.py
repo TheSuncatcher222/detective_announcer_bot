@@ -7,7 +7,7 @@ import requests
 import vk_api
 from vk_api.exceptions import ApiError
 
-from data.app_data import (
+from project.data.app_data import (
     LOCATIONS, MEDALS, MONTHS, NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS,
     TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_HASHTAG, VK_GROUP_TARGET_LOGO,
     VK_POST_LINK, WEEKDAYS)
