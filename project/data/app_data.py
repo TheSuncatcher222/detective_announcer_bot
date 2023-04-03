@@ -16,7 +16,8 @@ VK_GROUP_TARGET_LOGO: str = (
     'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
     'e8310f98da4ff095adb5e46ba20eef2d&type=album')
 
-API_UPDATE: int = 1
+API_TELEGRAM_UPDATE_SEC: int = 0.5
+API_VK_UPDATE_SEC: int = 1
 
 DATE_HEADLIGHT: str = (
     '————————————\n{number}  {date} | {location} | {count}\n————————————\n')
@@ -37,12 +38,12 @@ LOCATIONS: dict[str, str] = {
     'секретное место на Чернышевской': (
         'Дворец «Олимпия» (Литейный пр., д. 14, ст.м. Чернышевская)'),
     'секретное место на Василеостровской': (
-        'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)'),}
+        'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)')}
 
 MEDALS: dict[int, list[str]] = {
     -2: ['#alibi_medal #alibi_gold_medal'],
     -4: ['#alibi_medal #alibi_silver_medal'],
-    -6: ['#alibi_medal #alibi_bronze_medal'],}
+    -6: ['#alibi_medal #alibi_bronze_medal']}
 
 MONTHS = {
     'января': 1,
