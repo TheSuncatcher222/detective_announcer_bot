@@ -29,7 +29,7 @@ def test_define_post_topic():
     post = EXAMPLE_TEAMS
     assert define_post_topic(post) == 'teams'
 
-    print(f'test_json_data_read_write {GREEN_PASSED}')
+    print(f'test_define_post_topic {GREEN_PASSED}')
     return
 
 
