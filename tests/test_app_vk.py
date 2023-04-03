@@ -3,7 +3,7 @@
 # Вводить невалидные данные
 # Вводить неверное количество данных
 
-GREEN_PASSED = '\033[32mPASSED\033[0m'
+from tests.test_main import GREEN_PASSED, RED_FAILED
 
 from tests.vk_wall_examples import (
     EXAMPLE_CHECKIN, EXAMPLE_OTHER, EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW,
@@ -51,10 +51,11 @@ def test_game_dates_add_weekday_place():
     date_format = game_dates_add_weekday_place(GAME_DATES_INPUT)
     for date in range(len(GAME_DATES_INPUT)):
         assert date_format[date] == GAME_DATES_OUTPUT[date], (
-            f'Format FAILED!{NL}INPUT: {GAME_DATES_INPUT[date]}{NL}'
+            f'Format {RED_FAILED}!{NL}INPUT: {GAME_DATES_INPUT[date]}{NL}'
             f'FORMAT: {date_format[date]}{NL}CORRECT: {GAME_DATES_OUTPUT[date]}')
     print(f'test_game_dates_add_weekday_place {GREEN_PASSED}')
     return
+
 
 def test_fix_post_text():
     post_text: str = (
@@ -76,7 +77,7 @@ def test_fix_post_text():
     NL = '\n'
     for i in range(len(result)):
         assert fix_post_text(post_text)[1][i] == result[i], (
-            'Text missfixed!\n'
+            f'Text fixed {RED_FAILED}{NL}'
             f'Current paragraph: "{fix_post_text(post_text)[1][i]}"{NL}'
             f'Valid paragraph:   "{result[i]}"')
     print(f'test_fix_post_text {GREEN_PASSED}')

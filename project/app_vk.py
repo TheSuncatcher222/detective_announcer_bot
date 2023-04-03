@@ -2,7 +2,7 @@ from datetime import datetime
 from http import HTTPStatus
 import os
 from PyPDF2 import PdfReader
-from re import findall
+from re import findall, sub
 import requests
 import vk_api
 from vk_api.exceptions import ApiError
@@ -95,15 +95,8 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
 def fix_post_text(text: str) -> list:
     """."""
     # Тут появились какие-то \u3000
-    unfixed_text: str = text
-    fixed_text: str = unfixed_text.replace('\n \n', '\n\n')
-    fixed_text = fixed_text.replace('\n', '\n\n')
-    splitted_text: list = fixed_text.split('\n\n')
-    try:
-        while 1:
-            splitted_text.remove('')
-    except ValueError:
-        pass
+    fixed_text = sub(r'(\n\s*\n)+', '\n', text.strip())
+    splitted_text = [s for s in fixed_text.split('\n')]
     return fixed_text, splitted_text
 
 
@@ -150,7 +143,7 @@ def parse_post_preview(fixed_text: str, splitted_text: list):
     game_dates: list = findall(
         r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
         fixed_text)
-    game_dates = game_dates_add_weekday(game_dates=game_dates)
+    game_dates = game_dates_add_weekday_place(game_dates=game_dates)
     post_text += splitted_text[len(splitted_text)-3:len(splitted_text)-2]
     return post_text
 
