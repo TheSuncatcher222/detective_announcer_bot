@@ -65,7 +65,7 @@ def define_post_topic(post: dict) -> str:
     return 'other'
 
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНАs
+# ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def game_dates_add_weekday_place(game_dates: list) -> list:
     """Add day of the week to each date and formate location."""
     DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
@@ -91,13 +91,13 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
         game_dates_format.append(f'{date} ({day_name}), {time} — {location}')
     return game_dates_format
 
-
-def fix_post_text(text: str) -> list:
+# ФУНКЦИЯ ПРОТЕСТИРОВАНА
+def split_post_text(text: str) -> list:
     """."""
     # Тут появились какие-то \u3000
     fixed_text = sub(r'(\n\s*\n)+', '\n', text.strip())
     splitted_text = [s for s in fixed_text.split('\n')]
-    return fixed_text, splitted_text
+    return splitted_text
 
 
 def get_post_image_url(post: dict, block: str):
@@ -111,11 +111,10 @@ def get_post_image_url(post: dict, block: str):
                 post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
         if 'http' not in post_image_url:
             raise ValueError
+    except KeyError:
+        f"Post's json for {block} from VK wall has unknown structure!"
     except ValueError:
-        raise Exception(
-            "Post's json from VK wall has unknown structure!"
-            "Try ['items'][0]['attachments'][0]['photo']['sizes'][4]"
-            "['url']: data does not contain 'http' link.")
+        f"['url'] for {block}: data does not contain 'http' link."
     return post_image_url
 
 

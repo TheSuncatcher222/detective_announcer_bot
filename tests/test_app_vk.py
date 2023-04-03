@@ -10,7 +10,7 @@ from tests.vk_wall_examples import (
     EXAMPLE_RATING, EXAMPLE_RESULTS, EXAMPLE_TEAMS)
 
 from project.app_vk import (
-    define_post_topic, game_dates_add_weekday_place, fix_post_text)
+    define_post_topic, game_dates_add_weekday_place, split_post_text)
 
 
 def test_define_post_topic():
@@ -57,7 +57,7 @@ def test_game_dates_add_weekday_place():
     return
 
 
-def test_fix_post_text():
+def test_split_post_text():
     post_text: str = (
         'Регистрация. India\n'
         'Индия, 2006 год.\n\n'
@@ -76,9 +76,9 @@ def test_fix_post_text():
         '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении']
     NL = '\n'
     for i in range(len(result)):
-        assert fix_post_text(post_text)[1][i] == result[i], (
+        assert split_post_text(post_text)[i] == result[i], (
             f'Text fixed {RED_FAILED}{NL}'
-            f'Current paragraph: "{fix_post_text(post_text)[1][i]}"{NL}'
+            f'Current paragraph: "{split_post_text(post_text)[1][i]}"{NL}'
             f'Valid paragraph:   "{result[i]}"')
     print(f'test_fix_post_text {GREEN_PASSED}')
     return
