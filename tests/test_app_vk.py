@@ -3,11 +3,14 @@
 # Вводить невалидные данные
 # Вводить неверное количество данных
 
+GREEN_PASSED = '\033[32mPASSED\033[0m'
+
 from tests.vk_wall_examples import (
     EXAMPLE_CHECKIN, EXAMPLE_OTHER, EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW,
     EXAMPLE_RATING, EXAMPLE_RESULTS, EXAMPLE_TEAMS)
 
-from project.app_vk import define_post_topic, game_dates_add_weekday_place
+from project.app_vk import (
+    define_post_topic, game_dates_add_weekday_place, fix_post_text)
 
 
 def test_define_post_topic():
@@ -26,7 +29,7 @@ def test_define_post_topic():
     post = EXAMPLE_TEAMS
     assert define_post_topic(post) == 'teams'
 
-    print('test_json_data_read_write PASSED')
+    print(f'test_json_data_read_write {GREEN_PASSED}')
     return
 
 
@@ -50,5 +53,31 @@ def test_game_dates_add_weekday_place():
         assert date_format[date] == GAME_DATES_OUTPUT[date], (
             f'Format FAILED!{NL}INPUT: {GAME_DATES_INPUT[date]}{NL}'
             f'FORMAT: {date_format[date]}{NL}CORRECT: {GAME_DATES_OUTPUT[date]}')
-    print('test_game_dates_add_weekday_place PASSED')
+    print(f'test_game_dates_add_weekday_place {GREEN_PASSED}')
+    return
+
+def test_fix_post_text():
+    post_text: str = (
+        'Регистрация. India\n'
+        'Индия, 2006 год.\n\n'
+        'Между сезонами монсунов, волна преступлений захлестнула север Индии. '
+        'Что это было? Предстоит разобраться\n \n'
+        'Ссылка на регистрацию: \n'
+        'https://vk.com/app5619682_-40914100\n    \n'
+        '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении\n')
+    result: list[str] = [
+        'Регистрация. India',
+        'Индия, 2006 год.',
+        'Между сезонами монсунов, волна преступлений захлестнула север Индии. '
+        'Что это было? Предстоит разобраться',
+        'Ссылка на регистрацию: ',
+        'https://vk.com/app5619682_-40914100',
+        '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении']
+    NL = '\n'
+    for i in range(len(result)):
+        assert fix_post_text(post_text)[1][i] == result[i], (
+            'Text missfixed!\n'
+            f'Current paragraph: "{fix_post_text(post_text)[1][i]}"{NL}'
+            f'Valid paragraph:   "{result[i]}"')
+    print(f'test_fix_post_text {GREEN_PASSED}')
     return
