@@ -4,34 +4,13 @@ import os
 from PyPDF2 import PdfReader
 from re import findall
 import requests
-from telegram import TelegramError
 import vk_api
 from vk_api.exceptions import ApiError
 
-from data.app_data import(
-    LOCATIONS,
-    MEDALS,
-    MONTHS,
-    NON_PINNED_POST_ID,
-    PINNED_POST_ID,
-    POST_TOPICS,
-    TEAM_NAME,
-    TELEGRAM_USER,
-    VK_GROUP_TARGET,
-    VK_GROUP_TARGET_HASHTAG,
-    VK_GROUP_TARGET_LOGO,
-    VK_POST_LINK,
-    WEEKDAYS)
-
-# import json
-# from json.decoder import JSONDecodeError
-
-# import sys
-# 
-# 
-# from telegram.ext import CommandHandler
-# from telegram.ext import MessageHandler
-# from telegram.ext import Updater
+from data.app_data import (
+    LOCATIONS, MEDALS, MONTHS, NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS,
+    TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_HASHTAG, VK_GROUP_TARGET_LOGO,
+    VK_POST_LINK, WEEKDAYS)
 
 
 def init_vk_bot(token: str, user_id: int) -> any:
@@ -67,7 +46,6 @@ def get_vk_wall_update(
             raise Exception(
                 "Post's json from VK wall has unknown structure!"
                 f"Try ['items'][{num}]['id'].")
-    # Может сразу убрать из поста лишнее, чтобы не гонять туда-сюда?
     return update
 
 
@@ -97,7 +75,8 @@ def game_dates_add_weekday(game_dates: list) -> list:
         date_split = date.split(' — ')
         date_time, location = date_split[0], LOCATIONS[date_split[1]]
         date_time_split = date_time.split(', ')
-        date = date_time_split[0].split(' ')  # Возможно я тут сломал, скобки были пустые
+        # Возможно я тут сломал, скобки были пустые
+        date = date_time_split[0].split(' ')
         month = MONTHS[date[1]]
         if month >= now_month:
             year = now_year
@@ -258,175 +237,3 @@ def parse_post(post: dict, post_topic: str) -> dict:
     if 'game_dates':
         parsed_post['game_dates'] = game_dates
     return parsed_post
-
-
-def send_message(bot, message: str) -> None:
-    """Отправляет сообщение в Telegram."""
-    try:
-        bot.send_message(
-            chat_id=TELEGRAM_USER,
-            text=message)
-    except TelegramError:
-        raise Exception("Bot can't send the message!")
-    return
-
-
-def send_update(telegram_bot, parsed_post: dict) -> True:
-    """Отправляет полученные данные с ВК в телеграм чат."""
-    if not parsed_post['post_text']:
-        return True
-    output_text: str = ''
-    for paragraph in parsed_post['post_text']:
-        output_text += (paragraph + 2*'\n')
-    try:
-        telegram_bot.send_photo(
-            chat_id=TELEGRAM_USER,
-            photo=parsed_post['post_image_url'],
-            caption=output_text)
-        if 'game_dates' in parsed_post:
-            game_dates = rebuild_game_dates_json(
-                new_game=parsed_post['game_dates'])
-            game_dates_message = get_game_dates_json(data=game_dates)
-            send_message(
-                bot=telegram_bot, message=game_dates_message)
-    except TelegramError as err:
-        raise Exception(f"Bot can't send the message! Error message: {err}")
-    return True
-
-
-# def get_game_dates_json(data: dict) -> str:
-#     """Преобразует записи из game_dates.json в текстовое сообщение."""
-#     message: str = ''
-#     for game in data['games'].values():
-#         message += (game['date'] + str(game['total_teammates']) + '\n')
-#         for teammate in game['teammates']:
-#             message += 'teammate' + '\n'
-#             i = 1
-#             while i != game['teammates']['teammate']:
-#                 message += f'{teammate} (гость)' + '\n'
-#     return message
-            
-
-# def rebuild_game_dates_json(
-#     game_num: int = None,
-#     teammate: int = None,
-#     teammate_action: int = None,
-#     message_id: int = None,
-#     new_game = None) -> dict:
-#     """Направляет запрос на перезапись данных в game_dates.json.
-#     При получении номера игры и id участника или получении id сообщения:
-#     перезапись существующих данных. При получении данных о новой игре:
-#     формирование новых данных (количество и описание доступных игровых дней).
-#     """
-#     if new_game is None:
-#         file_name = 'game_dates.json'
-#         data = json_data_read(file_name=file_name)
-#         if data is None:
-#             raise SystemExit(
-#                 f'{file_name} is damaged and must be checked!')
-#     if all((game_num, teammate, teammate_action)):
-#         if teammate_action not in (-1, 1):
-#             raise SystemExit(
-#                 f"Teammate action has wrong data! Got '{teammate_action}', but"
-#                 "'-1' or '1' expected.")
-#         selected_game = data['games'][str(game_num)]
-#         if str(teammate) not in selected_game['teammates']:
-#             if teammate_action == -1:
-#                 return
-#             elif teammate_action == 1:
-#                 selected_game['teammates'][str(teammate)] = 1
-#                 selected_game['total_teammates'] += 1
-#         else:
-#             if teammate_action == 1:
-#                 selected_game['teammates'][str(teammate)] += 1
-#                 selected_game['total_teammates'] += 1
-#             else:
-#                 teammate_current = selected_game['teammates'][str(teammate)]
-#                 if teammate_current <= 1:
-#                     del selected_game['teammates'][str(teammate)]
-#                     selected_game['total_teammates'] -= 1
-#                 else:
-#                     selected_game['teammates'][str(teammate)] -= 1
-#                     selected_game['total_teammates'] -= 1
-#         data['games'][str(game_num)] = selected_game
-#     elif message_id:
-#         data['message_id'] = message_id
-#     elif new_game:
-#         count: str = 0
-#         data = {
-#             'message_id': None,
-#             'games': {}}
-#         for date in new_game:
-#             count += 1
-#             date_split = date.split(' — ')
-#             date = app_data.DATE_HEADLIGHT.format(
-#                 number=app_data.EMOJI_NUMBERS[count],
-#                 date=date_split[0],
-#                 location=date_split[1],
-#                 count=0)
-#             data['games'][count] = {
-#                 'total_teammates': 0,
-#                 'date': date,
-#                 'teammates': {}}
-#     else:
-#         raise SystemExit(
-#             'Something is wrong with input data in rebuild_game_dates_json!'
-#             f'Got: game_num = {game_num}, teammate = {teammate}, '
-#             f'teammate_action = {teammate_action}, message_id = {message_id}, '
-#             f'new_game = {new_game}')
-#     return data
-
-
-
-
-
-# def check_telegram_bot_response(token: str) -> None:
-#     """Проверяет ответ telegram BOT API."""
-#     response: requests.Response = requests.get(
-#         f'https://api.telegram.org/bot{token}/getMe')
-#     status: int = response.status_code
-#     if status == HTTPStatus.OK:
-#         return
-#     if status == HTTPStatus.UNAUTHORIZED:
-#         raise SystemExit('Telegram bot token is invalid!')
-#     else:
-#         logger.warning(
-#             f'Telegram API is unavailable with status {status}! '
-#             'Try to reconnect in 5 minutes.')
-#         sleep(300)
-#         check_telegram_bot_response(token=token)
-
-
-# def game_dates_json_update(telegram_id: int):
-#     pass
-
-
-
-    #####################################################
-    # updater = Updater(token=app_data.TELEGRAM_BOT_TOKEN)
-    # dispatcher = updater.dispatcher
-    # dispatcher.add_handler(CommandHandler('start', send_message(bot=telegram_bot, message='Привет!')))
-
-    # while 1:
-    #     try:
-    #         
-    #         if update:
-    #             
-
-    #             
-    #             
-
-#                 logger.info('Sending update complete!')
-#                 last_vk_wall_id = parsed_post['post_id']
-#                 json_data_write(
-#                     file_name='last_vk_wall_id.json',
-#                     data={'last_vk_wall_id': last_vk_wall_id})
-    #         else:
-    #             logger.debug('No updates available.')
-    #         updater.start_polling(poll_interval=1.0)
-    #         updater.idle()
-
-    #     logger.debug(f'Sleep for {app_data.API_UPDATE} sec.')
-    #     updater.start_polling(poll_interval=1.0)
-    #     updater.idle()
-
