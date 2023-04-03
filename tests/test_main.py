@@ -11,7 +11,7 @@ def test_json_data_read_write():
             pass
 
     FILE_NAME: str = 'TEST_FAKE_FILE.json'
-    remove_file_if_exists(APP_JSON_FOLDER.format(FILE_NAME))
+    remove_file_if_exists(f'{APP_JSON_FOLDER}{FILE_NAME}')
 
     test_value = None
     test_value = json_data_read(file_name=FILE_NAME)
@@ -27,6 +27,6 @@ def test_json_data_read_write():
     test_value = json_data_read(file_name=None, key='keey')
     assert test_value != 'vaalue', 'Read file with correct key FAILED.'
     
-    remove_file_if_exists(APP_JSON_FOLDER.format(FILE_NAME))
+    remove_file_if_exists(f'{APP_JSON_FOLDER}{FILE_NAME}')
     print('test_json_data_read_write PASSED')
     return

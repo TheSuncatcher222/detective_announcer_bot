@@ -44,7 +44,7 @@ def json_data_read(file_name: str, key: str = None) -> any:
     If there is no file or no given key if data - return 0.
     Optional: return certain value for given key."""
     try:
-        with open(APP_JSON_FOLDER.format(file_name)) as read_file:
+        with open(f'{APP_JSON_FOLDER}{file_name}') as read_file:
             data: dict[str] = json.load(read_file)
         if key:
             return data[key]
@@ -58,7 +58,7 @@ def json_data_read(file_name: str, key: str = None) -> any:
 # ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def json_data_write(file_name: str, write_data: dict) -> None:
     """Write given data to json file. Create new if not exists."""
-    with open(APP_JSON_FOLDER.format(file_name), 'w') as write_file:
+    with open(f'{APP_JSON_FOLDER}{file_name}', 'w') as write_file:
         json.dump(write_data, write_file)
     return
 
