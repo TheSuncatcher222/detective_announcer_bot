@@ -12,7 +12,7 @@ from tests.vk_wall_examples import (
 
 from project.app_vk import (
     define_post_topic, game_dates_add_weekday_place, get_post_image_url,
-    parse_post_stop_list, split_post_text)
+    parse_post_preview, parse_post_stop_list, split_post_text)
 
 
 def test_define_post_topic():
@@ -138,6 +138,59 @@ def test_get_post_image_url():
     return
 
 
+def test_parse_post_preview():
+    correct_game_dates = [
+        '27 марта (ср), 19:00 — ParkKing '
+        '(Александровский Парк, 4, ст.м. Горьковская)',
+        '28 марта (чт), 19:00 — ParkKing '
+        '(Александровский Парк, 4, ст.м. Горьковская)',
+        '30 марта (сб), 19:00 — Дворец «Олимпия» '
+        '(Литейный пр., д. 14, ст.м. Чернышевская)',
+        '2 апреля (вс), 19:00 — Дворец «Олимпия» '
+        '(Литейный пр., д. 14, ст.м. Чернышевская)',
+        '3 апреля (пн), 19:00 — ParkKing '
+        '(Александровский Парк, 4, ст.м. Горьковская)'
+    ]
+    correct_text = [
+        'Анонс. India',         
+        'Индия, 2006 год.',
+        'Между сезонами монсунов, затяжных дождей, волна жестоких, кровавых '
+        'преступлений захлестнула север Индии. Массовые убийства местных и '
+        'туристов держали людей в ужасе в течение нескольких месяцев. Пара '
+        'французов, турист из Бразилии, а жертвы среди местного населения и '
+        'вовсе исчислялись десятками...',
+        'Все в порезах. Некоторые — без глаз. И с кулонами в форме '
+         'полумесяца на шее. Что это было? Предстоит разобраться',
+         #  'Детективы, мы отправляемся в Индию, самое время выбрать '
+         #  'даты расследования:',
+         #  '— 27 марта, 19:00 — секретное место на Горьковской;',
+         #  '— 28 марта, 19:00 — секретное место на Горьковской;',
+         #  '— 30 марта, 19:00 — секретное место на Чернышевской;',
+         #  '— 2 апреля, 19:00 — секретное место на Чернышевской;',
+         #  '— 3 апреля, 19:00 — секретное место на Горьковской.',
+         'Старт регистрации 22 марта в 18:05.',
+         # 'Первые 5 зарегистрировавшихся команд играют по специальной '
+         # 'цене — 400 рублей с детектива! Рекомендуем подписаться '
+         # 'на обновления группы.,
+         # '#alibispb #alibi_preview #новыйпроект #СообщениеоПреступлении'
+    ]
+    result_game_dates, result_text = parse_post_preview(
+        post_text=EXAMPLE_PREVIEW['text'],
+        split_text=split_post_text(post_text=EXAMPLE_PREVIEW['text']))
+    for i in range(len(correct_game_dates)):
+        assert result_game_dates[i].strip() == correct_game_dates[i], (
+            f"Parse 'preview' (game dates) {RED_FAILED}!{NL}"
+            f'Current paragraph: "{result_game_dates[i].strip()}"{NL}'
+            f'Valid paragraph:   "{correct_game_dates[i]}"')
+    for i in range(len(correct_text)):
+        assert result_text[i].strip() == correct_text[i], (
+            f"Parse 'preview' (text) {RED_FAILED}!{NL}"
+            f'Current paragraph: "{result_text[i].strip()}"{NL}'
+            f'Valid paragraph:   "{correct_text[i]}"')
+    print(f'test_parse_post_preview {GREEN_PASSED}')
+    return
+
+
 def test_parse_post_stop_list():
     split_text: list = ['Тек №1', 'Тек №2', 'Тек удалить']
     result = parse_post_stop_list(
@@ -173,7 +226,7 @@ def test_split_post_text():
         'Ссылка на регистрацию: \n'
         'https://vk.com/app5619682_-40914100\n    \n'
         '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении\n')
-    result: list[str] = [
+    correct: list[str] = [
         'Регистрация. India',
         'Индия, 2006 год.',
         'Между сезонами монсунов, волна преступлений захлестнула север Индии. '
@@ -181,10 +234,11 @@ def test_split_post_text():
         'Ссылка на регистрацию: ',
         'https://vk.com/app5619682_-40914100',
         '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении']
+    result = split_post_text(post_text=post_text)
     for i in range(len(result)):
-        assert split_post_text(text=post_text)[i] == result[i], (
+        assert result[i] == correct[i], (
             f'Text fixed {RED_FAILED}{NL}'
-            f'Current paragraph: "{split_post_text(post_text)[i]}"{NL}'
-            f'Valid paragraph:   "{result[i]}"')
+            f'Current paragraph: "{result[i]}"{NL}'
+            f'Valid paragraph:   "{correct[i]}"')
     print(f'test_fix_post_text {GREEN_PASSED}')
     return
