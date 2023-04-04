@@ -8,9 +8,9 @@ import vk_api
 from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
-    LOCATIONS, MEDALS, NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS,
-    TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_HASHTAG, VK_GROUP_TARGET_LOGO,
-    VK_POST_LINK)
+    APP_JSON_FOLDER, LOCATIONS, MEDALS, NON_PINNED_POST_ID, PINNED_POST_ID,
+    POST_TOPICS, TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_HASHTAG,
+    VK_GROUP_TARGET_LOGO, VK_POST_LINK)
 
 
 def init_vk_bot(token: str, user_id: int) -> any:
@@ -24,7 +24,6 @@ def init_vk_bot(token: str, user_id: int) -> any:
     return vk
 
 
-# ФУНКЦИЯ НЕ НУЖДАЕТСЯ В ТЕСТИРОВАНИИ
 def get_vk_wall_update(
         last_vk_wall_id: int,
         vk_bot: vk_api.VkApi.method,
@@ -50,7 +49,6 @@ def get_vk_wall_update(
     return update
 
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def define_post_topic(post: dict) -> str:
     """Define the topic of the given post."""
     try:
@@ -65,7 +63,6 @@ def define_post_topic(post: dict) -> str:
     return 'other'
 
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def game_dates_add_weekday_place(game_dates: list) -> list:
     """Add day of the week to each date and formate location."""
     DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
@@ -91,17 +88,16 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
         game_dates_format.append(f'{date} ({day_name}), {time} — {location}')
     return game_dates_format
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНА
+
 def split_post_text(text: str) -> list:
     """Split text into paragraphs."""
-    # Тут появились какие-то \u3000
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', text.strip())
     splitted_text: list = [s for s in fixed_text.split('\n')]
     return splitted_text
 
 
-def get_post_image_url(post: dict, block: str):
-    """."""
+def get_post_image_url(post: dict, block: str) -> str:
+    """Get image URL from the given post."""
     try:
         if block == 'photo':
             post_image_url = (
@@ -111,11 +107,12 @@ def get_post_image_url(post: dict, block: str):
                 post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
         if 'http' not in post_image_url:
             raise ValueError
+        return post_image_url
     except KeyError:
         f"Post's json for {block} from VK wall has unknown structure!"
     except ValueError:
         f"['url'] for {block}: data does not contain 'http' link."
-    return post_image_url
+    return None
 
 
 def parse_post_stop_list(post: dict):
@@ -126,7 +123,7 @@ def parse_post_stop_list(post: dict):
         raise Exception(
             "Post's json from VK wall has unknown structure!"
             "Try ['items'][0]['attachments'][1]['doc']['url'].")
-    filename = 'stop-list.pdf'
+    filename = f'{APP_JSON_FOLDER}stop-list.pdf'
     open(filename, 'wb').write(response.content)
     reader = PdfReader(filename)
     for i in range(len(reader.pages)):
