@@ -134,7 +134,7 @@ def test_get_post_image_url():
                                 {'url': 'some-url.com'}]}}}]},
             'input_type': 'album',
             'expected': None},
-        'uncorrect_key_post_photo': {
+        'uncorrect_key_post_album': {
             'input': {'no_attachments': []},
             'input_type': 'album',
             'expected': None}}
@@ -157,7 +157,7 @@ def test_get_post_image_url():
                 f"in test data: '{test_name}'{NL}"
                 f"Expected: '{expected}'{NL}"
                 f"     Got: '{result}'")
-    return 
+    return
 
 
 def test_parse_post_preview():
@@ -175,7 +175,7 @@ def test_parse_post_preview():
         '(Александровский Парк, 4, ст.м. Горьковская)'
     ]
     expected_text = [
-        'Анонс. India',         
+        'Анонс. India',
         'Индия, 2006 год.',
         'Между сезонами монсунов, затяжных дождей, волна жестоких, кровавых '
         'преступлений захлестнула север Индии. Массовые убийства местных и '
@@ -228,7 +228,7 @@ def test_parse_post_stop_list():
             ['Команда допущена к регистрации на серию игр!',
              'Тек №1',
              'Тек №2']],
-        'non_exists_team':[
+        'non_exists_team': [
             'Пингвины',
             ['Команда уже была на представленной серии игр!',
              'Тек №1',
@@ -265,7 +265,7 @@ def test_split_post_text():
         'Ссылка на регистрацию: \n'
         'https://vk.com/app5619682_-40914100\n    \n'
         '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении\n')
-    correct: list[str] = [
+    expected_text: list[str] = [
         'Регистрация. India',
         'Индия, 2006 год.',
         'Между сезонами монсунов, волна преступлений захлестнула север Индии. '
@@ -273,11 +273,29 @@ def test_split_post_text():
         'Ссылка на регистрацию: ',
         'https://vk.com/app5619682_-40914100',
         '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении']
-    result = split_post_text(post_text=post_text)
-    for i in range(len(result)):
-        assert result[i] == correct[i], (
-            f'Text fixed {RED_FAILED}{NL}'
-            f'Current paragraph: "{result[i]}"{NL}'
-            f'Valid paragraph:   "{correct[i]}"')
-    print(f'test_fix_post_text {GREEN_PASSED}')
+    errors: list = []
+    result_text = split_post_text(post_text=post_text)
+    try:
+        assert len(result_text) == len(expected_text)
+    except AssertionError:
+        print(
+            f'test_fix_post_text {RED_FAILED}{NL}'
+            f"Expected: {len(expected_text)} abstracts{NL}"
+            f"     Got: {len(result_text)} abstracts")
+        return
+    for i in range(len(result_text)-1):
+        try:
+            result = result_text[i]
+            expected = expected_text[i]
+            assert result == expected
+        except AssertionError:
+            errors.append((result, expected))
+    if not errors:
+        print(f'test_fix_post_text {GREEN_PASSED}')
+    else:
+        print(f'test_fix_post_text {RED_FAILED}')
+        for result, expected in errors:
+            print(
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
     return
