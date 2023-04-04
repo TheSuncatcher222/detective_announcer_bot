@@ -139,10 +139,10 @@ def test_get_post_image_url():
 
 
 def test_parse_post_stop_list():
-    splitted_text: list = ['Тек №1', 'Тек №2', 'Тек удалить']
+    split_text: list = ['Тек №1', 'Тек №2', 'Тек удалить']
     result = parse_post_stop_list(
         post=DETECTIT_STOP_LIST,
-        splitted_text=splitted_text,
+        split_text=split_text,
         team_name='Пингвиннннннннннннннннннн')
     correct = [
         'Команда допущена к регистрации на серию игр!', 'Тек №1', 'Тек №2']
@@ -152,7 +152,7 @@ def test_parse_post_stop_list():
 
     result = parse_post_stop_list(
         post=DETECTIT_STOP_LIST,
-        splitted_text=splitted_text,
+        split_text=split_text,
         team_name='Пингвины')
     correct = [
         'Команда уже была на представленной серии игр!', 'Тек №1', 'Тек №2']
