@@ -16,7 +16,7 @@ from project.app_vk import (
 
 
 def test_define_post_topic():
-    post_topic_pairs = [
+    post_topic_pairs: dict[dict, str] = [
         (EXAMPLE_CHECKIN, 'checkin'),
         (EXAMPLE_OTHER, 'other'),
         (EXAMPLE_PRIZE_RESULTS, 'prize_results'),
@@ -24,10 +24,10 @@ def test_define_post_topic():
         (EXAMPLE_RATING, 'rating'),
         (EXAMPLE_RESULTS, 'results'),
         (EXAMPLE_TEAMS, 'teams')]
-    errors = []
+    errors: list = []
     for post, expected in post_topic_pairs:
         try:
-            result = define_post_topic(post=post)
+            result: str = define_post_topic(post=post)
             assert result == expected
         except AssertionError:
             errors.append((result, expected))
@@ -59,19 +59,20 @@ def test_game_dates_add_weekday_place():
         '(16-я лин. B.O., 83, ст.м. Василеостровская)',
         '31 декабря (вс), 23:59 — секретное место в нигде',
         '01 января (пн), 00:00 — ']
-    date_format = game_dates_add_weekday_place(game_dates=game_dates_input)
-    errors = []
+    date_format: list = game_dates_add_weekday_place(
+        game_dates=game_dates_input)
+    errors: list = []
     for date in range(len(game_dates_expected)):
         try:
-            result = date_format[date]
-            expected = game_dates_expected[date]
+            result: str = date_format[date]
+            expected: str = game_dates_expected[date]
             assert result == expected
         except AssertionError:
             errors.append((result, expected))
     if not errors:
-        print(f'test_define_post_topic {GREEN_PASSED}')
+        print(f'test_game_dates_add_weekday_place {GREEN_PASSED}')
     else:
-        print(f'test_define_post_topic {RED_FAILED}')
+        print(f'test_game_dates_add_weekday_place {RED_FAILED}')
         for result, expected in errors:
             print(
                 f"Expected: '{expected}'{NL}"
@@ -80,78 +81,83 @@ def test_game_dates_add_weekday_place():
 
 
 def test_get_post_image_url():
-    correct_post_photo = {
-        'attachments': [
-            {'photo': {
-                'sizes': [
-                    None,
-                    None,
-                    None,
-                    None,
-                    {'url': 'http://some-url.com'}]}}]}
-    result = get_post_image_url(post=correct_post_photo, block='photo')
-    correct = 'http://some-url.com'
-    assert result == correct, (
-        f'Get media URL with correct_post_photo {RED_FAILED}{NL}'
-        f'Result:  {result}{NL}Correct: {correct}')
-
-    uncorrect_url_post_photo = {
-        'attachments': [
-            {'photo': {
-                'sizes': [
-                    None,
-                    None,
-                    None,
-                    None,
-                    {'url': 'some-url.com'}]}}]}
-    result = get_post_image_url(post=uncorrect_url_post_photo, block='photo')
-    assert result is None, (
-        f'Get media URL with uncorrect_url_post_photo {RED_FAILED}{NL}'
-        f'Result:  {result}{NL}Correct: None')
-
-    uncorrect_key_post_photo = {'no_attachments': []}
-    result = get_post_image_url(post=uncorrect_key_post_photo, block='photo')
-    assert result is None, (
-        f'Get media URL with uncorrect_key_post_photo {RED_FAILED}{NL}'
-        f'Result:  {result}{NL}Correct: None')
-
-    correct_post_album = {
-        'attachments': [
-            {'album': {
-                'thumb': {
-                    'sizes': [
-                        None,
-                        None,
-                        None,
-                        {'url': 'http://some-url.com'}]}}}]}
-    result = get_post_image_url(post=correct_post_album, block='album')
-    correct = 'http://some-url.com'
-    assert result == correct, (
-        f'Get media URL with correct_post_album {RED_FAILED}{NL}'
-        f'Result:  {result}{NL}Correct: {correct}')
-
-    uncorrect_url_post_album = {
-        'attachments': [
-            {'album': {
-                'thumb': {
-                    'sizes': [
-                        None,
-                        None,
-                        None,
-                        {'url': 'some-url.com'}]}}}]}
-    result = get_post_image_url(post=uncorrect_url_post_album, block='album')
-    assert result is None, (
-        f'Get media URL with uncorrect_url_post_album {RED_FAILED}{NL}'
-        f'Result:  {result}{NL}Correct: None')
-
-    uncorrect_key_post_album = {'no_attachments': []}
-    result = get_post_image_url(post=uncorrect_key_post_album, block='album')
-    assert result is None, (
-        f'Get media URL with uncorrect_key_post_album {RED_FAILED}{NL}'
-        f'Result:  {result}{NL}Correct: None')
-
-    print(f'test_get_post_image_url {GREEN_PASSED}')
-    return
+    post_photo_urls: dict = {
+        'correct_post_photo': {
+            'input': {
+                'attachments': [
+                    {'photo': {
+                        'sizes': [
+                            None,
+                            None,
+                            None,
+                            None,
+                            {'url': 'http://some-url.com'}]}}]},
+            'input_type': 'photo',
+            'expected': 'http://some-url.com'},
+        'uncorrect_url_post_photo': {
+            'input': {
+                'attachments': [
+                    {'photo': {
+                        'sizes': [
+                            None,
+                            None,
+                            None,
+                            None,
+                            {'url': 'some-url.com'}]}}]},
+            'input_type': 'photo',
+            'expected': None},
+        'uncorrect_key_post_photo': {
+            'input': {'no_attachments': []},
+            'input_type': 'photo',
+            'expected': None},
+        'correct_post_album': {
+            'input': {
+                'attachments': [
+                    {'album': {
+                        'thumb': {
+                            'sizes': [
+                                None,
+                                None,
+                                None,
+                                {'url': 'http://some-url.com'}]}}}]},
+            'input_type': 'album',
+            'expected': 'http://some-url.com'},
+        'uncorrect_url_post_album': {
+            'input': {
+                'attachments': [
+                    {'album': {
+                        'thumb': {
+                            'sizes': [
+                                None,
+                                None,
+                                None,
+                                {'url': 'some-url.com'}]}}}]},
+            'input_type': 'album',
+            'expected': None},
+        'uncorrect_key_post_photo': {
+            'input': {'no_attachments': []},
+            'input_type': 'album',
+            'expected': None}}
+    errors: list = []
+    for test_name in post_photo_urls:
+        try:
+            test_data: dict = post_photo_urls[test_name]
+            result: str = get_post_image_url(
+                post=test_data['input'], block=test_data['input_type'])
+            expected: str = test_data['expected']
+            assert result == expected
+        except AssertionError:
+            errors.append((test_name, result, expected))
+    if not errors:
+        print(f'test_get_post_image_url {GREEN_PASSED}')
+    else:
+        print(f'test_get_post_image_url {RED_FAILED}')
+        for test_name, result, expected in errors:
+            print(
+                f"in test data: '{test_name}'{NL}"
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
+    return 
 
 
 def test_parse_post_preview():
