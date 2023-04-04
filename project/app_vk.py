@@ -9,8 +9,8 @@ from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
     APP_JSON_FOLDER, LOCATIONS, MEDALS, NON_PINNED_POST_ID, PINNED_POST_ID,
-    POST_TOPICS, TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_HASHTAG,
-    VK_GROUP_TARGET_LOGO, VK_POST_LINK)
+    POST_TOPICS, TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO,
+    VK_POST_LINK)
 
 
 def init_vk_bot(token: str, user_id: int) -> any:
@@ -182,13 +182,11 @@ def parse_post_photos(split_text: list, post_id: int):
     return post_text
 
 
-def parse_post_other(split_text):
+def parse_post_other(split_text: list):
     """."""
-    if VK_GROUP_TARGET_HASHTAG in split_text[len(split_text)-1]:
-        post_text = split_text[:len(split_text)-1]
-    else:
-        post_text = split_text
-    return post_text
+    if '#' in split_text[-1]:
+        split_text = split_text[:-1]
+    return split_text
 
 
 def parse_post(post: dict, post_topic: str) -> dict:
