@@ -16,22 +16,29 @@ from project.app_vk import (
 
 
 def test_define_post_topic():
-    post: dict[str] = EXAMPLE_CHECKIN
-    assert define_post_topic(post=post) == 'checkin'
-    post = EXAMPLE_OTHER
-    assert define_post_topic(post=post) == 'other'
-    post = EXAMPLE_PRIZE_RESULTS
-    assert define_post_topic(post=post) == 'prize_results'
-    post = EXAMPLE_PREVIEW
-    assert define_post_topic(post=post) == 'preview'
-    post = EXAMPLE_RATING
-    assert define_post_topic(post=post) == 'rating'
-    post = EXAMPLE_RESULTS
-    assert define_post_topic(post=post) == 'results'
-    post = EXAMPLE_TEAMS
-    assert define_post_topic(post=post) == 'teams'
-
-    print(f'test_define_post_topic {GREEN_PASSED}')
+    post_topic_pairs = [
+        (EXAMPLE_CHECKIN, 'checkin'),
+        (EXAMPLE_OTHER, 'other'),
+        (EXAMPLE_PRIZE_RESULTS, 'prize_results'),
+        (EXAMPLE_PREVIEW, 'preview'),
+        (EXAMPLE_RATING, 'rating'),
+        (EXAMPLE_RESULTS, 'results'),
+        (EXAMPLE_TEAMS, 'teams')
+    ]
+    errors = []
+    for post, expected in post_topic_pairs:
+        try:
+            assert define_post_topic(post=post) == expected
+        except AssertionError as err:
+            errors.append((post, expected, err))
+    if not errors:
+        print(f'test_define_post_topic {GREEN_PASSED}')
+    else:
+        print(f'test_define_post_topic {RED_FAILED}')
+        for post, expected_topic, err in errors:
+            print(
+                f'Expected: {expected_topic}{NL}'
+                f'     Got: {define_post_topic(post=post)}')
     return
 
 
