@@ -1,5 +1,7 @@
 from main import json_data_read, json_data_write
 
+NL = '\nl'
+
 GREEN_PASSED = '\033[32mPASSED\033[0m'
 RED_FAILED = '\033[31mFAILED\033[0m'
 
