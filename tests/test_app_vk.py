@@ -222,27 +222,37 @@ def test_parse_post_preview():
 
 def test_parse_post_stop_list():
     split_text: list = ['Тек №1', 'Тек №2', 'Тек удалить']
-    result = parse_post_stop_list(
-        post=DETECTIT_STOP_LIST,
-        split_text=split_text,
-        team_name='Пингвиннннннннннннннннннн')
-    correct = [
-        'Команда допущена к регистрации на серию игр!', 'Тек №1', 'Тек №2']
-    assert result == correct, (
-            f"Parse 'stop-list' with non exists team {RED_FAILED}!{NL}"
-            f'Result:  {result}{NL}Correct: {correct}')
-
-    result = parse_post_stop_list(
-        post=DETECTIT_STOP_LIST,
-        split_text=split_text,
-        team_name='Пингвины')
-    correct = [
-        'Команда уже была на представленной серии игр!', 'Тек №1', 'Тек №2']
-    assert result == correct, (
-            f"Parse 'stop-list' with exists team {RED_FAILED}!{NL}"
-            f'Result:  {result}{NL}Correct: {correct}')
-
-    print(f'test_parse_post_stop_list {GREEN_PASSED}')
+    teams: dict = {
+        'exists_team': [
+            'Пингвиныssssssssssss',
+            ['Команда допущена к регистрации на серию игр!',
+             'Тек №1',
+             'Тек №2']],
+        'non_exists_team':[
+            'Пингвины',
+            ['Команда уже была на представленной серии игр!',
+             'Тек №1',
+             'Тек №2']]}
+    errors: list = []
+    for team in teams:
+        try:
+            data: list = teams[team]
+            result: list = parse_post_stop_list(
+                post=DETECTIT_STOP_LIST,
+                split_text=split_text,
+                team_name=data[0])
+            expected: list = data[1]
+            assert result == expected
+        except AssertionError:
+            errors.append((result, expected))
+    if not errors:
+        print(f'test_parse_post_stop_list {GREEN_PASSED}')
+    else:
+        print(f'test_parse_post_stop_list {RED_FAILED}')
+        for result, expected in errors:
+            print(
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
     return
 
 
