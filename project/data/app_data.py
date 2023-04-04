@@ -19,7 +19,7 @@ VK_GROUP_TARGET_LOGO: str = (
 API_TELEGRAM_UPDATE_SEC: int = 0.5
 API_VK_UPDATE_SEC: int = 1
 
-APP_JSON_FOLDER: str = 'project/data/{}'
+APP_JSON_FOLDER: str = 'project/data/'
 
 DATE_HEADLIGHT: str = (
     '————————————\n{number}  {date} | {location} | {count}\n————————————\n')
