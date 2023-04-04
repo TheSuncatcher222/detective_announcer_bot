@@ -89,9 +89,9 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
     return game_dates_format
 
 
-def split_post_text(text: str) -> list:
+def split_post_text(post_text: str) -> list:
     """Split text into paragraphs."""
-    fixed_text: str = sub(r'(\n\s*\n)+', '\n', text.strip())
+    fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
     split_text: list = [s for s in fixed_text.split('\n')]
     return split_text
 
@@ -117,7 +117,7 @@ def get_post_image_url(post: dict, block: str) -> str:
 
 def parse_post_stop_list(
         post: dict, split_text: list, team_name=TEAM_NAME) -> list:
-    """Parse post text if topic is 'stop-list'.
+    """Parse post's text if the topic is 'stop-list'.
     Read attached PDF with stop-list and search team."""
     try:
         response: requests = requests.get(post['attachments'][1]['doc']['url'])
@@ -138,15 +138,15 @@ def parse_post_stop_list(
     return [text_verdict] + split_text[:len(split_text)-1]
 
 
-def parse_post_preview(fixed_text: str, split_text: list):
-    """."""
-    post_text = split_text[:3]
-    game_dates: list = findall(
-        r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
-        fixed_text)
-    game_dates = game_dates_add_weekday_place(game_dates=game_dates)
-    post_text += split_text[len(split_text)-3:len(split_text)-2]
-    return post_text
+def parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
+    """Parse post's text if the topic is 'preview'.
+    Separately return list with game dates and text."""
+    game_dates: list[str] = game_dates_add_weekday_place(
+        game_dates=findall(
+            r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
+            post_text))
+    post_text: list[str] = split_text[0:4] + split_text[-3:-2]
+    return game_dates, post_text
 
 
 def parse_post_checkin(split_text: str, post_id: int):
@@ -197,16 +197,18 @@ def parse_post(post: dict, post_topic: str) -> dict:
     post_text: str = None
     post_image_url: str = None
     game_dates: list = None
-    split_text = split_post_text(text=post['text'])
+    split_text = split_post_text(post_text=post['text'])
     if post_topic == 'stop-list':
-        post_text = parse_post_stop_list(post=post, split_text=split_text)
+        post_text = parse_post_stop_list(
+            post_text=post['text'], split_text=split_text)
     elif post_topic == 'preview':
-        post_text, game_dates = parse_post_preview(split_text=split_text)
+        game_dates, post_text = parse_post_preview(
+            post=post, split_text=split_text)
     elif post_topic == 'checkin':
         post_text = parse_post_checkin(split_text=split_text)
     elif post_topic == 'teams':
         post_text = ['Списки команд']
-    elif post_topic == 'game_results':  # and TEAM_NAME in fixed_text
+    elif post_topic == 'game_results' and TEAM_NAME in post['text']:
         post_text = parse_post_game_results(split_text=split_text)
     elif post_topic == 'prize_results':
         post_text = split_text[:len(split_text)-1]
