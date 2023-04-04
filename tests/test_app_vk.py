@@ -162,7 +162,7 @@ def test_get_post_image_url():
 
 def test_parse_post_preview():
     # Results are valid until March 27th 2023 23:59!
-    correct_game_dates = [
+    expected_game_dates = [
         '27 марта (ср), 19:00 — ParkKing '
         '(Александровский Парк, 4, ст.м. Горьковская)',
         '28 марта (чт), 19:00 — ParkKing '
@@ -174,7 +174,7 @@ def test_parse_post_preview():
         '3 апреля (пн), 19:00 — ParkKing '
         '(Александровский Парк, 4, ст.м. Горьковская)'
     ]
-    correct_text = [
+    expected_text = [
         'Анонс. India',         
         'Индия, 2006 год.',
         'Между сезонами монсунов, затяжных дождей, волна жестоких, кровавых '
@@ -183,34 +183,40 @@ def test_parse_post_preview():
         'французов, турист из Бразилии, а жертвы среди местного населения и '
         'вовсе исчислялись десятками...',
         'Все в порезах. Некоторые — без глаз. И с кулонами в форме '
-         'полумесяца на шее. Что это было? Предстоит разобраться',
-         #  'Детективы, мы отправляемся в Индию, самое время выбрать '
-         #  'даты расследования:',
-         #  '— 27 марта, 19:00 — секретное место на Горьковской;',
-         #  '— 28 марта, 19:00 — секретное место на Горьковской;',
-         #  '— 30 марта, 19:00 — секретное место на Чернышевской;',
-         #  '— 2 апреля, 19:00 — секретное место на Чернышевской;',
-         #  '— 3 апреля, 19:00 — секретное место на Горьковской.',
-         'Старт регистрации 22 марта в 18:05.',
-         # 'Первые 5 зарегистрировавшихся команд играют по специальной '
-         # 'цене — 400 рублей с детектива! Рекомендуем подписаться '
-         # 'на обновления группы.,
-         # '#alibispb #alibi_preview #новыйпроект #СообщениеоПреступлении'
+        'полумесяца на шее. Что это было? Предстоит разобраться',
+        #  'Детективы, мы отправляемся в Индию, самое время выбрать '
+        #  'даты расследования:',
+        #  '— 27 марта, 19:00 — секретное место на Горьковской;',
+        #  '— 28 марта, 19:00 — секретное место на Горьковской;',
+        #  '— 30 марта, 19:00 — секретное место на Чернышевской;',
+        #  '— 2 апреля, 19:00 — секретное место на Чернышевской;',
+        #  '— 3 апреля, 19:00 — секретное место на Горьковской.',
+        'Старт регистрации 22 марта в 18:05.',
+        # 'Первые 5 зарегистрировавшихся команд играют по специальной '
+        # 'цене — 400 рублей с детектива! Рекомендуем подписаться '
+        # 'на обновления группы.,
+        # '#alibispb #alibi_preview #новыйпроект #СообщениеоПреступлении'
     ]
     result_game_dates, result_text = parse_post_preview(
         post_text=EXAMPLE_PREVIEW['text'],
         split_text=split_post_text(post_text=EXAMPLE_PREVIEW['text']))
-    for i in range(len(correct_game_dates)):
-        assert result_game_dates[i].strip() == correct_game_dates[i], (
-            f"Parse 'preview' (game dates) {RED_FAILED}!{NL}"
-            f'Current paragraph: "{result_game_dates[i].strip()}"{NL}'
-            f'Valid paragraph:   "{correct_game_dates[i]}"')
-    for i in range(len(correct_text)):
-        assert result_text[i].strip() == correct_text[i], (
-            f"Parse 'preview' (text) {RED_FAILED}!{NL}"
-            f'Current paragraph: "{result_text[i].strip()}"{NL}'
-            f'Valid paragraph:   "{correct_text[i]}"')
-    print(f'test_parse_post_preview {GREEN_PASSED}')
+    errors: list = []
+    for (result, expected) in zip(
+            result_game_dates + result_text,
+            expected_game_dates + expected_text):
+        try:
+            result = result.strip()
+            assert result == expected
+        except AssertionError:
+            errors.append((result, expected))
+    if not errors:
+        print(f'test_parse_post_preview {GREEN_PASSED}')
+    else:
+        print(f'test_parse_post_preview {RED_FAILED}')
+        for result, expected in errors:
+            print(
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
     return
 
 
