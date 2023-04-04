@@ -23,34 +23,34 @@ def test_define_post_topic():
         (EXAMPLE_PREVIEW, 'preview'),
         (EXAMPLE_RATING, 'rating'),
         (EXAMPLE_RESULTS, 'results'),
-        (EXAMPLE_TEAMS, 'teams')
-    ]
+        (EXAMPLE_TEAMS, 'teams')]
     errors = []
     for post, expected in post_topic_pairs:
         try:
-            assert define_post_topic(post=post) == expected
-        except AssertionError as err:
-            errors.append((post, expected, err))
+            result = define_post_topic(post=post)
+            assert result == expected
+        except AssertionError:
+            errors.append((result, expected))
     if not errors:
         print(f'test_define_post_topic {GREEN_PASSED}')
     else:
         print(f'test_define_post_topic {RED_FAILED}')
-        for post, expected_topic, err in errors:
+        for result, expected in errors:
             print(
-                f'Expected: {expected_topic}{NL}'
-                f'     Got: {define_post_topic(post=post)}')
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
     return
 
 
 def test_game_dates_add_weekday_place():
-    GAME_DATES_INPUT: list[str] = [
+    game_dates_input: list[str] = [
         '17 марта, 19:00 — секретное место на Чернышевской',
         '21 апреля, 19:00 — секретное место на Горьковской',
         '23 марта, 19:00 — секретное место на Василеостровской',
         '31 декабря, 23:59 — секретное место в нигде',
         '01 января, 00:00 — ']
     # Results are valid until December 31th 2023 23:59!
-    GAME_DATES_OUTPUT: list[str] = [
+    game_dates_expected: list[str] = [
         '17 марта (вс), 19:00 — Дворец «Олимпия» '
         '(Литейный пр., д. 14, ст.м. Чернышевская)',
         '21 апреля (пт), 19:00 — ParkKing '
@@ -59,14 +59,23 @@ def test_game_dates_add_weekday_place():
         '(16-я лин. B.O., 83, ст.м. Василеостровская)',
         '31 декабря (вс), 23:59 — секретное место в нигде',
         '01 января (пн), 00:00 — ']
-    date_format = game_dates_add_weekday_place(game_dates=GAME_DATES_INPUT)
-    for date in range(len(GAME_DATES_INPUT)):
-        assert date_format[date] == GAME_DATES_OUTPUT[date], (
-            f'Format {RED_FAILED}!{NL}'
-            f'Input:   {GAME_DATES_INPUT[date]}{NL}'
-            f'Result:  {date_format[date]}{NL}'
-            f'Correct: {GAME_DATES_OUTPUT[date]}')
-    print(f'test_game_dates_add_weekday_place {GREEN_PASSED}')
+    date_format = game_dates_add_weekday_place(game_dates=game_dates_input)
+    errors = []
+    for date in range(len(game_dates_expected)):
+        try:
+            result = date_format[date]
+            expected = game_dates_expected[date]
+            assert result == expected
+        except AssertionError:
+            errors.append((result, expected))
+    if not errors:
+        print(f'test_define_post_topic {GREEN_PASSED}')
+    else:
+        print(f'test_define_post_topic {RED_FAILED}')
+        for result, expected in errors:
+            print(
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
     return
 
 
@@ -146,6 +155,7 @@ def test_get_post_image_url():
 
 
 def test_parse_post_preview():
+    # Results are valid until March 27th 2023 23:59!
     correct_game_dates = [
         '27 марта (ср), 19:00 — ParkKing '
         '(Александровский Парк, 4, ст.м. Горьковская)',
