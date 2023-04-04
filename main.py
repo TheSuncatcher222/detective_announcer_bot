@@ -11,7 +11,8 @@ from time import sleep
 from project.data.app_data import (
     APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC,
     DATE_HEADLIGHT, EMOJI_NUMBERS, TEAM_NAME, TELEGRAM_BOT_TOKEN,
-    TELEGRAM_TEAM_CHAT, TELEGRAM_USER, VK_TOKEN_ADMIN, VK_USER, VK_GROUP_TARGET)
+    TELEGRAM_TEAM_CHAT, TELEGRAM_USER, VK_TOKEN_ADMIN, VK_USER,
+    VK_GROUP_TARGET)
 import project.app_logger as app_logger
 from project.app_telegram import (
     check_telegram_bot_response, init_telegram_bot, send_update)
@@ -29,7 +30,7 @@ ALL_DATA: tuple[str] = (
 
 logger: logging.Logger = app_logger.get_logger(__name__)
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНА
+
 def check_env(data: list) -> None:
     """Checks env data."""
     if not all(data):
@@ -38,7 +39,6 @@ def check_env(data: list) -> None:
     return
 
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНА
 def json_data_read(file_name: str, key: str = None) -> any:
     """Read json file and return it's data.
     If there is no file or no given key if data - return 0.
@@ -55,7 +55,7 @@ def json_data_read(file_name: str, key: str = None) -> any:
         logger.info(f"JSON doesn't contain key '{key}'.")
     return 0
 
-# ФУНКЦИЯ ПРОТЕСТИРОВАНА
+
 def json_data_write(file_name: str, write_data: dict) -> None:
     """Write given data to json file. Create new if not exists."""
     with open(f'{APP_JSON_FOLDER}{file_name}', 'w') as write_file:
