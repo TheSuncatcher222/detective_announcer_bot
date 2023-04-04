@@ -105,32 +105,38 @@ def get_post_image_url(post: dict, block: str) -> str:
         elif block == 'album':
             post_image_url = (
                 post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
-        if 'http' not in post_image_url:
+        print(post_image_url)
+        if not post_image_url.startswith('http'):
             raise ValueError
         return post_image_url
-    except KeyError:
+    except (KeyError, IndexError):
         f"Post's json for {block} from VK wall has unknown structure!"
     except ValueError:
         f"['url'] for {block}: data does not contain 'http' link."
     return None
 
 
-def parse_post_stop_list(post: dict):
-    """."""
+def parse_post_stop_list(
+        post: dict, splitted_text: list, team_name=TEAM_NAME) -> list:
+    """Parse post text if topic is 'stop-list'.
+    Read attached PDF with stop-list and search team."""
     try:
-        response = requests.get(post['attachments'][1]['doc']['url'])
-    except Exception:
+        response: requests = requests.get(post['attachments'][1]['doc']['url'])
+    except (KeyError, IndexError):
         raise Exception(
             "Post's json from VK wall has unknown structure!"
             "Try ['items'][0]['attachments'][1]['doc']['url'].")
-    filename = f'{APP_JSON_FOLDER}stop-list.pdf'
-    open(filename, 'wb').write(response.content)
-    reader = PdfReader(filename)
+    filename: str = f'{APP_JSON_FOLDER}stop-list.pdf'
+    with open(filename, 'wb') as write_file:
+        write_file.write(response.content)
+    reader: PdfReader = PdfReader(filename)
+    text_verdict: str = 'Команда допущена к регистрации на серию игр!'
     for i in range(len(reader.pages)):
-        if TEAM_NAME in reader.pages[i].extract_text():
-            return ['Команда уже была на представленной серии игр!']
+        if team_name in reader.pages[i].extract_text():
+            text_verdict = 'Команда уже была на представленной серии игр!'
+            break
     os.remove(filename)
-    return ['Команда допущена к регистрации на представленную серию игр!']
+    return [text_verdict] + splitted_text[:len(splitted_text)-1]
 
 
 def parse_post_preview(fixed_text: str, splitted_text: list):
@@ -192,18 +198,16 @@ def parse_post(post: dict, post_topic: str) -> dict:
     post_text: str = None
     post_image_url: str = None
     game_dates: list = None
+    splitted_text = split_post_text(text=post['text'])
     if post_topic == 'stop-list':
-        post_text = parse_post_stop_list(post=post, post_id=post_id)
-    else:
-        fixed_text, splitted_text = fix_post_text(text=post['text'])
-    if post_topic == 'preview':
-        post_text = parse_post_preview(
-            fixed_text=fixed_text, splitted_text=splitted_text)
+        post_text = parse_post_stop_list(post=post, splitted_text=splitted_text)
+    elif post_topic == 'preview':
+        post_text = parse_post_preview(splitted_text=splitted_text)
     elif post_topic == 'checkin':
         post_text = parse_post_checkin(splitted_text=splitted_text)
     elif post_topic == 'teams':
         post_text = ['Списки команд']
-    elif post_topic == 'game_results' and TEAM_NAME in fixed_text:
+    elif post_topic == 'game_results':  # and TEAM_NAME in fixed_text
         post_text = parse_post_game_results(splitted_text=splitted_text)
     elif post_topic == 'prize_results':
         post_text = splitted_text[:len(splitted_text)-1]
