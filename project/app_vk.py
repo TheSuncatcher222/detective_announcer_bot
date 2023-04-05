@@ -171,12 +171,8 @@ def parse_post_game_results(split_text: str, team_name=TEAM_NAME):
 
 
 def parse_post_photos(split_text: list, post_id: int):
-    """."""
-    post_text_1 = ['📷 Фотографии 📷']
-    post_text_2 = split_text[:len(split_text)-2]
-    post_link = [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id})']
-    post_text = post_text_1 + post_text_2 + post_link
-    return post_text
+    """Parse post's text if the topic is 'photos'."""
+    return split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
 def parse_post_other(split_text: list):
