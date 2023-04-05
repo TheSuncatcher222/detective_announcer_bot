@@ -3,6 +3,8 @@
 # Вводить невалидные данные
 # Вводить неверное количество данных
 
+from project.data.app_data import VK_POST_LINK, VK_GROUP_TARGET
+
 from tests.test_main import GREEN_PASSED, NL, RED_FAILED
 
 from tests.vk_wall_examples import (
@@ -12,7 +14,8 @@ from tests.vk_wall_examples import (
 
 from project.app_vk import (
     define_post_topic, game_dates_add_weekday_place, get_post_image_url,
-    parse_post_preview, parse_post_stop_list, split_post_text)
+    parse_post_checkin, parse_post_preview, parse_post_stop_list,
+    split_post_text)
 
 
 def test_define_post_topic():
@@ -160,6 +163,44 @@ def test_get_post_image_url():
     return
 
 
+def test_parse_post_checkin():
+    post_id: int = EXAMPLE_CHECKIN['id']
+    split_text: list[str] = split_post_text(EXAMPLE_CHECKIN['text'])
+    expected_text: list[str] = [
+        'Регистрация. India',
+        'Ссылка на регистрацию:',
+        'https://vk.com/app5619682_-40914100',
+        'Действует розыгрыш бесплатного входа на всю команду! '
+        'Чтобы принять в нем участие, нужно вступить в группу и сделать '
+        'репост этой записи:\n'
+        f"{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}"]
+    errors: list = []
+    result_text = parse_post_checkin(split_text=split_text, post_id=post_id)
+    try:
+        assert len(result_text) == len(expected_text)
+    except AssertionError:
+        print(
+            f'test_parse_post_checkin {RED_FAILED}{NL}'
+            f"Expected: {len(expected_text)} abstracts{NL}"
+            f"     Got: {len(result_text)} abstracts")
+        return
+    for result, expected in zip(result_text, expected_text):
+        try:
+            assert result.strip() == expected
+        except AssertionError:
+            errors.append((result, expected))
+    if not errors:
+        print(f'test_parse_post_checkin {GREEN_PASSED}')
+    else:
+        print(f'test_parse_post_checkin {RED_FAILED}')
+        for result, expected in errors:
+            print(
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
+    return
+
+
+
 def test_parse_post_preview():
     # Results are valid until March 27th 2023 23:59!
     expected_game_dates = [
@@ -256,7 +297,7 @@ def test_parse_post_stop_list():
     return
 
 
-def test_split_post_text():
+def test_split_post_text() -> bool:
     post_text: str = (
         'Регистрация. India\n'
         'Индия, 2006 год.\n\n'
@@ -270,7 +311,7 @@ def test_split_post_text():
         'Индия, 2006 год.',
         'Между сезонами монсунов, волна преступлений захлестнула север Индии. '
         'Что это было? Предстоит разобраться',
-        'Ссылка на регистрацию: ',
+        'Ссылка на регистрацию:',
         'https://vk.com/app5619682_-40914100',
         '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении']
     errors: list = []
@@ -279,23 +320,24 @@ def test_split_post_text():
         assert len(result_text) == len(expected_text)
     except AssertionError:
         print(
-            f'test_fix_post_text {RED_FAILED}{NL}'
+            f'test_split_post_text {RED_FAILED}{NL}'
             f"Expected: {len(expected_text)} abstracts{NL}"
             f"     Got: {len(result_text)} abstracts")
         return
     for i in range(len(result_text)-1):
         try:
-            result = result_text[i]
+            result = result_text[i].strip()
             expected = expected_text[i]
             assert result == expected
         except AssertionError:
             errors.append((result, expected))
     if not errors:
-        print(f'test_fix_post_text {GREEN_PASSED}')
+        print(f'test_split_post_text {GREEN_PASSED}')
+        return True
     else:
-        print(f'test_fix_post_text {RED_FAILED}')
+        print(f'test_split_post_text {RED_FAILED}')
         for result, expected in errors:
             print(
                 f"Expected: '{expected}'{NL}"
                 f"     Got: '{result}'")
-    return
+    return False
