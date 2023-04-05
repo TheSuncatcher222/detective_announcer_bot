@@ -3,14 +3,14 @@
 # Вводить невалидные данные
 # Вводить неверное количество данных
 
-from project.data.app_data import VK_POST_LINK, VK_GROUP_TARGET
+from project.data.app_data import MEDALS, VK_POST_LINK, VK_GROUP_TARGET
 
 from tests.test_main import GREEN_PASSED, NL, RED_FAILED
 
 from tests.vk_wall_examples import (
     DETECTIT_STOP_LIST,
-    EXAMPLE_CHECKIN, EXAMPLE_OTHER, EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW,
-    EXAMPLE_RATING, EXAMPLE_RESULTS, EXAMPLE_TEAMS)
+    EXAMPLE_CHECKIN, EXAMPLE_GAME_RESULTS, EXAMPLE_OTHER,
+    EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW, EXAMPLE_RATING, EXAMPLE_TEAMS)
 
 from project.app_vk import (
     define_post_topic, game_dates_add_weekday_place, get_post_image_url,
@@ -21,11 +21,11 @@ from project.app_vk import (
 def test_define_post_topic():
     post_topic_pairs: dict[dict, str] = [
         (EXAMPLE_CHECKIN, 'checkin'),
+        (EXAMPLE_GAME_RESULTS, 'game_results'),
         (EXAMPLE_OTHER, 'other'),
         (EXAMPLE_PRIZE_RESULTS, 'prize_results'),
         (EXAMPLE_PREVIEW, 'preview'),
         (EXAMPLE_RATING, 'rating'),
-        (EXAMPLE_RESULTS, 'game_results'),
         (EXAMPLE_TEAMS, 'teams')]
     errors: list = []
     for post, expected in post_topic_pairs:
@@ -198,6 +198,84 @@ def test_parse_post_checkin():
                 f"Expected: '{expected}'{NL}"
                 f"     Got: '{result}'")
     return
+
+
+def test_parse_post_game_results():
+    expected_text_base: list[str] = [
+        'Новая неделя — новые игры! В понедельник, в секретном месте на '
+        'Горьковской мы с вами начали серию India. И теперь готовы поделиться '
+        'результатами первой игры.',
+        '▪5 место: «Речевые аутисты»',
+        'Ну, благо речь на игре нужна в последнюю очередь — все ответы '
+        'принимаются в письменном виде. И с этим команда справилась '
+        'отлично 🎉',
+        '▪4 место: «Босс молокосос и компания»',
+        'Ох уж этот пятый тур… Но наш опыт показывает: те, кто уверенно '
+        'держался в течение всей игры, не особенно пострадают от неудачи в '
+        'самом конце. Так и вышло 🎊',
+        '▪3 место: «Котики Киану Ривза»',
+        'Всем котикам — по медали. Бронзовой! 🐱',
+        '▪2 место: «Мы так и думали»',
+        'Думать — это хорошо. Хорошо думать — ещё лучше. От этого бывают '
+        'первые места, награды и другие приятные штуки 😉',
+        '▪1 место: «Винтажный газогенератор»',
+        'Удивительная машина — генерирует умные мысли и правильные ответы 🥂',
+        'А впереди ещё четыре игры! Посмотрим, как справятся другие '
+        'детективные агентства.']
+    expected_text_base_len = len(expected_text_base)
+    expected_dict = {
+        'team_out': {
+            'team_name': '13sda112fdssf3',
+            'expected_text_last': expected_text_base[-1],
+            'expected_len': expected_text_base_len},
+        'team_5th': {
+            'team_name': 'Речевые аутисты',
+            'expected_text_last': MEDALS['5th'][0],
+            'expected_len': expected_text_base_len + 1},
+        'team_4th': {
+            'team_name': 'Босс молокосос и компания',
+            'expected_text_last': MEDALS['4th'][0],
+            'expected_len': expected_text_base_len + 1},
+        'team_3th': {
+            'team_name': 'Котики Киану Ривза',
+            'expected_text_last': MEDALS['3th'][0],
+            'expected_len': expected_text_base_len + 1},
+        'team_2th': {
+            'team_name': 'Мы так и думали',
+            'expected_text_last': MEDALS['2th'][0],
+            'expected_len': expected_text_base_len + 1},
+        'team_1th': {
+            'team_name': 'Винтажный газогенератор',
+            'expected_text_last': MEDALS['1th'][0],
+            'expected_len': expected_text_base_len + 1}}
+    errors: list = []
+    for team in expected_dict:
+        try:
+            split_text: list[str] = split_post_text(
+                EXAMPLE_GAME_RESULTS['text'])
+            data: dict[str] = expected_dict[team]
+            result_text: list = parse_post_game_results(
+                split_text=split_text, team_name=data['team_name'])
+            result: int = len(result_text)
+            expected: int = data['expected_len']
+            assert result == expected
+            result = result_text[-1]
+            expected = data['expected_text_last']
+            assert result == expected
+        except AssertionError:
+            errors.append((team, result, expected))
+    if not errors:
+        print(f'parse_post_game_results {GREEN_PASSED}')
+    else:
+        print(f'parse_post_game_results {RED_FAILED}')
+        for team, result, expected in errors:
+            print(
+                f"For team: {team}{NL}"
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
+    return
+
+
 
 
 def test_parse_post_preview():
