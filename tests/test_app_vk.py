@@ -279,7 +279,8 @@ def test_parse_post_game_results():
 def test_parse_post_photos():
     split_text: list[str] = ['Стр №1', 'Стр №2', 'Стр №3']
     post_id: int = 100500
-    result_list: list[str] = parse_post_photos(split_text=split_text, post_id=post_id)
+    result_list: list[str] = parse_post_photos(
+        split_text=split_text, post_id=post_id)
     expected_list: list[str] = [
         'Стр №1', 'Стр №2', 'Стр №3',
         f'https://vk.com/alibigames?w=wall-{VK_GROUP_TARGET}_{post_id}']

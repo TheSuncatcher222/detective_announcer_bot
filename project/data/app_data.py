@@ -65,4 +65,4 @@ POST_TOPICS: dict[str, str] = {
     None: 'photos'
 """
 
-VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-{}_{}'
+VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
