@@ -92,8 +92,7 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
 def split_post_text(post_text: str) -> list:
     """Split text into paragraphs."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
-    split_text: list = [s for s in fixed_text.split('\n')]
-    return split_text
+    return [s for s in fixed_text.split('\n')]
 
 
 def get_post_image_url(post: dict, block: str) -> str:
