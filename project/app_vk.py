@@ -2,7 +2,7 @@ from datetime import datetime
 from http import HTTPStatus
 import os
 from PyPDF2 import PdfReader
-from re import findall, sub
+from re import findall, search, sub
 import requests
 import vk_api
 from vk_api.exceptions import ApiError
@@ -159,15 +159,15 @@ def parse_post_checkin(split_text: str, post_id: int) -> list[str]:
         f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
-def parse_post_game_results(split_text: str):
+def parse_post_game_results(split_text: str, team_name=TEAM_NAME):
     """Parse post's text if the topic is 'game_results'."""
-    post_text = split_text[:2]
-    post_text += (split_text[-7:-1])
-    for paragraph, medal in MEDALS.items():
-        if TEAM_NAME in post_text[paragraph]:
-            post_text += medal
+    reg_exp = fr'\d\sместо: «{team_name}»'
+    for paragraph in split_text:
+        reg_search = search(reg_exp, paragraph)
+        if reg_search:
+            split_text += MEDALS[f'{reg_search.group(0)[0]}th']
             break
-    return post_text
+    return split_text
 
 
 def parse_post_photos(split_text: list, post_id: int):
@@ -212,6 +212,8 @@ def parse_post(post: dict, post_topic: str) -> dict:
             split_text=split_text, post_id=post_id)
     elif post_topic == 'other':
         post_text = parse_post_other(split_text=split_text)
+    if not post_text:
+        return None
     if post_topic == 'prize_results':
         response = requests.get(VK_GROUP_TARGET_LOGO)
         if response.status_code != HTTPStatus.OK:
