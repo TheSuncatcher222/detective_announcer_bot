@@ -175,17 +175,10 @@ def parse_post_photos(split_text: list, post_id: int):
     return split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
-def parse_post_other(split_text: list):
-    """."""
-    if '#' in split_text[-1]:
-        split_text = split_text[:-1]
-    return split_text
-
-
 def parse_post(post: dict, post_topic: str) -> dict:
     """Производит структурный анализ и разделяет пост на составные части."""
     post_id: int = post['id']
-    post_text: str = None
+    post_text: list = None
     post_image_url: str = None
     game_dates: list = None
     split_text = split_post_text(post_text=post['text'])
@@ -207,7 +200,7 @@ def parse_post(post: dict, post_topic: str) -> dict:
         post_text = parse_post_photos(
             split_text=split_text, post_id=post_id)
     elif post_topic == 'other':
-        post_text = parse_post_other(split_text=split_text)
+        post_text = split_text
     if not post_text:
         return None
     if post_topic == 'prize_results':
