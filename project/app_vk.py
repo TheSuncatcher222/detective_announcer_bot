@@ -95,7 +95,7 @@ def split_post_text(post_text: str) -> list:
     return fixed_text.split('\n')[:-1]
 
 
-def get_post_image_url(post: dict, block: str) -> str:
+def get_post_image_url(block: str, post: dict) -> str:
     """Get image URL from the given post."""
     try:
         if block == 'photo':
@@ -148,7 +148,7 @@ def parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
     return game_dates, post_text
 
 
-def parse_post_checkin(split_text: str, post_id: int) -> list[str]:
+def parse_post_checkin(post_id: int, split_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
         split_text[0],
@@ -170,35 +170,33 @@ def parse_post_game_results(split_text: str, team_name=TEAM_NAME):
     return split_text
 
 
-def parse_post_photos(split_text: list, post_id: int):
+def parse_post_photos(post_id: int, split_text: list):
     """Parse post's text if the topic is 'photos'."""
     return split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
 def parse_post(post: dict, post_topic: str) -> dict:
-    """Производит структурный анализ и разделяет пост на составные части."""
+    """Manage post parsing."""
     post_id: int = post['id']
     post_text: list = None
     post_image_url: str = None
     game_dates: list = None
     split_text = split_post_text(post_text=post['text'])
     if post_topic == 'stop-list':
-        post_text = parse_post_stop_list(
-            post_text=post['text'], split_text=split_text)
+        post_text = parse_post_stop_list(post=post, split_text=split_text)
     elif post_topic == 'preview':
         game_dates, post_text = parse_post_preview(
-            post=post, split_text=split_text)
+            post_text=post['text'], split_text=split_text)
     elif post_topic == 'checkin':
-        post_text = parse_post_checkin(split_text=split_text)
+        post_text = parse_post_checkin(post_id=post_id, split_text=split_text)
     elif post_topic == 'teams':
-        post_text = ['Списки команд']
+        post_text = split_text[:2]
     elif post_topic == 'game_results' and TEAM_NAME in post['text']:
         post_text = parse_post_game_results(split_text=split_text)
     elif post_topic == 'prize_results':
-        post_text = split_text[:len(split_text)-1]
-    elif post_topic == 'photos':
-        post_text = parse_post_photos(
-            split_text=split_text, post_id=post_id)
+        post_text = split_text
+    elif post_topic == 'photos' or post_topic == 'rating':
+        post_text = parse_post_photos(split_text=split_text, post_id=post_id)
     elif post_topic == 'other':
         post_text = split_text
     if not post_text:
