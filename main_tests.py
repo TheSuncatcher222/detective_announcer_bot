@@ -13,13 +13,15 @@ def main_tests():
         test_app_vk.test_parse_post_game_results()
         test_app_vk.test_parse_post_preview()
         test_app_vk.test_parse_post_stop_list()
+        test_app_vk.test_parse_post()
     else:
         print(
             'Due to test_split_post_text fault next bounded tests:\n'
             f'   - test_parse_post_checkin {YELLOW_SKIPPED}{NL}'
             f'   - parse_post_game_results {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post_preview {YELLOW_SKIPPED}{NL}'
-            f'   - test_parse_post_stop_list {YELLOW_SKIPPED}{NL}')
+            f'   - test_parse_post_stop_list {YELLOW_SKIPPED}{NL}'
+            f'   - test_parse_post {YELLOW_SKIPPED}{NL}')
 
 
 if __name__ == '__main__':

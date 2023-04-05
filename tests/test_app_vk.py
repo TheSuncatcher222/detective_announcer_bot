@@ -3,9 +3,10 @@
 # Вводить невалидные данные
 # Вводить неверное количество данных
 
-from project.data.app_data import MEDALS, VK_POST_LINK, VK_GROUP_TARGET
+from project.data.app_data import (
+    MEDALS, TEAM_NAME, VK_POST_LINK, VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO)
 
-from tests.test_main import GREEN_PASSED, NL, RED_FAILED
+from tests.test_main import GREEN_PASSED, NL, RED_FAILED, YELLOW_SKIPPED
 
 from tests.vk_wall_examples import (
     DETECTIT_STOP_LIST,
@@ -13,9 +14,10 @@ from tests.vk_wall_examples import (
     EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW, EXAMPLE_RATING, EXAMPLE_TEAMS)
 
 from project.app_vk import (
-    define_post_topic, game_dates_add_weekday_place, get_post_image_url,
-    parse_post_checkin, parse_post_game_results, parse_post_photos,
-    parse_post_preview, parse_post_stop_list, split_post_text)
+    findall, define_post_topic, game_dates_add_weekday_place,
+    get_post_image_url, parse_post, parse_post_checkin,
+    parse_post_game_results, parse_post_photos, parse_post_preview,
+    parse_post_stop_list, split_post_text)
 
 
 def test_define_post_topic():
@@ -163,8 +165,135 @@ def test_get_post_image_url():
     return
 
 
+def test_parse_post():
+    expected_results: dict = {
+        'CHECKIN': {
+            'post': EXAMPLE_CHECKIN,
+            'post_topic': 'checkin',
+            'expected_results': {
+                'post_id': EXAMPLE_CHECKIN['id'],
+                'post_image_url': get_post_image_url(
+                    post=EXAMPLE_CHECKIN, block='photo'),
+                'post_text': parse_post_checkin(
+                    post_id=EXAMPLE_CHECKIN['id'],
+                    split_text=split_post_text(EXAMPLE_CHECKIN['text'])),
+                'game_dates': None}},
+        'GAME_RESULTS': {
+            'post': EXAMPLE_GAME_RESULTS,
+            'post_topic': 'game_results',
+            'expected_results': {
+                'post_id': EXAMPLE_GAME_RESULTS['id'],
+                'post_image_url': get_post_image_url(
+                    post=EXAMPLE_GAME_RESULTS, block='photo'),
+                'post_text': parse_post_game_results(
+                    split_text=split_post_text(EXAMPLE_GAME_RESULTS['text']),
+                    team_name=TEAM_NAME),
+                'game_dates': None}},
+        'OTHER': {
+            'post': EXAMPLE_OTHER,
+            'post_topic': 'other',
+            'expected_results': {
+                'post_id': EXAMPLE_OTHER['id'],
+                'post_image_url': get_post_image_url(
+                    post=EXAMPLE_OTHER, block='album'),
+                'post_text': split_post_text(post_text=EXAMPLE_OTHER['text']),
+                'game_dates': None}},
+        'EXAMPLE_PRIZE_RESULTS': {
+            'post': EXAMPLE_PRIZE_RESULTS,
+            'post_topic': 'prize_results',
+            'expected_results': {
+                'post_id': EXAMPLE_PRIZE_RESULTS['id'],
+                'post_image_url': VK_GROUP_TARGET_LOGO,
+                'post_text': split_post_text(
+                    post_text=EXAMPLE_PRIZE_RESULTS['text']),
+                'game_dates': None}},
+        'EXAMPLE_PREVIEW': {
+            'post': EXAMPLE_PREVIEW,
+            'post_topic': 'preview',
+            'expected_results': {
+                'post_id': EXAMPLE_PREVIEW['id'],
+                'post_image_url': get_post_image_url(
+                    post=EXAMPLE_PREVIEW, block='photo'),
+                'post_text': parse_post_preview(
+                    post_text=EXAMPLE_PREVIEW['text'],
+                    split_text=split_post_text(EXAMPLE_PREVIEW['text']))[1],
+                'game_dates': game_dates_add_weekday_place(
+                    game_dates=findall(
+                        r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
+                        EXAMPLE_PREVIEW['text']))}},
+        'RATING': {
+            'post': EXAMPLE_RATING,
+            'post_topic': 'rating',
+            'expected_results': {
+                'post_id': EXAMPLE_RATING['id'],
+                'post_image_url': get_post_image_url(
+                    post=EXAMPLE_RATING, block='photo'),
+                'post_text': parse_post_photos(
+                    split_text=split_post_text(EXAMPLE_RATING['text']),
+                    post_id=EXAMPLE_RATING['id']),
+                'game_dates': None}},
+        'EXAMPLE_TEAMS': {
+            'post': EXAMPLE_TEAMS,
+            'post_topic': 'teams',
+            'expected_results': {
+                'post_id': EXAMPLE_TEAMS['id'],
+                'post_image_url': get_post_image_url(
+                    post=EXAMPLE_TEAMS, block='photo'),
+                'post_text': split_post_text(EXAMPLE_TEAMS['text'])[:2],
+                'game_dates': None}},
+        'STOP_LIST': {
+            'post': DETECTIT_STOP_LIST,
+            'post_topic': 'stop-list',
+            'expected_results': {
+                'post_id': DETECTIT_STOP_LIST['id'],
+                'post_image_url': get_post_image_url(
+                    post=DETECTIT_STOP_LIST, block='photo'),
+                'post_text': parse_post_stop_list(
+                    post=DETECTIT_STOP_LIST,
+                    split_text=split_post_text(DETECTIT_STOP_LIST['text']),
+                    team_name=TEAM_NAME),
+                'game_dates': None}}}
+    errors: list = []
+    errors_extra: list = []
+    for post_type in expected_results:
+        post_data: dict = expected_results[post_type]
+        result_post: dict = parse_post(
+            post=post_data['post'], post_topic=post_data['post_topic'])
+        for expected_key in post_data['expected_results']:
+            try:
+                result: any = result_post.get(expected_key, None)
+                expected: any = post_data['expected_results'][expected_key]
+                assert result == expected
+            except AssertionError:
+                errors.append((post_type, expected_key, result, expected))
+            except AttributeError as err:
+                if post_type == 'GAME_RESULTS':
+                    errors_extra.append(
+                        f"    - test for {post_type} {YELLOW_SKIPPED} due to "
+                        "TEAM_NAME not in post's test! Change TEAM_NAME in "
+                        ".env to 'Винтажный газогенератор'")
+                else:
+                    errors_extra.append(
+                        f"    - test for {post_type} {YELLOW_SKIPPED}"
+                        f"{NL}      Full error: {err}")
+                break
+    if not errors:
+        print(f'test_parse_post {GREEN_PASSED}')
+    else:
+        print(f'test_parse_post {RED_FAILED}')
+        for post_type, expected_key, result, expected in errors:
+            print(
+                f"For post type '{post_type}' and key {expected_key}{NL}"
+                f"Expected: '{expected}'{NL}"
+                f"     Got: '{result}'")
+    if errors_extra:
+        for error in errors_extra:
+            print(error)
+    return
+
+
 def test_parse_post_checkin():
-    post_id: int = EXAMPLE_CHECKIN['id']
+    post_id: int = 100500
     split_text: list[str] = split_post_text(EXAMPLE_CHECKIN['text'])
     expected_text: list[str] = [
         'Регистрация. India',
