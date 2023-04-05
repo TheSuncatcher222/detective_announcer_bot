@@ -14,8 +14,8 @@ from tests.vk_wall_examples import (
 
 from project.app_vk import (
     define_post_topic, game_dates_add_weekday_place, get_post_image_url,
-    parse_post_checkin, parse_post_preview, parse_post_stop_list,
-    split_post_text)
+    parse_post_checkin, parse_post_game_results, parse_post_preview,
+    parse_post_stop_list, split_post_text)
 
 
 def test_define_post_topic():
@@ -25,7 +25,7 @@ def test_define_post_topic():
         (EXAMPLE_PRIZE_RESULTS, 'prize_results'),
         (EXAMPLE_PREVIEW, 'preview'),
         (EXAMPLE_RATING, 'rating'),
-        (EXAMPLE_RESULTS, 'results'),
+        (EXAMPLE_RESULTS, 'game_results'),
         (EXAMPLE_TEAMS, 'teams')]
     errors: list = []
     for post, expected in post_topic_pairs:
@@ -200,7 +200,6 @@ def test_parse_post_checkin():
     return
 
 
-
 def test_parse_post_preview():
     # Results are valid until March 27th 2023 23:59!
     expected_game_dates = [
@@ -312,8 +311,7 @@ def test_split_post_text() -> bool:
         'Между сезонами монсунов, волна преступлений захлестнула север Индии. '
         'Что это было? Предстоит разобраться',
         'Ссылка на регистрацию:',
-        'https://vk.com/app5619682_-40914100',
-        '#alibispb #alibi_checkin #новыйпроект #СообщениеоПреступлении']
+        'https://vk.com/app5619682_-40914100']
     errors: list = []
     result_text = split_post_text(post_text=post_text)
     try:

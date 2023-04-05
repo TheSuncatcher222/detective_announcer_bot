@@ -55,7 +55,7 @@ POST_TOPICS: dict[str, str] = {
     'Итоги розыгрыша': 'prize_results',
     'Анонс': 'preview',
     '#ГонорарДетектива': 'rating',
-    '#alibispb_results': 'results',
+    '#alibispb_results': 'game_results',
     'Списки команд': 'teams'}
 """
 Нет данных для категорий:

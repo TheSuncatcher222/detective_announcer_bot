@@ -92,7 +92,7 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
 def split_post_text(post_text: str) -> list:
     """Split text into paragraphs."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
-    return [s for s in fixed_text.split('\n')]
+    return fixed_text.split('\n')[:-1]
 
 
 def get_post_image_url(post: dict, block: str) -> str:
@@ -144,7 +144,7 @@ def parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
         game_dates=findall(
             r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
             post_text))
-    post_text: list[str] = split_text[0:4] + split_text[-3:-2]
+    post_text: list[str] = split_text[0:4] + split_text[-2:-1]
     return game_dates, post_text
 
 
@@ -152,7 +152,7 @@ def parse_post_checkin(split_text: str, post_id: int) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
         split_text[0],
-        *split_text[-5:-3],
+        *split_text[-4:-2],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:\n'
@@ -160,9 +160,9 @@ def parse_post_checkin(split_text: str, post_id: int) -> list[str]:
 
 
 def parse_post_game_results(split_text: str):
-    """."""
+    """Parse post's text if the topic is 'game_results'."""
     post_text = split_text[:2]
-    post_text += (split_text[len(split_text)-7:len(split_text)-1])
+    post_text += (split_text[-7:-1])
     for paragraph, medal in MEDALS.items():
         if TEAM_NAME in post_text[paragraph]:
             post_text += medal
