@@ -54,10 +54,10 @@ NON_PINNED_POST_ID: int = 1
 
 POST_TOPICS: dict[str, str] = {
     'Регистрация': 'checkin',
+    '#alibispb_results': 'game_results',
     'Итоги розыгрыша': 'prize_results',
     'Анонс': 'preview',
     '#ГонорарДетектива': 'rating',
-    '#alibispb_results': 'game_results',
     'Списки команд': 'teams'}
 """
 Нет данных для категорий:
