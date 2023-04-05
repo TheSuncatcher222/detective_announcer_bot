@@ -12,7 +12,7 @@ def main_tests():
         test_app_vk.test_parse_post_stop_list()
     else:
         print(
-            'Due to test_split_post_text fault:\n'
+            'Due to test_split_post_text fault next bounded tests:\n'
             f'   - test_parse_post_checkin() {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post_preview() {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post_stop_list() {YELLOW_SKIPPED}{NL}')
