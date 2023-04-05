@@ -7,7 +7,6 @@ def main_tests():
     test_app_vk.test_define_post_topic()
     test_app_vk.test_game_dates_add_weekday_place()
     test_app_vk.test_get_post_image_url()
-    test_app_vk.test_parse_post_photos()
     if test_app_vk.test_split_post_text():
         test_app_vk.test_parse_post_checkin()
         test_app_vk.test_parse_post_game_results()

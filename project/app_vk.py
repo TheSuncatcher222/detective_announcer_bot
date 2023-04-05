@@ -170,11 +170,6 @@ def parse_post_game_results(split_text: str, team_name=TEAM_NAME):
     return split_text
 
 
-def parse_post_photos(post_id: int, split_text: list):
-    """Parse post's text if the topic is 'photos'."""
-    return split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
-
-
 def parse_post(post: dict, post_topic: str) -> dict:
     """Manage post parsing."""
     post_id: int = post['id']
@@ -196,7 +191,7 @@ def parse_post(post: dict, post_topic: str) -> dict:
     elif post_topic == 'prize_results':
         post_text = split_text
     elif post_topic == 'photos' or post_topic == 'rating':
-        post_text = parse_post_photos(split_text=split_text, post_id=post_id)
+        post_text = split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
     elif post_topic == 'other':
         post_text = split_text
     if not post_text:

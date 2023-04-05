@@ -16,8 +16,8 @@ from tests.vk_wall_examples import (
 from project.app_vk import (
     findall, define_post_topic, game_dates_add_weekday_place,
     get_post_image_url, parse_post, parse_post_checkin,
-    parse_post_game_results, parse_post_photos, parse_post_preview,
-    parse_post_stop_list, split_post_text)
+    parse_post_game_results, parse_post_preview, parse_post_stop_list,
+    split_post_text)
 
 
 def test_define_post_topic():
@@ -228,9 +228,10 @@ def test_parse_post():
                 'post_id': EXAMPLE_RATING['id'],
                 'post_image_url': get_post_image_url(
                     post=EXAMPLE_RATING, block='photo'),
-                'post_text': parse_post_photos(
-                    split_text=split_post_text(EXAMPLE_RATING['text']),
-                    post_id=EXAMPLE_RATING['id']),
+                'post_text': (
+                    split_post_text(EXAMPLE_RATING['text'])
+                    + [f"{VK_POST_LINK}{VK_GROUP_TARGET}_"
+                       f"{EXAMPLE_RATING['id']}"]),
                 'game_dates': None}},
         'EXAMPLE_TEAMS': {
             'post': EXAMPLE_TEAMS,
@@ -400,31 +401,6 @@ def test_parse_post_game_results():
         for team, result, expected in errors:
             print(
                 f"For team: {team}{NL}"
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
-    return
-
-
-def test_parse_post_photos():
-    split_text: list[str] = ['Стр №1', 'Стр №2', 'Стр №3']
-    post_id: int = 100500
-    result_list: list[str] = parse_post_photos(
-        split_text=split_text, post_id=post_id)
-    expected_list: list[str] = [
-        'Стр №1', 'Стр №2', 'Стр №3',
-        f'https://vk.com/alibigames?w=wall-{VK_GROUP_TARGET}_{post_id}']
-    errors: list = []
-    for result, expected in zip(result_list, expected_list):
-        try:
-            assert result == expected
-        except AssertionError:
-            errors.append((result, expected))
-    if not errors:
-        print(f'test_parse_post_photos {GREEN_PASSED}')
-    else:
-        print(f'test_parse_post_photos {RED_FAILED}')
-        for result, expected in errors:
-            print(
                 f"Expected: '{expected}'{NL}"
                 f"     Got: '{result}'")
     return
