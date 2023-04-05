@@ -41,10 +41,12 @@ LOCATIONS: dict[str, str] = {
     'секретное место на Василеостровской':
         'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)'}
 
-MEDALS: dict[int, list[str]] = {
-    -2: ['#alibi_medal #alibi_gold_medal'],
-    -4: ['#alibi_medal #alibi_silver_medal'],
-    -6: ['#alibi_medal #alibi_bronze_medal']}
+MEDALS: dict[str, list[str]] = {
+    '1th': ['#medal #gold_medal'],
+    '2th': ['#medal #silver_medal'],
+    '3th': ['#medal #bronze_medal'],
+    '4th': ['#medal #iron_medal'],
+    '5th': ['#medal #wood_medal']}
 
 
 PINNED_POST_ID: int = 0
