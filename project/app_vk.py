@@ -149,17 +149,15 @@ def parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
     return game_dates, post_text
 
 
-def parse_post_checkin(split_text: str, post_id: int):
-    """."""
-    post_text_1 = split_text[:1]
-    post_text_2 = split_text[len(split_text)-5:len(split_text)-3]
-    post_text_3 = [
+def parse_post_checkin(split_text: str, post_id: int) -> list[str]:
+    """Parse post's text if the topic is 'checkin'."""
+    return [
+        split_text[0],
+        *split_text[-5:-3],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
-        'репост этой записи:']
-    post_link = [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
-    post_text = post_text_1 + post_text_2 + post_text_3 + post_link
-    return post_text
+        'репост этой записи:\n'
+        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
 def parse_post_game_results(split_text: str):
