@@ -67,4 +67,6 @@ TEAM_CONFIG: dict[dict[any]] = {
         'last_message_id': None,
         'game_dates': {}}
 
+TEAM_GUEST: str = '(приглашенный гость)'
+
 VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
