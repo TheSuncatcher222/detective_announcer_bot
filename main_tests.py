@@ -17,7 +17,7 @@ def main_tests():
         print(
             'Due to test_split_post_text fault next bounded tests:\n'
             f'   - test_parse_post_checkin {YELLOW_SKIPPED}{NL}'
-            f'   - parse_post_game_results {YELLOW_SKIPPED}{NL}'
+            f'   - test_parse_post_game_results {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post_preview {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post_stop_list {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post {YELLOW_SKIPPED}{NL}')
