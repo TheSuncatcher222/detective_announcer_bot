@@ -21,9 +21,7 @@ API_VK_UPDATE_SEC: int = 1
 APP_JSON_FOLDER: str = 'project/data/'
 
 DATE_HEADLIGHT: str = (
-    '————————————\n{number}  {date} | {location} | {count}\n————————————\n')
-DATE_HEADLIGHT_X: str = (
-    '————————————\n{number}  Не смогу быть | {count}\n————————————\n')
+    '————————————\n{number}  {date_location} | {count}\n————————————')
 
 EMOJI_NUMBERS: dict[int, str] = {
     0: '🚫',
@@ -34,7 +32,7 @@ EMOJI_NUMBERS: dict[int, str] = {
     5: '5️⃣'}
 
 LOCATIONS: dict[str, str] = {
-    'секретное место на Горьковской': 
+    'секретное место на Горьковской':
         'ParkKing (Александровский Парк, 4, ст.м. Горьковская)',
     'секретное место на Чернышевской':
         'Дворец «Олимпия» (Литейный пр., д. 14, ст.м. Чернышевская)',
@@ -64,5 +62,9 @@ POST_TOPICS: dict[str, str] = {
     None: 'stop-list'
     None: 'photos'
 """
+
+TEAM_CONFIG: dict[dict[any]] = {
+        'last_message_id': None,
+        'game_dates': {}}
 
 VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
