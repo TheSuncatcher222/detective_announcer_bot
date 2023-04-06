@@ -69,7 +69,7 @@ def send_message(bot, message: str, chat_id: int = TELEGRAM_USER) -> None:
     """Send message to target telegram user/chat."""
     try:
         bot.send_message(
-            chat_id=TELEGRAM_USER,
+            chat_id=chat_id,
             text=message)
     except TelegramError:
         raise Exception("Bot can't send the message!")
