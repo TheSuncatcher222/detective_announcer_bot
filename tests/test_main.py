@@ -2,10 +2,12 @@ from main import json_data_read, json_data_write
 
 NL = '\n'
 
+GAP: str = '      '
+GAP_DASH: str = '    - '
+
 GREEN_PASSED = '\033[32mPASSED\033[0m'
 RED_FAILED = '\033[31mFAILED\033[0m'
 YELLOW_SKIPPED = '\033[33mSKIPPED\033[0m'
-
 
 def test_json_data_read_write():
     import os
