@@ -34,15 +34,15 @@ def rebuild_team_config(
     Otherwise change exists data according teammate decision."""
     if create_new:
         team_config['game_dates'] = {
+            **{
+            i + 1: {
+                'date_location': game,
+                'teammates_count': 0,
+                'teammates': {}} for i, game in enumerate(game_dates)},
             0: {
                 'date_location': 'Не смогу быть',
                 'teammates_count': 0,
                 'teammates': {}}}
-        for i in range (len(game_dates)):
-            team_config['game_dates'][i + 1] = {
-                'date_location': game_dates[i],
-                'teammates_count': 0,
-                'teammates': {}}
     else:
         pass
     return
@@ -51,12 +51,10 @@ def rebuild_team_config(
 def form_game_dates_text(game_dates: dict) -> str:
     """Form text message from game_dates."""
     abstracts: list[str] = []
-    for i in (1, 2, 3, 4, 5, 0):
-        if game_dates.get(i, None) is None:
-            continue
-        date_location, teammates_count, teammates = game_dates[i].values()
+    for key in game_dates:
+        date_location, teammates_count, teammates = game_dates[key].values()
         abstracts.append(DATE_HEADLIGHT.format(
-            number=EMOJI_NUMBERS[i],
+            number=EMOJI_NUMBERS[key],
             date_location=date_location,
             teammates_count=teammates_count))
         for teammate in teammates:
