@@ -1,4 +1,4 @@
-from tests import test_main, test_app_vk
+from tests import test_main, test_app_telegram, test_app_vk
 from tests.test_main import NL, YELLOW_SKIPPED
 
 
@@ -21,6 +21,7 @@ def main_tests():
             f'   - test_parse_post_preview {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post_stop_list {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post {YELLOW_SKIPPED}{NL}')
+    test_app_telegram.test_rebuild_team_config()
 
 
 if __name__ == '__main__':
