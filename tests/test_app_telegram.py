@@ -1,6 +1,6 @@
 from project.app_telegram import form_game_dates_text, rebuild_team_config
 
-from project.data.app_data import TEAM_CONFIG
+from project.data.app_data import TEAM_CONFIG, TEAM_GUEST
 
 from tests.test_main import GAP, GAP_DASH, GREEN_PASSED, NL, RED_FAILED
 
@@ -29,14 +29,18 @@ def test_form_game_dates_text():
         '————————————\n'
         '1️⃣ Какая-та локация №1 | 4\n'
         '————————————\n'
-        'user_1: 2\n'
-        'user_2: 1\n'
-        'user_3: 1\n'
+        'user_1\n'
+        f'user_1 {TEAM_GUEST}\n'
+        'user_2\n'
+        'user_3\n'
         '————————————\n'
         '2️⃣ Другая локация в 18:00 | 5\n'
         '————————————\n'
-        'user_1: 4\n'
-        'user_10: 1\n'
+        'user_1\n'
+        f'user_1 {TEAM_GUEST}\n'
+        f'user_1 {TEAM_GUEST}\n'
+        f'user_1 {TEAM_GUEST}\n'
+        'user_10\n'
         '————————————\n'
         '🚫 Не смогу быть | 0\n'
         '————————————')
