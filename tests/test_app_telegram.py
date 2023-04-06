@@ -7,10 +7,6 @@ from tests.test_main import GAP, GAP_DASH, GREEN_PASSED, NL, RED_FAILED
 
 def test_form_game_dates_text():
     game_dates = {
-        0: {
-                'date_location': 'Не смогу быть',
-                'teammates_count': 0,
-                'teammates': {}},
         1: {
                 'date_location': 'Какая-та локация №1',
                 'teammates_count': 4,
@@ -23,7 +19,11 @@ def test_form_game_dates_text():
                 'teammates_count': 5,
                 'teammates': {
                     'user_1': 4,
-                    'user_10': 1}}}
+                    'user_10': 1}},
+        0: {
+                'date_location': 'Не смогу быть',
+                'teammates_count': 0,
+                'teammates': {}}}
     result = form_game_dates_text(game_dates)
     expected: str = (
         '————————————\n'
@@ -64,10 +64,6 @@ def test_rebuild_team_config():
     expected_dict = {
         'last_message_id': None,
         'game_dates': {
-            0: {
-                'date_location': 'Не смогу быть',
-                'teammates_count': 0,
-                'teammates': {}},
             1: {
                 'date_location': 'Игра № 2',
                 'teammates_count': 0,
@@ -79,7 +75,11 @@ def test_rebuild_team_config():
             3: {
                 'date_location': 'Игра № 3',
                 'teammates_count': 0,
-                'teammates': {}}}}
+                'teammates': {}}},
+            0: {
+                'date_location': 'Не смогу быть',
+                'teammates_count': 0,
+                'teammates': {}}}
     errors: list = []
     for num in expected_dict['game_dates']:
         try:
