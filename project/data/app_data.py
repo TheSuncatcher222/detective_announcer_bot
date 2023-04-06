@@ -21,7 +21,7 @@ API_VK_UPDATE_SEC: int = 1
 APP_JSON_FOLDER: str = 'project/data/'
 
 DATE_HEADLIGHT: str = (
-    '————————————\n{number}  {date_location} | {count}\n————————————')
+    '————————————\n{number} {date_location} | {teammates_count}\n————————————')
 
 EMOJI_NUMBERS: dict[int, str] = {
     0: '🚫',
