@@ -1,8 +1,3 @@
-# Ничего не вводить
-# Вводить некорректный тип данных
-# Вводить невалидные данные
-# Вводить неверное количество данных
-
 from project.data.app_data import (
     MEDALS, TEAM_NAME, VK_POST_LINK, VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO)
 
