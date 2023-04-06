@@ -3,7 +3,8 @@ import requests
 import telegram
 from telegram import TelegramError
 
-from project.data.app_data import DATE_HEADLIGHT, EMOJI_NUMBERS, TELEGRAM_USER
+from project.data.app_data import (
+    DATE_HEADLIGHT, EMOJI_NUMBERS, TEAM_GUEST, TELEGRAM_USER)
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -57,9 +58,11 @@ def form_game_dates_text(game_dates: dict) -> str:
             number=EMOJI_NUMBERS[key],
             date_location=date_location,
             teammates_count=teammates_count))
-        for teammate in teammates:
-            abstracts.append(f'{teammate}: {teammates[teammate]}')
-    return '\n'.join(abstract for abstract in abstracts)
+        for teammate, count in teammates.items():
+            abstracts.append(teammate)
+            for _ in range(1, count):
+                abstracts.append(f'{teammate} {TEAM_GUEST}')
+    return '\n'.join(abstracts)
 
 
 def send_message(bot, message: str, chat_id: int = TELEGRAM_USER) -> None:
