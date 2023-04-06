@@ -9,10 +9,9 @@ import logging
 from time import sleep
 
 from project.data.app_data import (
-    APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC,
-    DATE_HEADLIGHT, EMOJI_NUMBERS, TEAM_NAME, TELEGRAM_BOT_TOKEN,
-    TELEGRAM_TEAM_CHAT, TELEGRAM_USER, VK_TOKEN_ADMIN, VK_USER,
-    VK_GROUP_TARGET)
+    APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, TEAM_CONFIG,
+    TEAM_NAME, TELEGRAM_BOT_TOKEN, TELEGRAM_TEAM_CHAT, TELEGRAM_USER,
+    VK_TOKEN_ADMIN, VK_USER, VK_GROUP_TARGET)
 import project.app_logger as app_logger
 from project.app_telegram import (
     check_telegram_bot_response, init_telegram_bot, send_update)
@@ -63,21 +62,30 @@ def json_data_write(file_name: str, write_data: dict) -> None:
     return
 
 
-def vk_listener(last_vk_wall_id: int, telegram_bot, vk_bot) -> None:
-    """."""
-    logger.info('Try to receive data from VK group wall.')
-    update = get_vk_wall_update(
+def vk_listener(
+        last_vk_wall_id: int,
+        team_config: dict,
+        telegram_bot,
+        vk_bot) -> None:
+    """Use VK API for checking updates from target VK group.
+    If new post available - parse it and sent to target telegram chat."""
+    logger.debug('Try to receive data from VK group wall.')
+    update: dict = get_vk_wall_update(
+        last_vk_wall_id=last_vk_wall_id,
         vk_bot=vk_bot,
-        vk_group_id=VK_GROUP_TARGET,
-        last_vk_wall_id=last_vk_wall_id)
+        vk_group_id=VK_GROUP_TARGET)
     if update:
         logger.info('New post available!')
-        topic = define_post_topic(post=update)
-        parsed_post = parse_post(post=update, post_topic=topic)
-        send_update(telegram_bot=telegram_bot, parsed_post=parsed_post)
-        json_data_write(
-            file_name='last_vk_wall_id.json',
-            data={'last_vk_wall_id': parsed_post['post_id']})
+        topic: str = define_post_topic(post=update)
+        parsed_post: dict = parse_post(post=update, post_topic=topic)
+        if parsed_post:
+            send_update(
+                parsed_post=parsed_post,
+                team_config=team_config,
+                telegram_bot=telegram_bot)
+            json_data_write(
+                file_name='last_vk_wall_id.json',
+                data={'last_vk_wall_id': parsed_post['post_id']})
     logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
     sleep(API_VK_UPDATE_SEC)
     return
@@ -89,33 +97,35 @@ def telegram_listener() -> None:
 
 
 def main():
-    """Main program."""
+    """Main program. Manage vk_listener and telegram_listener."""
     logger.info('Program is running.')
     check_env(data=ALL_DATA)
     check_telegram_bot_response(token=TELEGRAM_BOT_TOKEN)
     vk_bot = init_vk_bot(
         token=VK_TOKEN_ADMIN, user_id=VK_USER)
     telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
-    last_api_error: str = json_data_read(
-        file_name='last_api_error.json', key='last_api_error')
-    last_vk_wall_id: int = json_data_read(
-        file_name='last_vk_wall_id.json', key='last_vk_wall_id')
+    last_api_error: str = json_data_read(file_name='last_api_error.json')
+    last_vk_wall_id: int = json_data_read(file_name='last_vk_wall_id.json')
+    team_config: dict = json_data_read(file_name='team_config.json')
+    if not team_config:
+        team_config = TEAM_CONFIG
     logger.info('Data check succeed. All API are available. Start polling.')
     while 1:
         try:
             vk_listener(
                 last_vk_wall_id=last_vk_wall_id,
+                team_config=team_config,
                 telegram_bot=telegram_bot,
                 vk_bot=vk_bot)
             # telegram_listener()
         except SystemExit as err:
-            """Error in code.
-            Program execution is not possible."""
+            """\033[31mError in code.
+            Program execution is not possible.\033[0m"""
             logger.critical(err)
             raise
         except Exception as err:
-            """Error on the API side.
-            The program will continue to run normally."""
+            """\033[33mError on the API side.
+            The program will continue to run normally.[0m"""
             # last_api_error: str = json_data_read(file_name=last_api_error)
             # if err != last_api_error:
             #     pass
