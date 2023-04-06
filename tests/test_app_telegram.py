@@ -1,5 +1,5 @@
 from project.app_telegram import (
-    form_game_dates_text, rebuild_team_config_game_dates)
+    create_new_team_config_game_dates, form_game_dates_text)
 
 from project.data.app_data import TEAM_CONFIG, TEAM_GUEST
 
@@ -61,11 +61,11 @@ def test_form_game_dates_text():
     return
 
 
-def test_rebuild_team_config_game_dates():
+def test_create_new_team_config_game_dates():
     team_config = TEAM_CONFIG
     game_dates = ['Игра № 2', 'Игра № 1', 'Игра № 3']
-    rebuild_team_config_game_dates(
-        create_new=True, team_config=team_config, game_dates=game_dates)
+    create_new_team_config_game_dates(
+        game_dates=game_dates, team_config=team_config)
     expected_dict = {
         'last_message_id': None,
         'game_count': 3,
