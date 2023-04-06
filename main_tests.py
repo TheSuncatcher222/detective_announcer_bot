@@ -22,7 +22,7 @@ def main_tests():
             f'   - test_parse_post_stop_list {YELLOW_SKIPPED}{NL}'
             f'   - test_parse_post {YELLOW_SKIPPED}{NL}')
     test_app_telegram.test_form_game_dates_text()
-    test_app_telegram.test_rebuild_team_config()
+    test_app_telegram.test_rebuild_team_config_game_dates()
 
 
 if __name__ == '__main__':

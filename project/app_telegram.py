@@ -25,7 +25,7 @@ def init_telegram_bot(token: str) -> telegram.Bot:
     return telegram.Bot(token=token)
 
 
-def rebuild_team_config(
+def rebuild_team_config_game_dates(
         create_new: bool,
         team_config: dict,
         game_dates: list = None,
@@ -95,11 +95,12 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         message='\n\n'.join(s for s in parsed_post['post_text']),
         photo_url=parsed_post['post_image_url'])
     if 'game_dates' in parsed_post:
-        game_dates = rebuild_team_config(
+        rebuild_team_config_game_dates(
             create_new=True,
             team_config=team_config,
             game_dates=parsed_post['game_dates'])
-        game_dates_message = form_game_dates_text(game_dates=game_dates)
+        game_dates_message: str = form_game_dates_text(
+            game_dates=parsed_post['game_dates'])
         # Убрать кнопки из сообщения с текущим last_message_id
         send_message(
             bot=telegram_bot, message=game_dates_message)
