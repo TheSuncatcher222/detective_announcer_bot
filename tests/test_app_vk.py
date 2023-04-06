@@ -1,7 +1,8 @@
 from project.data.app_data import (
     MEDALS, TEAM_NAME, VK_POST_LINK, VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO)
 
-from tests.test_main import GREEN_PASSED, NL, RED_FAILED, YELLOW_SKIPPED
+from tests.test_main import (
+    GAP, GAP_DASH, GREEN_PASSED, NL, RED_FAILED, YELLOW_SKIPPED)
 
 from tests.vk_wall_examples import (
     DETECTIT_STOP_LIST,
@@ -37,8 +38,8 @@ def test_define_post_topic():
         print(f'test_define_post_topic {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -75,8 +76,8 @@ def test_game_dates_add_weekday_place():
         print(f'test_game_dates_add_weekday_place {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -154,9 +155,9 @@ def test_get_post_image_url():
         print(f'test_get_post_image_url {RED_FAILED}')
         for test_name, result, expected in errors:
             print(
-                f"in test data: '{test_name}'{NL}"
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP_DASH}In test data: '{test_name}'{NL}"
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -279,9 +280,9 @@ def test_parse_post():
         print(f'test_parse_post {RED_FAILED}')
         for post_type, expected_key, result, expected in errors:
             print(
-                f"For post type '{post_type}' and key {expected_key}{NL}"
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP_DASH}For '{post_type}' and key {expected_key}{NL}"
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     if errors_extra:
         for error in errors_extra:
             print(error)
@@ -306,8 +307,8 @@ def test_parse_post_checkin():
     except AssertionError:
         print(
             f'test_parse_post_checkin {RED_FAILED}{NL}'
-            f"Expected: {len(expected_text)} abstracts{NL}"
-            f"     Got: {len(result_text)} abstracts")
+            f"{GAP}Expected: {len(expected_text)} abstracts{NL}"
+            f"{GAP}     Got: {len(result_text)} abstracts")
         return
     for result, expected in zip(result_text, expected_text):
         try:
@@ -320,8 +321,8 @@ def test_parse_post_checkin():
         print(f'test_parse_post_checkin {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -395,9 +396,9 @@ def test_parse_post_game_results():
         print(f'parse_post_game_results {RED_FAILED}')
         for team, result, expected in errors:
             print(
-                f"For team: {team}{NL}"
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP_DASH}For team: {team}{NL}"
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -456,8 +457,8 @@ def test_parse_post_preview():
         print(f'test_parse_post_preview {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -492,8 +493,8 @@ def test_parse_post_stop_list():
         print(f'test_parse_post_stop_list {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
 
 
@@ -520,8 +521,8 @@ def test_split_post_text() -> bool:
     except AssertionError:
         print(
             f'test_split_post_text {RED_FAILED}{NL}'
-            f"Expected: {len(expected_text)} abstracts{NL}"
-            f"     Got: {len(result_text)} abstracts")
+            f"{GAP}Expected: {len(expected_text)} abstracts{NL}"
+            f"{GAP}     Got: {len(result_text)} abstracts")
         return
     for i in range(len(result_text)-1):
         try:
@@ -537,6 +538,6 @@ def test_split_post_text() -> bool:
         print(f'test_split_post_text {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: '{expected}'{NL}"
-                f"     Got: '{result}'")
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return False

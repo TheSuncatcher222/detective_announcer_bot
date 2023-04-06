@@ -55,8 +55,8 @@ def test_form_game_dates_text():
         print(f'test_form_game_dates_text {RED_FAILED}')
         for result, expected in errors:
             print(
-                f"Expected: {NL}{expected}{NL}"
-                f"Got: {NL}{result}")
+                f"{GAP}Expected: {NL}{expected}{NL}"
+                f"{GAP}Got: {NL}{result}")
     return
 
 
