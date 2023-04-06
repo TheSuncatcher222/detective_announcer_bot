@@ -65,6 +65,7 @@ POST_TOPICS: dict[str, str] = {
 
 TEAM_CONFIG: dict[dict[any]] = {
         'last_message_id': None,
+        'game_count': 0,
         'game_dates': {}}
 
 TEAM_GUEST: str = '(приглашенный гость)'

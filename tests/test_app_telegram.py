@@ -68,6 +68,7 @@ def test_rebuild_team_config_game_dates():
         create_new=True, team_config=team_config, game_dates=game_dates)
     expected_dict = {
         'last_message_id': None,
+        'game_count': 3,
         'game_dates': {
             1: {
                 'date_location': 'Игра № 2',
@@ -86,6 +87,14 @@ def test_rebuild_team_config_game_dates():
                 'teammates_count': 0,
                 'teammates': {}}}
     errors: list = []
+    errors_len: str = None
+    try:
+        assert team_config['game_count'] == expected_dict['game_count']
+    except AssertionError:
+        errors_len = (
+            f"{GAP_DASH}Error in count 'game_count' value:{NL}"
+            f"{GAP}Expected: {expected_dict['game_count']}{NL}"
+            f"{GAP}     Got: {team_config['game_count']}")
     for num in expected_dict['game_dates']:
         try:
             result = team_config['game_dates'][num]
@@ -93,13 +102,16 @@ def test_rebuild_team_config_game_dates():
             assert result == expected
         except AssertionError:
             errors.append((num, result, expected))
-    if not errors:
-        print(f'test_rebuild_team_config {GREEN_PASSED}')
-    else:
-        print(f'test_rebuild_team_config {RED_FAILED}')
+    if not errors and not errors_len:
+        print(f'test_rebuild_team_config_game_dates {GREEN_PASSED}')
+        return
+    print(f'test_rebuild_team_config_game_dates {RED_FAILED}')
+    if errors:
         for num, result, expected in errors:
             print(
-                f"{GAP_DASH}For {num} position in game_dates:{NL}"
+                f"{GAP_DASH}For {num}th position in game_dates:{NL}"
                 f"{GAP}Expected: '{expected}'{NL}"
                 f"{GAP}     Got: '{result}'")
+    if errors_len:
+        print(errors_len)
     return

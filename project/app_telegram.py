@@ -34,6 +34,7 @@ def rebuild_team_config_game_dates(
     If flag create_new is True - create new data for new game_dates.
     Otherwise change exists data according teammate decision."""
     if create_new:
+        team_config['game_count'] = len(game_dates)
         team_config['game_dates'] = {
             **{
             i + 1: {
@@ -99,10 +100,10 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
             create_new=True,
             team_config=team_config,
             game_dates=parsed_post['game_dates'])
-        game_dates_message: str = form_game_dates_text(
-            game_dates=parsed_post['game_dates'])
         # Убрать кнопки из сообщения с текущим last_message_id
         send_message(
-            bot=telegram_bot, message=game_dates_message)
+            bot=telegram_bot,
+            message=form_game_dates_text(
+                game_dates=parsed_post['game_dates']))
         # получить новый message_id и вписать его в словарь
     return
