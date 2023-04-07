@@ -23,13 +23,24 @@ APP_JSON_FOLDER: str = 'project/data/'
 DATE_HEADLIGHT: str = (
     '————————————\n{number} {date_location} | {teammates_count}\n————————————')
 
-EMOJI_NUMBERS: dict[int, str] = {
+EMOJI_SYMBOLS: dict[int, str] = {
     0: '🚫',
     1: '1️⃣',
     2: '2️⃣',
     3: '3️⃣',
     4: '4️⃣',
-    5: '5️⃣'}
+    5: '5️⃣',
+    '+': '✅',
+    '-': '❌'}
+EMOJI_SYMBOLS_REVERS: dict[int, str] = {
+    '🚫': 0,
+    '1️⃣': 1,
+    '2️⃣': 2,
+    '3️⃣': 3,
+    '4️⃣': 4,
+    '5️⃣': 5,
+    '✅': '+',
+    '❌': '-'}
 
 LOCATIONS: dict[str, str] = {
     'секретное место на Горьковской':
