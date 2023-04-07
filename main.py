@@ -105,7 +105,9 @@ def main():
         token=VK_TOKEN_ADMIN, user_id=VK_USER)
     telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
     last_api_error: str = json_data_read(file_name='last_api_error.json')
-    last_vk_wall_id: int = json_data_read(file_name='last_vk_wall_id.json')
+    last_vk_wall_id: int = json_data_read(
+        file_name='last_vk_wall_id.json',
+        key='last_vk_wall_id')
     team_config: dict = json_data_read(file_name='team_config.json')
     if not team_config:
         team_config = TEAM_CONFIG
