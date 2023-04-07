@@ -1,12 +1,11 @@
 # -*- coding: UTF-8 -*-
 
+import asyncio
 import json
-from json.decoder import JSONDecodeError
 import logging
 # from telegram.ext import CommandHandler
 # from telegram.ext import MessageHandler
 # from telegram.ext import Updater
-from time import sleep
 
 from project.data.app_data import (
     APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, TEAM_CONFIG,
@@ -62,41 +61,49 @@ def json_data_write(file_name: str, write_data: dict) -> None:
     return
 
 
-def vk_listener(
+async def vk_listener(
         last_vk_wall_id: int,
         team_config: dict,
         telegram_bot,
         vk_bot) -> None:
     """Use VK API for checking updates from target VK group.
     If new post available - parse it and sent to target telegram chat."""
-    logger.debug('Try to receive data from VK group wall.')
-    update: dict = get_vk_wall_update(
-        last_vk_wall_id=last_vk_wall_id,
-        vk_bot=vk_bot,
-        vk_group_id=VK_GROUP_TARGET)
-    if update:
-        logger.info('New post available!')
-        topic: str = define_post_topic(post=update)
-        parsed_post: dict = parse_post(post=update, post_topic=topic)
-        if parsed_post:
-            send_update(
-                parsed_post=parsed_post,
-                team_config=team_config,
-                telegram_bot=telegram_bot)
-            json_data_write(
-                file_name='last_vk_wall_id.json',
-                data={'last_vk_wall_id': parsed_post['post_id']})
-    logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
-    sleep(API_VK_UPDATE_SEC)
-    return
+    while 1:
+        logger.debug('Try to receive data from VK group wall.')
+        update: dict = get_vk_wall_update(
+            last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
+            vk_bot=vk_bot,
+            vk_group_id=VK_GROUP_TARGET)
+        if update:
+            logger.info('New post available!')
+            topic: str = define_post_topic(post=update)
+            parsed_post: dict = parse_post(post=update, post_topic=topic)
+            if parsed_post:
+                send_update(
+                    parsed_post=parsed_post,
+                    team_config=team_config,
+                    telegram_bot=telegram_bot)
+                json_data_write(
+                    file_name='last_vk_wall_id.json',
+                    write_data={'last_vk_wall_id': parsed_post['post_id']})
+                last_vk_wall_id['last_vk_wall_id'] = parsed_post['post_id']
+        logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
+        await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
-def telegram_listener() -> None:
-    sleep(API_TELEGRAM_UPDATE_SEC)
+async def telegram_listener() -> None:
+    asyncio.sleep(API_TELEGRAM_UPDATE_SEC)
     pass
 
 
-def main():
+async def spam_in_console() -> None:
+    """For test asyncio work. Spam text in console."""
+    while 1:
+        print('SpamSpamSpamSpamSpamSpamSpam')
+        await asyncio.sleep(5)
+
+
+async def main():
     """Main program. Manage vk_listener and telegram_listener."""
     logger.info('Program is running.')
     check_env(data=ALL_DATA)
@@ -104,37 +111,40 @@ def main():
     vk_bot = init_vk_bot(
         token=VK_TOKEN_ADMIN, user_id=VK_USER)
     telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
-    last_api_error: str = json_data_read(file_name='last_api_error.json')
-    last_vk_wall_id: int = json_data_read(
-        file_name='last_vk_wall_id.json',
-        key='last_vk_wall_id')
+    # last_api_error: str = json_data_read(file_name='last_api_error.json')
+    last_vk_wall_id: dict = json_data_read(file_name='last_vk_wall_id.json')
+    if not last_vk_wall_id:
+        last_vk_wall_id = {'last_vk_wall_id': 0}
     team_config: dict = json_data_read(file_name='team_config.json')
     if not team_config:
         team_config = TEAM_CONFIG
     logger.info('Data check succeed. All API are available. Start polling.')
-    while 1:
-        try:
-            vk_listener(
-                last_vk_wall_id=last_vk_wall_id,
-                team_config=team_config,
-                telegram_bot=telegram_bot,
-                vk_bot=vk_bot)
-            # telegram_listener()
-        except SystemExit as err:
-            """\033[31mError in code.
-            Program execution is not possible.\033[0m"""
-            logger.critical(err)
-            raise
-        except Exception as err:
-            """\033[33mError on the API side.
-            The program will continue to run normally.[0m"""
-            # last_api_error: str = json_data_read(file_name=last_api_error)
-            # if err != last_api_error:
-            #     pass
-            logger.warning(err)
-            pass
-        break
+    task_vk = asyncio.create_task(
+        vk_listener(
+            last_vk_wall_id=last_vk_wall_id,
+            team_config=team_config,
+            telegram_bot=telegram_bot,
+            vk_bot=vk_bot))
+    task_spam = asyncio.create_task(spam_in_console())
+    await asyncio.gather(task_vk, task_spam)
+    # while 1:
+    #     try:
+    #         await asyncio.gather(task_vk, task_spam)
+    #         # telegram_listener()
+    #     except SystemExit as err:
+    #         """\033[31mError in code.
+    #         Program execution is not possible.\033[0m"""
+    #         logger.critical(err)
+    #         raise
+    #     except Exception as err:
+    #         """\033[33mError on the API side.
+    #         The program will continue to run normally.[0m"""
+    #         # last_api_error: str = json_data_read(file_name=last_api_error)
+    #         # if err != last_api_error:
+    #         #     pass
+    #         logger.warning(err)
+    #         pass
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
