@@ -25,38 +25,59 @@ def init_telegram_bot(token: str) -> telegram.Bot:
     return telegram.Bot(token=token)
 
 
-def rebuild_team_config_game_dates(
-        create_new: bool,
-        team_config: dict,
-        game_dates: list = None,
-        teammate_decision: dict = None) -> None:
-    """Rebuild data in team_config.
-    If flag create_new is True - create new data for new game_dates.
-    Otherwise change exists data according teammate decision."""
-    if create_new:
-        team_config['game_count'] = len(game_dates)
-        team_config['game_dates'] = {
-            **{
+def create_new_team_config_game_dates(
+        game_dates: list, team_config: dict) -> None:
+    """Create new data in team_config for new game_dates."""
+    team_config['game_count'] = len(game_dates)
+    team_config['game_dates'] = {
+        **{
             i + 1: {
                 'date_location': game,
-                'teammates_count': 0,
                 'teammates': {}} for i, game in enumerate(game_dates)},
-            0: {
-                'date_location': 'Не смогу быть',
-                'teammates_count': 0,
-                'teammates': {}}}
+        0: {
+            'date_location': 'Не смогу быть',
+            'teammates': {}}}
+    return
+
+
+def rebuild_team_config_game_dates(
+        team_config: dict,
+        teammate_decision: dict) -> None:
+    """Rebuild data in team_config according teammate decision."""
+    teammate: str = teammate_decision['teammate']
+    game_num: int = teammate_decision['game_num']
+    decision: int = teammate_decision['decision']
+    if decision == 1:
+        if game_num == 0 and teammate not in team_config[
+                'game_dates'][game_num]['teammates']:
+            team_config['game_dates'][game_num]['teammates'][teammate] = 1
+            for i in range(1, team_config['game_count']):
+                team_config['game_dates'][i]['teammates'].pop(teammate, None)
+        else:
+            team_config['game_dates'][0]['teammates'].pop(teammate, None)
+            if teammate not in team_config[
+                    'game_dates'][game_num]['teammates']:
+                team_config[
+                    'game_dates'][game_num]['teammates'][teammate] = 0
+            team_config['game_dates'][game_num]['teammates'][teammate] += 1
     else:
-        pass
+        if teammate in team_config['game_dates'][game_num]['teammates']:
+            team_config['game_dates'][game_num]['teammates'][teammate] -= 1
+            if team_config['game_dates'][game_num]['teammates'][teammate] == 0:
+                del team_config['game_dates'][game_num]['teammates'][teammate]
     return
 
 
 def form_game_dates_text(game_dates: dict) -> str:
     """Form text message from game_dates."""
     abstracts: list[str] = []
-    for key in game_dates:
-        date_location, teammates_count, teammates = game_dates[key].values()
+    for num in game_dates:
+        teammates_count: int = sum(
+            game_dates[num]['teammates'][teammate]
+            for teammate in game_dates[num]['teammates'])
+        date_location, teammates = game_dates[num].values()
         abstracts.append(DATE_HEADLIGHT.format(
-            number=EMOJI_NUMBERS[key],
+            number=EMOJI_NUMBERS[num],
             date_location=date_location,
             teammates_count=teammates_count))
         for teammate, count in teammates.items():
@@ -96,14 +117,11 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         message='\n\n'.join(s for s in parsed_post['post_text']),
         photo_url=parsed_post['post_image_url'])
     if 'game_dates' in parsed_post:
-        rebuild_team_config_game_dates(
-            create_new=True,
-            team_config=team_config,
-            game_dates=parsed_post['game_dates'])
+        create_new_team_config_game_dates(
+            game_dates=parsed_post['game_dates'], team_config=team_config)
         # Убрать кнопки из сообщения с текущим last_message_id
         send_message(
             bot=telegram_bot,
-            message=form_game_dates_text(
-                game_dates=parsed_post['game_dates']))
+            message=form_game_dates_text(game_dates=parsed_post['game_dates']))
         # получить новый message_id и вписать его в словарь
     return
