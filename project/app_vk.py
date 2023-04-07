@@ -155,7 +155,7 @@ def parse_post_checkin(post_id: int, split_text: str) -> list[str]:
         *split_text[-4:-2],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
-        'репост этой записи:\n'
+        'репост этой записи:\n\n'
         f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
