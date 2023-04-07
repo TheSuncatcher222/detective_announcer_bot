@@ -70,10 +70,20 @@ async def vk_listener(
     If new post available - parse it and sent to target telegram chat."""
     while 1:
         logger.debug('Try to receive data from VK group wall.')
-        update: dict = get_vk_wall_update(
-            last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
-            vk_bot=vk_bot,
-            vk_group_id=VK_GROUP_TARGET)
+        # update: dict = get_vk_wall_update(
+        #     last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
+        #     vk_bot=vk_bot,
+        #     vk_group_id=VK_GROUP_TARGET)
+        from tests import vk_wall_examples
+        update = vk_wall_examples.EXAMPLE_RATING
+        # EXAMPLE_CHECKIN OK
+        # EXAMPLE_PRIZE_RESULTS OK
+        # EXAMPLE_TEAMS OK
+
+        # EXAMPLE_GAME_RESULTS FAIL
+        # EXAMPLE_OTHER FAIL
+        # EXAMPLE_PREVIEW FAIL
+        # EXAMPLE_RATING FAIL
         if update:
             logger.info('New post available!')
             topic: str = define_post_topic(post=update)
