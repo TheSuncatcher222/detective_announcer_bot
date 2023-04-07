@@ -16,7 +16,7 @@ VK_GROUP_TARGET_LOGO: str = (
     'e8310f98da4ff095adb5e46ba20eef2d&type=album')
 
 API_TELEGRAM_UPDATE_SEC: int = 0.5
-API_VK_UPDATE_SEC: int = 1
+API_VK_UPDATE_SEC: int = 10
 
 APP_JSON_FOLDER: str = 'project/data/'
 
