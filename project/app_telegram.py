@@ -1,10 +1,10 @@
 from http import HTTPStatus
 import requests
 import telegram
-from telegram import TelegramError
+from telegram import TelegramError, ReplyKeyboardMarkup
 
 from project.data.app_data import (
-    DATE_HEADLIGHT, EMOJI_NUMBERS, TEAM_GUEST, TELEGRAM_USER)
+    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_USER)
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -25,6 +25,16 @@ def init_telegram_bot(token: str) -> telegram.Bot:
     return telegram.Bot(token=token)
 
 
+def create_keyboard_game_date(game_dates: list) -> list[list[str]]:
+    keyboard: list = []
+    for i in range(1, len(game_dates) + 1):
+        keyboard.append(
+            [f"{EMOJI_SYMBOLS[i]}{EMOJI_SYMBOLS['+']}",
+             f"{EMOJI_SYMBOLS[i]}{EMOJI_SYMBOLS['-']}"])
+    keyboard.append([f'{EMOJI_SYMBOLS[0]}'])
+    return keyboard
+
+
 def create_new_team_config_game_dates(
         game_dates: list, team_config: dict) -> None:
     """Create new data in team_config for new game_dates."""
@@ -37,6 +47,8 @@ def create_new_team_config_game_dates(
         0: {
             'date_location': 'Не смогу быть',
             'teammates': {}}}
+    team_config['game_dates_keyboard'] = create_keyboard_game_date(
+        game_dates=game_dates)
     return
 
 
@@ -77,7 +89,7 @@ def form_game_dates_text(game_dates: dict) -> str:
             for teammate in game_dates[num]['teammates'])
         date_location, teammates = game_dates[num].values()
         abstracts.append(DATE_HEADLIGHT.format(
-            number=EMOJI_NUMBERS[num],
+            number=EMOJI_SYMBOLS[num],
             date_location=date_location,
             teammates_count=teammates_count))
         for teammate, count in teammates.items():
@@ -96,6 +108,23 @@ def send_message(bot, message: str, chat_id: int = TELEGRAM_USER) -> None:
     except TelegramError:
         raise Exception("Bot can't send the message!")
     return
+
+
+def send_message_for_game_dates(
+        bot,
+        message: str,
+        chat_id: int = TELEGRAM_USER,
+        keyboard: list[list[str]] = None) -> int:
+    """Send message with game dates and keyboard to target telegram user/chat.
+    Return message id."""
+    try:
+        message = bot.send_message(
+            chat_id=chat_id,
+            keyboard=ReplyKeyboardMarkup(keyboard=keyboard),
+            text=message)
+    except TelegramError:
+        raise Exception("Bot can't send the message!")
+    return message.message_id
 
 
 def send_photo(photo_url: str, bot, message: str = None) -> None:
@@ -120,8 +149,8 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         create_new_team_config_game_dates(
             game_dates=parsed_post['game_dates'], team_config=team_config)
         # Убрать кнопки из сообщения с текущим last_message_id
-        send_message(
+        team_config['last_message_id'] = send_message_for_game_dates(
             bot=telegram_bot,
-            message=form_game_dates_text(game_dates=parsed_post['game_dates']))
-        # получить новый message_id и вписать его в словарь
+            message=form_game_dates_text(game_dates=parsed_post['game_dates']),
+            keyboard=None)
     return
