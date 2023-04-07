@@ -7,6 +7,7 @@ def main_tests():
 
     test_app_telegram.test_create_new_team_config_game_dates()
     test_app_telegram.test_form_game_dates_text()
+    test_app_telegram.test_rebuild_team_config_game_dates()
 
     test_app_vk.test_define_post_topic()
     test_app_vk.test_game_dates_add_weekday_place()
