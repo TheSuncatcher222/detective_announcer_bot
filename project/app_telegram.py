@@ -145,7 +145,7 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         bot=telegram_bot,
         message='\n\n'.join(s for s in parsed_post['post_text']),
         photo_url=parsed_post['post_image_url'])
-    if 'game_dates' in parsed_post:
+    if 'game_dates':
         create_new_team_config_game_dates(
             game_dates=parsed_post['game_dates'], team_config=team_config)
         # Убрать кнопки из сообщения с текущим last_message_id
