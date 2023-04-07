@@ -99,7 +99,12 @@ def test_create_new_team_config_game_dates():
                 'teammates': {}},
             0: {
                 'date_location': 'Не смогу быть',
-                'teammates': {}}}}
+                'teammates': {}}},
+        'game_dates_keyboard': [
+            ['1️⃣✅', '1️⃣❌'],
+            ['2️⃣✅', '2️⃣❌'],
+            ['3️⃣✅', '3️⃣❌'],
+            ['🚫']]}
     errors: list = []
     errors_len: str = None
     try:
@@ -116,6 +121,12 @@ def test_create_new_team_config_game_dates():
             assert result == expected
         except AssertionError:
             errors.append((num, result, expected))
+    try:
+        result = team_config['game_dates_keyboard']
+        expected = expected_dict['game_dates_keyboard']
+        assert result == expected
+    except AssertionError:
+        errors.append((num, result, expected))
     if not errors and not errors_len:
         print(f'test_rebuild_team_config_game_dates {GREEN_PASSED}')
         return
