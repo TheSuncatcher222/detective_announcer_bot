@@ -128,9 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# ToDo list
-todo
-
 # json files
 game_dates.json
 last_vk_wall_id.json
