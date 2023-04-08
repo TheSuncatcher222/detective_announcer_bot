@@ -111,7 +111,7 @@ def get_post_image_url(block: str, post: dict) -> str:
         f"Post's json for {block} from VK wall has unknown structure!"
     except ValueError:
         f"['url'] for {block}: data does not contain 'http' link."
-    return None
+    return VK_GROUP_TARGET_LOGO
 
 
 def parse_post_stop_list(
@@ -198,10 +198,8 @@ def parse_post(post: dict, post_topic: str) -> dict:
         return None
     if post_topic == 'photos':
         post_image_url = get_post_image_url(post=post, block='album')
-    elif post_topic != 'prize_results':
+    else:
         post_image_url = get_post_image_url(post=post, block='photo')
-    if not post_image_url:
-        post_image_url = VK_GROUP_TARGET_LOGO
     parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
