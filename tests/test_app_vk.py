@@ -106,11 +106,11 @@ def test_get_post_image_url():
                             None,
                             {'url': 'some-url.com'}]}}]},
             'input_type': 'photo',
-            'expected': None},
+            'expected': VK_GROUP_TARGET_LOGO},
         'uncorrect_key_post_photo': {
             'input': {'no_attachments': []},
             'input_type': 'photo',
-            'expected': None},
+            'expected': VK_GROUP_TARGET_LOGO},
         'correct_post_album': {
             'input': {
                 'attachments': [
@@ -134,11 +134,11 @@ def test_get_post_image_url():
                                 None,
                                 {'url': 'some-url.com'}]}}}]},
             'input_type': 'album',
-            'expected': None},
+            'expected': VK_GROUP_TARGET_LOGO},
         'uncorrect_key_post_album': {
             'input': {'no_attachments': []},
             'input_type': 'album',
-            'expected': None}}
+            'expected': VK_GROUP_TARGET_LOGO}}
     errors: list = []
     for test_name in post_photo_urls:
         try:
