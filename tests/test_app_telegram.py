@@ -7,58 +7,6 @@ from project.data.app_data import TEAM_CONFIG, TEAM_GUEST
 from tests.test_main import GAP, GAP_DASH, GREEN_PASSED, NL, RED_FAILED
 
 
-def test_form_game_dates_text():
-    game_dates = {
-        1: {
-                'date_location': 'Какая-та локация №1',
-                'teammates': {
-                    'user_1': 2,
-                    'user_2': 1,
-                    'user_3': 1}},
-        2: {
-                'date_location': 'Другая локация в 18:00',
-                'teammates': {
-                    'user_1': 4,
-                    'user_10': 1}},
-        0: {
-                'date_location': 'Не смогу быть',
-                'teammates': {}}}
-    result = form_game_dates_text(game_dates)
-    expected: str = (
-        '————————————\n'
-        '1️⃣ Какая-та локация №1 | 4\n'
-        '————————————\n'
-        'user_1\n'
-        f'user_1 {TEAM_GUEST}\n'
-        'user_2\n'
-        'user_3\n'
-        '————————————\n'
-        '2️⃣ Другая локация в 18:00 | 5\n'
-        '————————————\n'
-        'user_1\n'
-        f'user_1 {TEAM_GUEST}\n'
-        f'user_1 {TEAM_GUEST}\n'
-        f'user_1 {TEAM_GUEST}\n'
-        'user_10\n'
-        '————————————\n'
-        '🚫 Не смогу быть | 0\n'
-        '————————————')
-    errors = []
-    try:
-        assert result == expected
-    except AssertionError:
-        errors.append((result, expected))
-    if not errors:
-        print(f'test_form_game_dates_text {GREEN_PASSED}')
-    else:
-        print(f'test_form_game_dates_text {RED_FAILED}')
-        for result, expected in errors:
-            print(
-                f"{GAP}Expected: {NL}{expected}{NL}"
-                f"{GAP}Got: {NL}{result}")
-    return
-
-
 def test_create_keyboard_game_date():
     game_dates: list = ['Игра 1', 'Игра 2']
     expected = [['1️⃣✅', '1️⃣❌'], ['2️⃣✅', '2️⃣❌'], ['🚫']]
@@ -139,6 +87,58 @@ def test_create_new_team_config_game_dates():
                 f"{GAP}     Got: '{result}'")
     if errors_len:
         print(errors_len)
+    return
+
+
+def test_form_game_dates_text():
+    game_dates = {
+        1: {
+                'date_location': 'Какая-та локация №1',
+                'teammates': {
+                    'user_1': 2,
+                    'user_2': 1,
+                    'user_3': 1}},
+        2: {
+                'date_location': 'Другая локация в 18:00',
+                'teammates': {
+                    'user_1': 4,
+                    'user_10': 1}},
+        0: {
+                'date_location': 'Не смогу быть',
+                'teammates': {}}}
+    result = form_game_dates_text(game_dates)
+    expected: str = (
+        '————————————\n'
+        '1️⃣ Какая-та локация №1 | 4\n'
+        '————————————\n'
+        'user_1\n'
+        f'user_1 {TEAM_GUEST}\n'
+        'user_2\n'
+        'user_3\n'
+        '————————————\n'
+        '2️⃣ Другая локация в 18:00 | 5\n'
+        '————————————\n'
+        'user_1\n'
+        f'user_1 {TEAM_GUEST}\n'
+        f'user_1 {TEAM_GUEST}\n'
+        f'user_1 {TEAM_GUEST}\n'
+        'user_10\n'
+        '————————————\n'
+        '🚫 Не смогу быть | 0\n'
+        '————————————')
+    errors = []
+    try:
+        assert result == expected
+    except AssertionError:
+        errors.append((result, expected))
+    if not errors:
+        print(f'test_form_game_dates_text {GREEN_PASSED}')
+    else:
+        print(f'test_form_game_dates_text {RED_FAILED}')
+        for result, expected in errors:
+            print(
+                f"{GAP}Expected: {NL}{expected}{NL}"
+                f"{GAP}Got: {NL}{result}")
     return
 
 
