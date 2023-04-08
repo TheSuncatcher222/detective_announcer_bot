@@ -1,10 +1,10 @@
 from http import HTTPStatus
 import requests
 import telegram
-from telegram import TelegramError, ReplyKeyboardMarkup
+from telegram import TelegramError, InlineKeyboardMarkup, InlineKeyboardButton
 
 from project.data.app_data import (
-    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_USER)
+    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_TEAM_CHAT)
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -25,9 +25,11 @@ def init_telegram_bot(token: str) -> telegram.Bot:
     return telegram.Bot(token=token)
 
 
-def create_keyboard_game_date(game_dates: list) -> list[list[str]]:
+def create_keyboard_game_date(
+        games_count: int) -> list[list[InlineKeyboardButton]]:
+    """Create InlineKeyboardButton for game dates message."""
     keyboard: list = []
-    for i in range(1, len(game_dates) + 1):
+    for i in range(1, games_count + 1):
         keyboard.append(
             [f"{EMOJI_SYMBOLS[i]}{EMOJI_SYMBOLS['+']}",
              f"{EMOJI_SYMBOLS[i]}{EMOJI_SYMBOLS['-']}"])
@@ -48,7 +50,7 @@ def create_new_team_config_game_dates(
             'date_location': 'Не смогу быть',
             'teammates': {}}}
     team_config['game_dates_keyboard'] = create_keyboard_game_date(
-        game_dates=game_dates)
+        games_count=team_config['game_count'])
     return
 
 
@@ -99,7 +101,7 @@ def form_game_dates_text(game_dates: dict) -> str:
     return '\n'.join(abstracts)
 
 
-def send_message(bot, message: str, chat_id: int = TELEGRAM_USER) -> None:
+def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
     """Send message to target telegram user/chat."""
     try:
         bot.send_message(
@@ -113,26 +115,30 @@ def send_message(bot, message: str, chat_id: int = TELEGRAM_USER) -> None:
 def send_message_for_game_dates(
         bot,
         message: str,
-        chat_id: int = TELEGRAM_USER,
-        keyboard: list[list[str]] = None) -> int:
+        keyboard: list[list[InlineKeyboardMarkup]],
+        chat_id: int = TELEGRAM_TEAM_CHAT) -> int:
     """Send message with game dates and keyboard to target telegram user/chat.
     Return message id."""
     try:
         message = bot.send_message(
             chat_id=chat_id,
-            keyboard=ReplyKeyboardMarkup(keyboard=keyboard),
+            reply_markup=InlineKeyboardMarkup(keyboard),
             text=message)
     except TelegramError:
         raise Exception("Bot can't send the message!")
     return message.message_id
 
 
-def send_photo(photo_url: str, bot, message: str = None) -> None:
+def send_photo(
+        bot,
+        photo_url: str,
+        message: str = None,
+        chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
     """Send photo with optional message to target telegram user/chat."""
     try:
         bot.send_photo(
             caption=message,
-            chat_id=TELEGRAM_USER,
+            chat_id=chat_id,
             photo=photo_url)
     except TelegramError as err:
         raise Exception(f'Bot failed to send photo-message! Error: {err}')
@@ -151,6 +157,6 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         # Убрать кнопки из сообщения с текущим last_message_id
         team_config['last_message_id'] = send_message_for_game_dates(
             bot=telegram_bot,
-            message=form_game_dates_text(game_dates=parsed_post['game_dates']),
-            keyboard=None)
+            message=form_game_dates_text(game_dates=team_config['game_dates']),
+            keyboard=team_config['game_dates_keyboard'])
     return
