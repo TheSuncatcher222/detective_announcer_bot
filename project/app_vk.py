@@ -196,18 +196,12 @@ def parse_post(post: dict, post_topic: str) -> dict:
         post_text = split_text
     if not post_text:
         return None
-    if post_topic == 'prize_results':
-        response = requests.get(VK_GROUP_TARGET_LOGO)
-        if response.status_code != HTTPStatus.OK:
-            raise Exception(
-                'Group main picture URL is unavaliable with '
-                f'status: {response.status_code}!')
-        else:
-            post_image_url = VK_GROUP_TARGET_LOGO
-    elif post_topic == 'photos':
+    if post_topic == 'photos':
         post_image_url = get_post_image_url(post=post, block='album')
-    else:
+    elif post_topic != 'prize_results':
         post_image_url = get_post_image_url(post=post, block='photo')
+    if not post_image_url:
+        post_image_url = VK_GROUP_TARGET_LOGO
     parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
