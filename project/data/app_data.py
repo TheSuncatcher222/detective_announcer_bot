@@ -62,12 +62,12 @@ PINNED_POST_ID: int = 0
 NON_PINNED_POST_ID: int = 1
 
 POST_TOPICS: dict[str, str] = {
-    'Регистрация': 'checkin',
+    '#alibi_checkin': 'checkin',
     '#alibispb_results': 'game_results',
     'Итоги розыгрыша': 'prize_results',
-    'Анонс': 'preview',
+    '#alibi_preview': 'preview',
     '#ГонорарДетектива': 'rating',
-    'Списки команд': 'teams'}
+    '#detectit_teams': 'teams'}
 """
 Нет данных для категорий:
     None: 'stop-list'
