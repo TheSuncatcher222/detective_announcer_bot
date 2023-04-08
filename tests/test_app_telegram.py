@@ -62,7 +62,7 @@ def test_form_game_dates_text():
 def test_create_keyboard_game_date():
     game_dates: list = ['Игра 1', 'Игра 2']
     expected = [['1️⃣✅', '1️⃣❌'], ['2️⃣✅', '2️⃣❌'], ['🚫']]
-    result = create_keyboard_game_date(game_dates=game_dates)
+    result = create_keyboard_game_date(games_count=len(game_dates))
     errors: list = []
     try:
         assert result == expected
