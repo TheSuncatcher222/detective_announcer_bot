@@ -60,7 +60,7 @@ TEAM_CONFIG: dict[dict[any]] = {
         'last_message_id': None,
         'game_count': 0,
         'game_dates': {}}
-TEAM_CONFIG_BUTTONS = {
+TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
     1: [
         [
             InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
