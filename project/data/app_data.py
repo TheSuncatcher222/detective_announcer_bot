@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+from telegram import InlineKeyboardButton
 
 load_dotenv()
 
@@ -22,25 +23,6 @@ APP_JSON_FOLDER: str = 'project/data/'
 
 DATE_HEADLIGHT: str = (
     '————————————\n{number} {date_location} | {teammates_count}\n————————————')
-
-EMOJI_SYMBOLS: dict[int, str] = {
-    0: '🚫',
-    1: '1️⃣',
-    2: '2️⃣',
-    3: '3️⃣',
-    4: '4️⃣',
-    5: '5️⃣',
-    '+': '✅',
-    '-': '❌'}
-EMOJI_SYMBOLS_REVERS: dict[int, str] = {
-    '🚫': 0,
-    '1️⃣': 1,
-    '2️⃣': 2,
-    '3️⃣': 3,
-    '4️⃣': 4,
-    '5️⃣': 5,
-    '✅': '+',
-    '❌': '-'}
 
 LOCATIONS: dict[str, str] = {
     'секретное место на Горьковской':
@@ -78,6 +60,79 @@ TEAM_CONFIG: dict[dict[any]] = {
         'last_message_id': None,
         'game_count': 0,
         'game_dates': {}}
+TEAM_CONFIG_BUTTONS = {
+    1: [
+        [
+            InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
+            InlineKeyboardButton('1️⃣❌', callback_data='1 -1'),
+            InlineKeyboardButton('🚫', callback_data='0 +1')]],
+    2: [
+        [
+            InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
+            InlineKeyboardButton('1️⃣❌', callback_data='1 -1'),
+            InlineKeyboardButton('2️⃣✅', callback_data='2 +1'),
+            InlineKeyboardButton('2️⃣❌', callback_data='2 -1')],
+        [
+            InlineKeyboardButton('🚫', callback_data='0 +1')]],
+    3: [
+        [
+            InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
+            InlineKeyboardButton('1️⃣❌', callback_data='1 -1'),
+            InlineKeyboardButton('2️⃣✅', callback_data='2 +1'),
+            InlineKeyboardButton('2️⃣❌', callback_data='2 -1')],
+        [
+            InlineKeyboardButton('3️⃣✅', callback_data='3 +1'),
+            InlineKeyboardButton('3️⃣❌', callback_data='3 -1'),
+            InlineKeyboardButton(' ', callback_data=None),
+            InlineKeyboardButton('🚫', callback_data='0 +1')]],
+    4: [
+        [
+            InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
+            InlineKeyboardButton('1️⃣❌', callback_data='1 -1'),
+            InlineKeyboardButton('2️⃣✅', callback_data='2 +1'),
+            InlineKeyboardButton('2️⃣❌', callback_data='2 -1')],
+        [
+            InlineKeyboardButton('3️⃣✅', callback_data='3 +1'),
+            InlineKeyboardButton('3️⃣❌', callback_data='3 -1'),
+            InlineKeyboardButton('4️⃣✅', callback_data='4 +1'),
+            InlineKeyboardButton('4️⃣❌', callback_data='4 -1')],
+        [
+            InlineKeyboardButton('🚫', callback_data='0 +1')]],
+    5: [
+        [
+            InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
+            InlineKeyboardButton('1️⃣❌', callback_data='1 -1'),
+            InlineKeyboardButton('2️⃣✅', callback_data='2 +1'),
+            InlineKeyboardButton('2️⃣❌', callback_data='2 -1')],
+        [
+            InlineKeyboardButton('3️⃣✅', callback_data='3 +1'),
+            InlineKeyboardButton('3️⃣❌', callback_data='3 -1'),
+            InlineKeyboardButton('4️⃣✅', callback_data='4 +1'),
+            InlineKeyboardButton('4️⃣❌', callback_data='4 -1')],
+        [
+            InlineKeyboardButton('5️⃣✅', callback_data='5 +1'),
+            InlineKeyboardButton('5️⃣❌', callback_data='5 -1'),
+            InlineKeyboardButton(' ', callback_data=None),
+            InlineKeyboardButton('🚫', callback_data='0 +1')]],
+    6: [
+        [
+            InlineKeyboardButton('1️⃣✅', callback_data='1 +1'),
+            InlineKeyboardButton('1️⃣❌', callback_data='1 -1'),
+            InlineKeyboardButton('2️⃣✅', callback_data='2 +1'),
+            InlineKeyboardButton('2️⃣❌', callback_data='2 -1')
+        ],
+        [
+            InlineKeyboardButton('3️⃣✅', callback_data='3 +1'),
+            InlineKeyboardButton('3️⃣❌', callback_data='3 -1'),
+            InlineKeyboardButton('4️⃣✅', callback_data='4 +1'),
+            InlineKeyboardButton('4️⃣❌', callback_data='4 -1')],
+        [
+            InlineKeyboardButton('5️⃣✅', callback_data='5 +1'),
+            InlineKeyboardButton('5️⃣❌', callback_data='5 -1'),
+            InlineKeyboardButton('6️⃣✅', callback_data='6 +1'),
+            InlineKeyboardButton('6️⃣❌', callback_data='6 -1')],
+        [
+            InlineKeyboardButton('🚫', callback_data='0 +1')]]}
 
 TEAM_GUEST: str = '(приглашенный гость)'
 
