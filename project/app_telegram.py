@@ -1,10 +1,11 @@
 from http import HTTPStatus
 import requests
 import telegram
-from telegram import TelegramError, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import TelegramError, InlineKeyboardMarkup
 
 from project.data.app_data import (
-    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_TEAM_CHAT)
+    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_CONFIG_BUTTONS, TEAM_GUEST,
+    TELEGRAM_TEAM_CHAT)
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -25,18 +26,6 @@ def init_telegram_bot(token: str) -> telegram.Bot:
     return telegram.Bot(token=token)
 
 
-def create_keyboard_game_date(
-        games_count: int) -> list[list[InlineKeyboardButton]]:
-    """Create InlineKeyboardButton for game dates message."""
-    keyboard: list = []
-    for i in range(1, games_count + 1):
-        keyboard.append(
-            [f"{EMOJI_SYMBOLS[i]}{EMOJI_SYMBOLS['+']}",
-             f"{EMOJI_SYMBOLS[i]}{EMOJI_SYMBOLS['-']}"])
-    keyboard.append([f'{EMOJI_SYMBOLS[0]}'])
-    return keyboard
-
-
 def create_new_team_config_game_dates(
         game_dates: list, team_config: dict) -> None:
     """Create new data in team_config for new game_dates."""
@@ -49,8 +38,6 @@ def create_new_team_config_game_dates(
         0: {
             'date_location': 'Не смогу быть',
             'teammates': {}}}
-    team_config['game_dates_keyboard'] = create_keyboard_game_date(
-        games_count=team_config['game_count'])
     return
 
 
@@ -58,6 +45,8 @@ def rebuild_team_config_game_dates(
         team_config: dict,
         teammate_decision: dict) -> None:
     """Rebuild data in team_config according teammate decision."""
+    if not teammate_decision:
+        return
     teammate: str = teammate_decision['teammate']
     game_num: int = teammate_decision['game_num']
     decision: int = teammate_decision['decision']
@@ -158,5 +147,5 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         team_config['last_message_id'] = send_message_for_game_dates(
             bot=telegram_bot,
             message=form_game_dates_text(game_dates=team_config['game_dates']),
-            keyboard=team_config['game_dates_keyboard'])
+            keyboard=TEAM_CONFIG_BUTTONS.get(team_config['game_count'], None))
     return
