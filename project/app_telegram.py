@@ -1,7 +1,7 @@
 from http import HTTPStatus
 import requests
 import telegram
-from telegram import TelegramError, InlineKeyboardMarkup
+from telegram import TelegramError, InlineKeyboardMarkup, InlineKeyboardButton
 
 from project.data.app_data import (
     DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_CONFIG_BUTTONS, TEAM_GUEST,
@@ -104,7 +104,7 @@ def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
 def send_message_for_game_dates(
         bot,
         message: str,
-        keyboard: list[list[InlineKeyboardMarkup]],
+        keyboard: list[list[InlineKeyboardButton]],
         chat_id: int = TELEGRAM_TEAM_CHAT) -> int:
     """Send message with game dates and keyboard to target telegram user/chat.
     Return message id."""
@@ -113,8 +113,8 @@ def send_message_for_game_dates(
             chat_id=chat_id,
             reply_markup=InlineKeyboardMarkup(keyboard),
             text=message)
-    except TelegramError:
-        raise Exception("Bot can't send the message!")
+    except TelegramError as err:
+        raise Exception(f"Bot can't send the message! {err}")
     return message.message_id
 
 
