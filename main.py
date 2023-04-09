@@ -4,8 +4,8 @@ import asyncio
 import json
 import logging
 # from telegram.ext import CommandHandler
-# from telegram.ext import MessageHandler
-# from telegram.ext import Updater
+# from telegram.ext import 
+from telegram.ext import Filters, MessageHandler, Updater, CallbackQueryHandler, CallbackContext
 
 from project.data.app_data import (
     APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, TEAM_CONFIG,
@@ -13,7 +13,8 @@ from project.data.app_data import (
     VK_TOKEN_ADMIN, VK_USER, VK_GROUP_TARGET)
 import project.app_logger as app_logger
 from project.app_telegram import (
-    check_telegram_bot_response, init_telegram_bot, send_update)
+    check_telegram_bot_response, init_telegram_bot,
+    rebuild_team_config_game_dates, send_message, send_update)
 from project.app_vk import (
     define_post_topic, get_vk_wall_update, init_vk_bot, parse_post)
 
@@ -75,15 +76,14 @@ async def vk_listener(
         #     vk_bot=vk_bot,
         #     vk_group_id=VK_GROUP_TARGET)
         from tests import vk_wall_examples
-        update = vk_wall_examples.EXAMPLE_RATING
-        # EXAMPLE_CHECKIN OK
-        # EXAMPLE_PRIZE_RESULTS OK
-        # EXAMPLE_TEAMS OK
-
-        # EXAMPLE_GAME_RESULTS FAIL
-        # EXAMPLE_OTHER FAIL
-        # EXAMPLE_PREVIEW FAIL
-        # EXAMPLE_RATING FAIL
+        update = vk_wall_examples.EXAMPLE_PREVIEW
+        # EXAMPLE_CHECKIN
+        # EXAMPLE_PRIZE_RESULTS
+        # EXAMPLE_TEAMS
+        # EXAMPLE_GAME_RESULTS
+        # EXAMPLE_RATING
+        # EXAMPLE_OTHER
+        # EXAMPLE_PREVIEW
         if update:
             logger.info('New post available!')
             topic: str = define_post_topic(post=update)
@@ -101,16 +101,32 @@ async def vk_listener(
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
-async def telegram_listener() -> None:
-    asyncio.sleep(API_TELEGRAM_UPDATE_SEC)
-    pass
+async def telegram_listener(team_config: dict) -> None:
+        
+        def handle_callback_query(update, context):
+            query = update.callback_query
+            username: str = query.from_user.username
+            game_num, decision = query.data.split()
+            rebuild_team_config_game_dates(
+                team_config=team_config,
+                teammate_decision={
+                    'teammate': username,
+                    'game_num': int(game_num),
+                    'decision': int(decision)})
+            
+        
+        updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
+        dispatcher = updater.dispatcher
+        dispatcher.add_handler(CallbackQueryHandler(handle_callback_query))
+        updater.start_polling(poll_interval=API_TELEGRAM_UPDATE_SEC)
 
 
-async def spam_in_console() -> None:
+
+async def spam_in_console(team_config) -> None:
     """For test asyncio work. Spam text in console."""
     while 1:
         print('SpamSpamSpamSpamSpamSpamSpam')
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
 
 
 async def main():
@@ -129,14 +145,16 @@ async def main():
     if not team_config:
         team_config = TEAM_CONFIG
     logger.info('Data check succeed. All API are available. Start polling.')
+    task_telegram = asyncio.create_task(
+        telegram_listener(team_config=team_config))
     task_vk = asyncio.create_task(
         vk_listener(
             last_vk_wall_id=last_vk_wall_id,
             team_config=team_config,
             telegram_bot=telegram_bot,
             vk_bot=vk_bot))
-    task_spam = asyncio.create_task(spam_in_console())
-    await asyncio.gather(task_vk, task_spam)
+    task_spam = asyncio.create_task(spam_in_console(team_config))
+    await asyncio.gather(task_spam, task_telegram, task_vk)
     # while 1:
     #     try:
     #         await asyncio.gather(task_vk, task_spam)
@@ -154,7 +172,6 @@ async def main():
     #         #     pass
     #         logger.warning(err)
     #         pass
-
 
 if __name__ == '__main__':
     asyncio.run(main())
