@@ -48,7 +48,8 @@ def edit_message(
         enable_markup: bool = True) -> None:
     """Edit target message in target telegram user/chat.
     If enable_markup is True add markup to message."""
-    keys = TEAM_CONFIG_BUTTONS.get(team_config['game_count'], None) if enable_markup else None
+    keys = TEAM_CONFIG_BUTTONS.get(
+        team_config['game_count'], None) if enable_markup else None
     bot.edit_message_text(
         chat_id=chat_id,
         message_id=team_config['last_message_id'],
