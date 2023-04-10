@@ -1,30 +1,10 @@
 from project.app_telegram import (
-    create_keyboard_game_date, create_new_team_config_game_dates,
+    create_new_team_config_game_dates,
     form_game_dates_text, rebuild_team_config_game_dates)
 
 from project.data.app_data import TEAM_CONFIG, TEAM_GUEST
 
 from tests.test_main import GAP, GAP_DASH, GREEN_PASSED, NL, RED_FAILED
-
-
-def test_create_keyboard_game_date():
-    game_dates: list = ['Игра 1', 'Игра 2']
-    expected = [['1️⃣✅', '1️⃣❌'], ['2️⃣✅', '2️⃣❌'], ['🚫']]
-    result = create_keyboard_game_date(games_count=len(game_dates))
-    errors: list = []
-    try:
-        assert result == expected
-    except AssertionError:
-        errors.append((result, expected))
-    if not errors:
-        print(f'test_create_keyboard_game_date {GREEN_PASSED}')
-    else:
-        print(f'test_create_keyboard_game_date {RED_FAILED}')
-        for result, expected in errors:
-            print(
-                f"{GAP}Expected: {NL}{expected}{NL}"
-                f"{GAP}Got: {NL}{result}")
-    return
 
 
 def test_create_new_team_config_game_dates():

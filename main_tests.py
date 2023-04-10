@@ -5,7 +5,6 @@ from tests.test_main import NL, YELLOW_SKIPPED
 def main_tests():
     test_main.test_json_data_read_write()
 
-    test_app_telegram.test_create_keyboard_game_date()
     test_app_telegram.test_create_new_team_config_game_dates()
     test_app_telegram.test_form_game_dates_text()
     test_app_telegram.test_rebuild_team_config_game_dates()
