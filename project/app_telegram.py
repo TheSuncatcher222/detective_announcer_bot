@@ -41,9 +41,25 @@ def create_new_team_config_game_dates(
     return
 
 
+def edit_message(
+        bot,
+        team_config: dict,
+        chat_id: str = TELEGRAM_TEAM_CHAT,
+        enable_markup: bool = True) -> None:
+    """Edit target message in target telegram user/chat.
+    If enable_markup is True add markup to message."""
+    keys = TEAM_CONFIG_BUTTONS.get(team_config['game_count'], None) if enable_markup else None
+    bot.edit_message_text(
+        chat_id=chat_id,
+        message_id=team_config['last_message_id'],
+        text=form_game_dates_text(game_dates=team_config['game_dates']),
+        reply_markup=InlineKeyboardMarkup(keys) if keys else None)
+    return
+
+
 def rebuild_team_config_game_dates(
         team_config: dict,
-        teammate_decision: dict) -> None:
+        teammate_decision: dict) -> bool:
     """Rebuild data in team_config according teammate decision."""
     if not teammate_decision:
         return
@@ -56,19 +72,22 @@ def rebuild_team_config_game_dates(
             team_config['game_dates'][game_num]['teammates'][teammate] = 1
             for i in range(1, team_config['game_count']):
                 team_config['game_dates'][i]['teammates'].pop(teammate, None)
-        else:
+            return True
+        elif game_num != 0:
             team_config['game_dates'][0]['teammates'].pop(teammate, None)
             if teammate not in team_config[
                     'game_dates'][game_num]['teammates']:
                 team_config[
                     'game_dates'][game_num]['teammates'][teammate] = 0
             team_config['game_dates'][game_num]['teammates'][teammate] += 1
+            return True
     else:
         if teammate in team_config['game_dates'][game_num]['teammates']:
             team_config['game_dates'][game_num]['teammates'][teammate] -= 1
             if team_config['game_dates'][game_num]['teammates'][teammate] == 0:
                 del team_config['game_dates'][game_num]['teammates'][teammate]
-    return
+            return True
+    return False
 
 
 def form_game_dates_text(game_dates: dict) -> str:
@@ -141,9 +160,11 @@ def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
         message='\n\n'.join(s for s in parsed_post['post_text']),
         photo_url=parsed_post['post_image_url'])
     if parsed_post['game_dates']:
+        if team_config['last_message_id']:
+            edit_message(
+                bot=telegram_bot, team_config=team_config, enable_markup=False)
         create_new_team_config_game_dates(
             game_dates=parsed_post['game_dates'], team_config=team_config)
-        # Убрать кнопки из сообщения с текущим last_message_id
         team_config['last_message_id'] = send_message_for_game_dates(
             bot=telegram_bot,
             message=form_game_dates_text(game_dates=team_config['game_dates']),
