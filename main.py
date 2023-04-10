@@ -69,39 +69,56 @@ async def vk_listener(
         vk_bot) -> None:
     """Use VK API for checking updates from target VK group.
     If new post available - parse it and sent to target telegram chat."""
+    last_api_error = None
     while 1:
-        logger.debug('Try to receive data from VK group wall.')
-        # update: dict = get_vk_wall_update(
-        #     last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
-        #     vk_bot=vk_bot,
-        #     vk_group_id=VK_GROUP_TARGET)
-        from tests import vk_wall_examples
-        update = vk_wall_examples.EXAMPLE_PREVIEW
-        # EXAMPLE_CHECKIN
-        # EXAMPLE_PRIZE_RESULTS
-        # EXAMPLE_TEAMS
-        # EXAMPLE_GAME_RESULTS
-        # EXAMPLE_RATING
-        # EXAMPLE_OTHER
-        # EXAMPLE_PREVIEW
-        if update:
-            logger.info('New post available!')
-            topic: str = define_post_topic(post=update)
-            parsed_post: dict = parse_post(post=update, post_topic=topic)
-            if parsed_post:
-                send_update(
-                    parsed_post=parsed_post,
-                    team_config=team_config,
-                    telegram_bot=telegram_bot)
-                json_data_write(
-                    file_name='team_config.json',
-                    write_data=team_config)
-                json_data_write(
-                    file_name='last_vk_wall_id.json',
-                    write_data={'last_vk_wall_id': parsed_post['post_id']})
-                last_vk_wall_id['last_vk_wall_id'] = parsed_post['post_id']
+        try:
+            logger.debug('Try to receive data from VK group wall.')
+            # update: dict = get_vk_wall_update(
+            #     last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
+            #     vk_bot=vk_bot,
+            #     vk_group_id=VK_GROUP_TARGET)
+            from tests import vk_wall_examples
+            update = vk_wall_examples.EXAMPLE_PREVIEW
+            # EXAMPLE_CHECKIN
+            # EXAMPLE_PRIZE_RESULTS
+            # EXAMPLE_TEAMS
+            # EXAMPLE_GAME_RESULTS
+            # EXAMPLE_RATING
+            # EXAMPLE_OTHER
+            # EXAMPLE_PREVIEW
+            if update:
+                logger.info('New post available!')
+                topic: str = define_post_topic(post=update)
+                parsed_post: dict = parse_post(post=update, post_topic=topic)
+                if parsed_post:
+                    send_update(
+                        parsed_post=parsed_post,
+                        team_config=team_config,
+                        telegram_bot=telegram_bot)
+                    json_data_write(
+                        file_name='team_config.json',
+                        write_data=team_config)
+                    json_data_write(
+                        file_name='last_vk_wall_id.json',
+                        write_data={'last_vk_wall_id': parsed_post['post_id']})
+                    last_vk_wall_id['last_vk_wall_id'] = parsed_post['post_id']
+        except SystemExit as err:
+            """Error in code.
+            Program execution is not possible."""
+            logger.critical(err)
+            raise
+        except Exception as err:
+            """Error on the API side.
+            The program will continue to run normally."""
+            last_api_error: str = json_data_read(
+                file_name='last_api_error.json')
+            err_str = str(err)
+            if err_str != last_api_error:
+                logger.warning(err)
+                send_message(
+                    bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
+            pass
         logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
-        break
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
@@ -109,10 +126,26 @@ async def telegram_listener(team_config: dict, telegram_bot) -> None:
     """Use Telegram API for handle callback query from target chat."""
     def handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
+    #     try:
+    #         await asyncio.gather(task_vk, task_spam)
+    #         # telegram_listener()
+    #     except SystemExit as err:
+    #         """\033[31mError in code.
+    #         Program execution is not possible.\033[0m"""
+    #         logger.critical(err)
+    #         raise
+    #     except Exception as err:
+    #         """\033[33mError on the API side.
+    #         The program will continue to run normally.[0m"""
+    #         # last_api_error: str = json_data_read(file_name=last_api_error)
+    #         # if err != last_api_error:
+    #         #     pass
+    #         logger.warning(err)
+    #         pass
         query = update.callback_query
-        username: str = query.from_user.username
-        if not username:
-            username = f'{query.from_user.first_name}'
+        username: str = (
+            query.from_user.username if query.from_user.username
+            else query.from_user.first_name)
         game_num, decision = query.data.split()
         rebuild = rebuild_team_config_game_dates(
             team_config=team_config,
@@ -140,7 +173,6 @@ async def main():
     vk_bot = init_vk_bot(
         token=VK_TOKEN_ADMIN, user_id=VK_USER)
     telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
-    # last_api_error: str = json_data_read(file_name='last_api_error.json')
     last_vk_wall_id: dict = json_data_read(file_name='last_vk_wall_id.json')
     if not last_vk_wall_id:
         last_vk_wall_id = {'last_vk_wall_id': 0}
