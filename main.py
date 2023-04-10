@@ -13,7 +13,7 @@ from project.data.app_data import (
     VK_TOKEN_ADMIN, VK_USER, VK_GROUP_TARGET)
 import project.app_logger as app_logger
 from project.app_telegram import (
-    check_telegram_bot_response, init_telegram_bot,
+    check_telegram_bot_response, edit_message, init_telegram_bot,
     rebuild_team_config_game_dates, send_message, send_update)
 from project.app_vk import (
     define_post_topic, get_vk_wall_update, init_vk_bot, parse_post)
@@ -94,39 +94,42 @@ async def vk_listener(
                     team_config=team_config,
                     telegram_bot=telegram_bot)
                 json_data_write(
+                    file_name='team_config.json',
+                    write_data=team_config)
+                json_data_write(
                     file_name='last_vk_wall_id.json',
                     write_data={'last_vk_wall_id': parsed_post['post_id']})
                 last_vk_wall_id['last_vk_wall_id'] = parsed_post['post_id']
         logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
+        break
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
-async def telegram_listener(team_config: dict) -> None:
-        
-        def handle_callback_query(update, context):
-            query = update.callback_query
-            username: str = query.from_user.username
-            game_num, decision = query.data.split()
-            rebuild_team_config_game_dates(
-                team_config=team_config,
-                teammate_decision={
-                    'teammate': username,
-                    'game_num': int(game_num),
-                    'decision': int(decision)})
-            
-        
-        updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
-        dispatcher = updater.dispatcher
-        dispatcher.add_handler(CallbackQueryHandler(handle_callback_query))
-        updater.start_polling(poll_interval=API_TELEGRAM_UPDATE_SEC)
+async def telegram_listener(team_config: dict, telegram_bot) -> None:
+    """Use Telegram API for handle callback query from target chat."""
+    def handle_callback_query(update, context) -> None:
+        """Handle callback query. Initialize edit message with query."""
+        query = update.callback_query
+        username: str = query.from_user.username
+        if not username:
+            username = f'{query.from_user.first_name}'
+        game_num, decision = query.data.split()
+        rebuild = rebuild_team_config_game_dates(
+            team_config=team_config,
+            teammate_decision={
+                'teammate': username,
+                'game_num': int(game_num),
+                'decision': int(decision)})
+        if rebuild:
+            edit_message(
+                bot=telegram_bot,
+                team_config=team_config)
+        return
 
-
-
-async def spam_in_console(team_config) -> None:
-    """For test asyncio work. Spam text in console."""
-    while 1:
-        print('SpamSpamSpamSpamSpamSpamSpam')
-        await asyncio.sleep(2)
+    updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CallbackQueryHandler(handle_callback_query))
+    updater.start_polling(poll_interval=API_TELEGRAM_UPDATE_SEC)
 
 
 async def main():
@@ -142,19 +145,21 @@ async def main():
     if not last_vk_wall_id:
         last_vk_wall_id = {'last_vk_wall_id': 0}
     team_config: dict = json_data_read(file_name='team_config.json')
-    if not team_config:
+    if team_config:
+        team_config['game_dates'] = {
+            int(num): data for num, data in team_config['game_dates'].items()}
+    else:
         team_config = TEAM_CONFIG
     logger.info('Data check succeed. All API are available. Start polling.')
     task_telegram = asyncio.create_task(
-        telegram_listener(team_config=team_config))
+        telegram_listener(team_config=team_config, telegram_bot=telegram_bot))
     task_vk = asyncio.create_task(
         vk_listener(
             last_vk_wall_id=last_vk_wall_id,
             team_config=team_config,
             telegram_bot=telegram_bot,
             vk_bot=vk_bot))
-    task_spam = asyncio.create_task(spam_in_console(team_config))
-    await asyncio.gather(task_spam, task_telegram, task_vk)
+    await asyncio.gather(task_telegram, task_vk)
     # while 1:
     #     try:
     #         await asyncio.gather(task_vk, task_spam)
