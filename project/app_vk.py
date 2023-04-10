@@ -1,5 +1,4 @@
 from datetime import datetime
-from http import HTTPStatus
 import os
 from PyPDF2 import PdfReader
 from re import findall, search, sub
