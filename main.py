@@ -3,9 +3,7 @@
 import asyncio
 import json
 import logging
-# from telegram.ext import CommandHandler
-# from telegram.ext import 
-from telegram.ext import Filters, MessageHandler, Updater, CallbackQueryHandler, CallbackContext
+from telegram.ext import Updater, CallbackQueryHandler
 
 from project.data.app_data import (
     APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, TEAM_CONFIG,
@@ -73,12 +71,12 @@ async def vk_listener(
     while 1:
         try:
             logger.debug('Try to receive data from VK group wall.')
-            # update: dict = get_vk_wall_update(
-            #     last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
-            #     vk_bot=vk_bot,
-            #     vk_group_id=VK_GROUP_TARGET)
-            from tests import vk_wall_examples
-            update = vk_wall_examples.EXAMPLE_PREVIEW
+            update: dict = get_vk_wall_update(
+                last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
+                vk_bot=vk_bot,
+                vk_group_id=VK_GROUP_TARGET)
+            # from tests import vk_wall_examples
+            # update = vk_wall_examples.EXAMPLE_PREVIEW
             # EXAMPLE_CHECKIN
             # EXAMPLE_PRIZE_RESULTS
             # EXAMPLE_TEAMS
@@ -102,11 +100,6 @@ async def vk_listener(
                         file_name='last_vk_wall_id.json',
                         write_data={'last_vk_wall_id': parsed_post['post_id']})
                     last_vk_wall_id['last_vk_wall_id'] = parsed_post['post_id']
-        except SystemExit as err:
-            """Error in code.
-            Program execution is not possible."""
-            logger.critical(err)
-            raise
         except Exception as err:
             """Error on the API side.
             The program will continue to run normally."""
@@ -126,37 +119,33 @@ async def telegram_listener(team_config: dict, telegram_bot) -> None:
     """Use Telegram API for handle callback query from target chat."""
     def handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
-    #     try:
-    #         await asyncio.gather(task_vk, task_spam)
-    #         # telegram_listener()
-    #     except SystemExit as err:
-    #         """\033[31mError in code.
-    #         Program execution is not possible.\033[0m"""
-    #         logger.critical(err)
-    #         raise
-    #     except Exception as err:
-    #         """\033[33mError on the API side.
-    #         The program will continue to run normally.[0m"""
-    #         # last_api_error: str = json_data_read(file_name=last_api_error)
-    #         # if err != last_api_error:
-    #         #     pass
-    #         logger.warning(err)
-    #         pass
-        query = update.callback_query
-        username: str = (
-            query.from_user.username if query.from_user.username
-            else query.from_user.first_name)
-        game_num, decision = query.data.split()
-        rebuild = rebuild_team_config_game_dates(
-            team_config=team_config,
-            teammate_decision={
-                'teammate': username,
-                'game_num': int(game_num),
-                'decision': int(decision)})
-        if rebuild:
-            edit_message(
-                bot=telegram_bot,
-                team_config=team_config)
+        try:
+            query = update.callback_query
+            username: str = (
+                query.from_user.username if query.from_user.username
+                else query.from_user.first_name)
+            game_num, decision = query.data.split()
+            rebuild = rebuild_team_config_game_dates(
+                team_config=team_config,
+                teammate_decision={
+                    'teammate': username,
+                    'game_num': int(game_num),
+                    'decision': int(decision)})
+            if rebuild:
+                edit_message(
+                    bot=telegram_bot,
+                    team_config=team_config)
+        except Exception as err:
+            """Error on the API side.
+            The program will continue to run normally."""
+            last_api_error: str = json_data_read(
+                file_name='last_api_error.json')
+            err_str = str(err)
+            if err_str != last_api_error:
+                logger.warning(err)
+                send_message(
+                    bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
+            pass
         return
 
     updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
@@ -167,12 +156,17 @@ async def telegram_listener(team_config: dict, telegram_bot) -> None:
 
 async def main():
     """Main program. Manage vk_listener and telegram_listener."""
-    logger.info('Program is running.')
-    check_env(data=ALL_DATA)
-    check_telegram_bot_response(token=TELEGRAM_BOT_TOKEN)
-    vk_bot = init_vk_bot(
-        token=VK_TOKEN_ADMIN, user_id=VK_USER)
-    telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
+    try:
+        logger.info('Program is running.')
+        check_env(data=ALL_DATA)
+        check_telegram_bot_response(token=TELEGRAM_BOT_TOKEN)
+        vk_bot = init_vk_bot(
+            token=VK_TOKEN_ADMIN, user_id=VK_USER)
+        telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
+    except SystemExit as err:
+        """Error in code. Program execution is not possible."""
+        logger.critical(err)
+        raise
     last_vk_wall_id: dict = json_data_read(file_name='last_vk_wall_id.json')
     if not last_vk_wall_id:
         last_vk_wall_id = {'last_vk_wall_id': 0}
@@ -182,7 +176,7 @@ async def main():
             int(num): data for num, data in team_config['game_dates'].items()}
     else:
         team_config = TEAM_CONFIG
-    logger.info('Data check succeed. All API are available. Start polling.')
+    logger.info('All data are available. Start asyncio API polling.')
     task_telegram = asyncio.create_task(
         telegram_listener(team_config=team_config, telegram_bot=telegram_bot))
     task_vk = asyncio.create_task(
@@ -192,23 +186,7 @@ async def main():
             telegram_bot=telegram_bot,
             vk_bot=vk_bot))
     await asyncio.gather(task_telegram, task_vk)
-    # while 1:
-    #     try:
-    #         await asyncio.gather(task_vk, task_spam)
-    #         # telegram_listener()
-    #     except SystemExit as err:
-    #         """\033[31mError in code.
-    #         Program execution is not possible.\033[0m"""
-    #         logger.critical(err)
-    #         raise
-    #     except Exception as err:
-    #         """\033[33mError on the API side.
-    #         The program will continue to run normally.[0m"""
-    #         # last_api_error: str = json_data_read(file_name=last_api_error)
-    #         # if err != last_api_error:
-    #         #     pass
-    #         logger.warning(err)
-    #         pass
+
 
 if __name__ == '__main__':
     asyncio.run(main())
