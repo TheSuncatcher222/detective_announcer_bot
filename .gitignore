@@ -132,4 +132,5 @@ dmypy.json
 game_dates.json
 last_vk_wall_id.json
 last_api_error.json
+team_config.json
 vk_wall_json_example.py
