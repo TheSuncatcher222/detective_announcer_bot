@@ -16,7 +16,7 @@ VK_GROUP_TARGET_LOGO: str = (
     'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
     'e8310f98da4ff095adb5e46ba20eef2d&type=album')
 
-API_TELEGRAM_UPDATE_SEC: int = 0.5
+API_TELEGRAM_UPDATE_SEC: int = 1
 API_VK_UPDATE_SEC: int = 10
 
 APP_JSON_FOLDER: str = 'project/data/'
@@ -83,7 +83,7 @@ TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
             InlineKeyboardButton(text='2️⃣❌', callback_data='2 -1')],
         [
             InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    5: [
+    3: [
         [
             InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
             InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
@@ -107,7 +107,7 @@ TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
             InlineKeyboardButton(text='4️⃣❌', callback_data='4 -1')],
         [
             InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    6: [
+    5: [
         [
             InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
             InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
@@ -146,42 +146,3 @@ TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
 TEAM_GUEST: str = '(приглашенный гость)'
 
 VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
-
-{
-    'update_id': 625267228,
-    'callback_query': {
-        'chat_instance': '-8206862260693408859',
-        'id': '1524654326679682664',
-        'message': {
-            'group_chat_created': False,
-            'reply_markup': {
-                'inline_keyboard': [[{'text': 'adsdas', 'callback_data': '-100310fasfasd'}]]},
-            'new_chat_photo': [],
-            'caption_entities': [],
-            'channel_chat_created': False,
-            'new_chat_members': [],
-            'message_id': 548,
-            'supergroup_chat_created': False,
-            'entities': [],
-            'delete_chat_photo': False,
-            'text': '————————————\n1️⃣ 27 марта (ср), 1 19:00 — ParkKing (Александровский Парк, 4, ст.м. Горьковская) | 0\n————————————\n————————————\n2️⃣ 28 марта (чт), 19:00 — Pa arkKing (Александровский Парк, 4, ст.м. Горьковская) | 0\n————————————\n————————————\n3️⃣ 30 марта (сб), 19:00 — Дворец «Оли импия» (Литейный пр., д. 14, ст.м. Чернышевская) | 0\n————————————\n————————————\n4️⃣ 2 апреля (вс), 19:00 — Дворец «Олимпия я» (Литейный пр., д. 14, ст.м. Чернышевская) | 0\n————————————\n————————————\n5️⃣ 3 апреля (пн), 19:00 — ParkKing (Александр ровский Парк, 4, ст.м. Горьковская) | 0\n————————————\n————————————\n🚫 Не смогу быть | 0\n————————————',
-            'photo': [],
-            'date': 1681033974,
-            'chat': {
-                'type': 'group',
-                'title': 'Bot detectit test',
-                'id': -818816020,
-                'all_members_are_administrators': True},
-            'from': {
-                'id': 5854517727,
-                'username': 'Detectit_Announcer_Bot',
-                'is_bot': True,
-                'first_name': '@Alibi_Announcer_Bot'}},
-        'data': '-100310fasfasd',
-        'from': {
-            'id': 354986248,
-            'language_code': 'ru',
-            'last_name': 'Свидунович',
-            'username': 'suncatcher222',
-            'is_bot': False,
-            'first_name': 'Кирилл'}}}
