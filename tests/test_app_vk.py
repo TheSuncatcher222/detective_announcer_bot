@@ -262,18 +262,14 @@ def test_parse_post():
                 expected: any = post_data['expected_results'][expected_key]
                 assert result == expected
             except AssertionError:
-                errors.append((post_type, expected_key, result, expected))
-            except AttributeError as err:
-                if post_type == 'GAME_RESULTS':
+                if (post_type == 'GAME_RESULTS' 
+                    and TEAM_NAME not in EXAMPLE_GAME_RESULTS['text']):
                     errors_extra.append(
                         f"    - test for {post_type} {YELLOW_SKIPPED} due to "
                         "TEAM_NAME not in post's test! Change TEAM_NAME in "
                         ".env to 'Винтажный газогенератор'")
-                else:
-                    errors_extra.append(
-                        f"    - test for {post_type} {YELLOW_SKIPPED}"
-                        f"{NL}      Full error: {err}")
-                break
+                    break
+                errors.append((post_type, expected_key, result, expected))
     if not errors:
         print(f'test_parse_post {GREEN_PASSED}')
     else:
