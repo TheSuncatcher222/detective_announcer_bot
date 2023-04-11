@@ -93,6 +93,7 @@ MIT
 **Free Software, Hell Yeah!**
 
 Created by [Altair21817]
+
 Данный бот __не является__ официальным!
 
 [Altair21817]: <https://github.com/Altair21817>
