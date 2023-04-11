@@ -30,8 +30,7 @@ def get_vk_chat_update(
     Looking only for 'Team successfully registered' message subject."""
     try:
         message: dict = vk_bot.messages.getHistory(
-            count=1, peer_id=-VK_GROUP_TARGET,
-            offset=13)
+            count=1, peer_id=-VK_GROUP_TARGET)
         message_id: int = message['items'][0]['id']
         if message_id > last_vk_message_id['last_vk_message_id']:
             message_text: str = message['items'][0]['text']
