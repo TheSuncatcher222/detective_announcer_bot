@@ -25,18 +25,18 @@ ___
 
 ### Установка
 
-[X] Создать телеграм-бота согласно [официальной инструкции ](https://core.telegram.org/bots).
+✅ Создать телеграм-бота согласно [официальной инструкции ](https://core.telegram.org/bots).
 
-[X] Получить VK токен по [ссылке ](https://vkhost.github.io/)
+✅ Получить VK токен по [ссылке ](https://vkhost.github.io/)
 
 _Стоит выбрать токен VK.com. Однако в случае возникновения ошибок API VK: vk_api.exceptions.ApiError: [3] Unknown method passed необходимо попробовать использовать токен VK Admin._
 
-[X] Перейти в целефую папку проекта и склонировать репозиторий
+✅ Перейти в целефую папку проекта и склонировать репозиторий
 ```sh
 git clone https://github.com/Altair21817/Alibi_Announcer_Bot.git
 ```
 
-[X] Создать виртуальное окружение
+✅ Создать виртуальное окружение
 
 > Windows
 
@@ -56,32 +56,32 @@ python3 -m venv venv
 brew link python@3.9
 ```
 
-[X] Активировать виртуальное окружение
+✅ Активировать виртуальное окружение
 
 ```sh
 sourse venv/scripts/activate
 ```
 
-[X] Обновить инсталлятор pip
+✅ Обновить инсталлятор pip
 
 ```sh
 python -m pip install --upgrade pip
 ```
 
-[X] Установить зависимости из requirements.txt
+✅ Установить зависимости из requirements.txt
 
 ```sh
 pip install -r requirements.txt
 ```
 
-[X] Перейти в папку с данными для подключения к API
+✅ Перейти в папку с данными для подключения к API
 ```
 cd project/data
 ```
 
-[X] Создать файл .env и заполнить его согласно примеру, указанному в файле .env.example
+✅ Создать файл .env и заполнить его согласно примеру, указанному в файле .env.example
 
-[X] Запустить сервер
+✅ Запустить сервер
 
 ```sh
 python main.py
