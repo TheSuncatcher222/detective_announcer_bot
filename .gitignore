@@ -130,6 +130,7 @@ dmypy.json
 
 # json files
 game_dates.json
+last_vk_message_id.json
 last_vk_wall_id.json
 last_api_error.json
 team_config.json
