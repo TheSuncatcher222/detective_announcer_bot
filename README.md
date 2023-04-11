@@ -10,13 +10,16 @@ ___
 ___
 ### Технологии
 
-[Python] (v.3.11) - целевой язык программирования
+[Python] (v.3.11) - целевой язык программирования.
+
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
 [VK API] - набор готовых классов, процедур, функций, структур и констант, предоставляемых социальной сетью VK (ВКонтакте), которые позволяют взаимодействовать с ее базой данных с помощью http-запросов.
+
 ![Вконтакте](https://img.shields.io/badge/вконтакте-%232E87FB.svg?&style=for-the-badge&logo=vk&logoColor=white)
 
 [Telegram API] - набор готовых классов, процедур, функций, структур и констант, предоставляемых социальной сетью Telegram, которые позволяют взаимодействовать с ее базой данных с помощью http-запросов.
+
 ![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 ___
 
