@@ -210,6 +210,9 @@ def parse_post(post: dict[str, any], post_topic: str) -> dict[str, any] | None:
             post_text=post['text'], split_text=split_text)
     elif post_topic == 'prize_results':
         post_text = split_text
+    # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фотографии
+    # elif post_topic == 'rating':
+    #     post_text = None
     elif post_topic == 'stop-list':
         post_text = _parse_post_stop_list(post=post, split_text=split_text)
     elif post_topic == 'teams':
