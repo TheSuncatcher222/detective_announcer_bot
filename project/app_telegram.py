@@ -95,18 +95,15 @@ def form_game_dates_text(game_dates: dict) -> str:
     """Form text message from game_dates."""
     abstracts: list[str] = []
     for num in game_dates:
-        teammates_count: int = sum(
-            game_dates[num]['teammates'][teammate]
-            for teammate in game_dates[num]['teammates'])
         date_location, teammates = game_dates[num].values()
         abstracts.append(DATE_HEADLIGHT.format(
             number=EMOJI_SYMBOLS[num],
-            date_location=date_location,
-            teammates_count=teammates_count))
+            date_location=date_location))
         for teammate, count in teammates.items():
-            abstracts.append(teammate)
+            abstracts.append(f'• {teammate}')
             for _ in range(1, count):
-                abstracts.append(f'{teammate} {TEAM_GUEST}')
+                abstracts.append(f'• {teammate} {TEAM_GUEST}')
+        abstracts.append('')
     return '\n'.join(abstracts)
 
 
