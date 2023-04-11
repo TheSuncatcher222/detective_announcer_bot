@@ -79,15 +79,6 @@ async def vk_listener(
                 last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
                 vk_bot=vk_bot,
                 vk_group_id=VK_GROUP_TARGET)
-            # from tests import vk_wall_examples
-            # update_wall = vk_wall_examples.EXAMPLE_PREVIEW
-            # EXAMPLE_CHECKIN
-            # EXAMPLE_PRIZE_RESULTS
-            # EXAMPLE_TEAMS
-            # EXAMPLE_GAME_RESULTS
-            # EXAMPLE_RATING
-            # EXAMPLE_OTHER
-            # EXAMPLE_PREVIEW
             if update_wall:
                 logger.info('New post available!')
                 topic: str = define_post_topic(post=update_wall)
