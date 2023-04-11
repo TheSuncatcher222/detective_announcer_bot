@@ -22,20 +22,44 @@ def test_json_data_read_write():
     FILE_NAME: str = 'TEST_FAKE_FILE.json'
     remove_file_if_exists(f'{APP_JSON_FOLDER}{FILE_NAME}')
 
-    test_value = None
-    test_value = json_data_read(file_name=FILE_NAME)
-    assert test_value == 0, f'Read non-existent file {RED_FAILED}.'
-    
-    json_data_write(file_name=FILE_NAME, write_data={'keey': 'vaalue'})
-    
-    test_value = None
-    test_value = json_data_read(file_name=FILE_NAME, key='fake_key')
-    assert test_value == 0, f'Read data with wrong key {RED_FAILED}.'
-    
-    test_value = None
-    test_value = json_data_read(file_name=None, key='keey')
-    assert test_value != f'vaalue', 'Read file with correct key {RED_FAILED}.'
-    
+    test_data = [
+        {
+            'key': None,
+            'expected': None,
+            'explanation': f'Read non-existent file error:',
+            'write_data': None},
+        {
+            'key': 'fake_key',
+            'expected': None,
+            'explanation': f'Read data with wrong key error:',
+            'write_data': {'keey': 'vaalue'}},
+        {
+            'key': None,
+            'expected': {'keey': 'vaalue'},
+            'explanation': f'Read existent file with data error:',
+            'write_data': {'keey': 'vaalue'}},
+        {
+            'key': 'keey',
+            'expected': 'vaalue',
+            'explanation': f'Read data with correct key error:',
+            'write_data': {'keey': 'vaalue'}}]
+    errors: list = []
+    for test in test_data:
+        try:
+            if test['write_data']:
+                json_data_write(file_name=FILE_NAME, write_data=test['write_data'])
+            test_value = json_data_read(file_name=FILE_NAME, key=test['key'])
+            assert test_value == test['expected']
+        except AssertionError:
+            errors.append((test_value, test['expected'], test['explanation']))
     remove_file_if_exists(f'{APP_JSON_FOLDER}{FILE_NAME}')
-    print(f'test_json_data_read_write {GREEN_PASSED}')
+    if not errors:
+        print(f'test_json_data_read_write {GREEN_PASSED}')
+    else:
+        print(f'test_json_data_read_write {RED_FAILED}')
+        for result, expected, explanation in errors:
+            print(
+                f"{GAP_DASH}{explanation}{NL}"
+                f"{GAP}Expected: '{expected}'{NL}"
+                f"{GAP}     Got: '{result}'")
     return
