@@ -60,11 +60,9 @@ POST_TOPICS: dict[str, str] = {
     '#alibi_preview': 'preview',
     '#ГонорарДетектива': 'rating',
     '#detectit_teams': 'teams'}
-"""
-Нет данных для категорий:
-    None: 'stop-list'
-    None: 'photos'
-"""
+# Пока что нет данных для категорий:
+#     None: 'stop-list'
+#     None: 'photos'
 
 TEAM_CONFIG: dict[dict[any]] = {
         'last_message_id': None,
@@ -146,7 +144,7 @@ TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
 
 TEAM_GUEST: str = '(приглашенный гость)'
 
-TEAM_REGISTER_LOOKUP: str = 'Регистрация команды «На кону хороший вечер»'
+TEAM_REGISTER_LOOKUP: str = f'Регистрация команды «{TEAM_NAME}»'
 TEAM_REGISTER_TEXT: str = (
     '\nДля подтверждения брони необходимо в течении дня оплатить участие в игре.'
     f'Оплата производится капитану команды по номеру {TEAM_CAPITAN_PROP} в размере 500 рублей.\n\n'
