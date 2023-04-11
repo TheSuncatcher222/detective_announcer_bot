@@ -18,7 +18,7 @@ from project.app_vk import (
     define_post_topic, get_vk_chat_update, get_vk_wall_update, init_vk_bot,
     parse_post)
 
-ALL_DATA: tuple[str] = (
+ALL_DATA: tuple[str, int] = (
     TEAM_NAME,
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_TEAM_CHAT,
