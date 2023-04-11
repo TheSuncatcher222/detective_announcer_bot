@@ -132,6 +132,40 @@ def _get_post_image_url(block: str, post: dict[str, any]) -> str:
     return VK_GROUP_TARGET_LOGO
 
 
+def _parse_post_checkin(post_id: int, split_text: str) -> list[str]:
+    """Parse post's text if the topic is 'checkin'."""
+    return [
+        split_text[0],
+        *split_text[-4:-2],
+        'Действует розыгрыш бесплатного входа на всю команду! '
+        'Чтобы принять в нем участие, нужно вступить в группу и сделать '
+        'репост этой записи:\n\n'
+        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
+
+
+def _parse_post_game_results(
+        split_text: str, team_name: str = TEAM_NAME) -> str:
+    """Parse post's text if the topic is 'game_results'."""
+    reg_exp: str = fr'\d\sместо: «{team_name}»'
+    for paragraph in split_text:
+        reg_search = search(reg_exp, paragraph)
+        if reg_search:
+            split_text += MEDALS[f'{reg_search.group(0)[0]}th']
+            break
+    return split_text
+
+
+def _parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
+    """Parse post's text if the topic is 'preview'.
+    Separately return list with game dates and text."""
+    game_dates: list[str] = _game_dates_add_weekday_place(
+        game_dates=findall(
+            r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
+            post_text))
+    post_text: list[str] = split_text[0:4] + split_text[-2:-1]
+    return game_dates, post_text
+
+
 def _parse_post_stop_list(
         post: dict[str, any], split_text: list[str], team_name: str = TEAM_NAME
         ) -> list[str]:
@@ -156,64 +190,30 @@ def _parse_post_stop_list(
     return [text_verdict] + split_text[:len(split_text)-1]
 
 
-def _parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
-    """Parse post's text if the topic is 'preview'.
-    Separately return list with game dates and text."""
-    game_dates: list[str] = _game_dates_add_weekday_place(
-        game_dates=findall(
-            r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
-            post_text))
-    post_text: list[str] = split_text[0:4] + split_text[-2:-1]
-    return game_dates, post_text
-
-
-def _parse_post_checkin(post_id: int, split_text: str) -> list[str]:
-    """Parse post's text if the topic is 'checkin'."""
-    return [
-        split_text[0],
-        *split_text[-4:-2],
-        'Действует розыгрыш бесплатного входа на всю команду! '
-        'Чтобы принять в нем участие, нужно вступить в группу и сделать '
-        'репост этой записи:\n\n'
-        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
-
-
-def _parse_post_game_results(
-        split_text: str, team_name: str = TEAM_NAME) -> str:
-    """Parse post's text if the topic is 'game_results'."""
-    reg_exp: str = fr'\d\sместо: «{team_name}»'
-    for paragraph in split_text:
-        reg_search = search(reg_exp, paragraph)
-        if reg_search:
-            split_text += MEDALS[f'{reg_search.group(0)[0]}th']
-            break
-    return split_text
-
-
-def parse_post(post: dict[str, any], post_topic: str) -> dict[str, any]:
+def parse_post(post: dict[str, any], post_topic: str) -> dict[str, any] | None:
     """Manage post parsing."""
     post_id: int = post['id']
     post_text: list[str] = None
     post_image_url: str = None
     game_dates: list[str] = None
     split_text: list[str] = _split_post_text(post_text=post['text'])
-    if post_topic == 'stop-list':
-        post_text = _parse_post_stop_list(post=post, split_text=split_text)
-    elif post_topic == 'preview':
-        game_dates, post_text = _parse_post_preview(
-            post_text=post['text'], split_text=split_text)
-    elif post_topic == 'checkin':
+    if post_topic == 'checkin':
         post_text = _parse_post_checkin(post_id=post_id, split_text=split_text)
-    elif post_topic == 'teams':
-        post_text = split_text[:2]
     elif post_topic == 'game_results' and TEAM_NAME in post['text']:
         post_text = _parse_post_game_results(split_text=split_text)
-    elif post_topic == 'prize_results':
+    elif post_topic == 'other':
         post_text = split_text
     elif post_topic == 'photos' or post_topic == 'rating':
         post_text = split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
-    elif post_topic == 'other':
+    elif post_topic == 'preview':
+        game_dates, post_text = _parse_post_preview(
+            post_text=post['text'], split_text=split_text)
+    elif post_topic == 'prize_results':
         post_text = split_text
+    elif post_topic == 'stop-list':
+        post_text = _parse_post_stop_list(post=post, split_text=split_text)
+    elif post_topic == 'teams':
+        post_text = split_text[:2]
     if not post_text:
         return None
     if post_topic == 'photos':
