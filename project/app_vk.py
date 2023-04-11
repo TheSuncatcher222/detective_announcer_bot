@@ -37,10 +37,12 @@ def get_vk_chat_update(
             if TEAM_REGISTER_LOOKUP in message_text:
                 message_text: list[str] = split_post_text(message_text)[1:2]
                 message_text.append(TEAM_REGISTER_TEXT)
+                last_vk_message_id['last_vk_message_id'] = message_id
+                return '\n'.join(message_text)
             last_vk_message_id['last_vk_message_id'] = message_id
+            return None
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
-    return '\n'.join(message_text)
 
 
 def get_vk_wall_update(
