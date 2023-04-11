@@ -190,7 +190,8 @@ def _parse_post_stop_list(
     return [text_verdict] + split_text[:len(split_text)-1]
 
 
-def parse_post(post: dict[str, any], post_topic: str) -> dict[str, any] | None:
+def parse_post(post: dict[str, any], post_topic: str
+        ) -> dict[str, any] | None | int:
     """Manage post parsing."""
     post_id: int = post['id']
     post_text: list[str] = None
@@ -199,8 +200,11 @@ def parse_post(post: dict[str, any], post_topic: str) -> dict[str, any] | None:
     split_text: list[str] = _split_post_text(post_text=post['text'])
     if post_topic == 'checkin':
         post_text = _parse_post_checkin(post_id=post_id, split_text=split_text)
-    elif post_topic == 'game_results' and TEAM_NAME in post['text']:
-        post_text = _parse_post_game_results(split_text=split_text)
+    elif post_topic == 'game_results':
+        if TEAM_NAME in post['text']:
+            post_text = _parse_post_game_results(split_text=split_text)
+        else:
+            return {'post_id': post_id}
     elif post_topic == 'other':
         post_text = split_text
     elif post_topic == 'photos' or post_topic == 'rating':

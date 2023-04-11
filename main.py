@@ -94,13 +94,14 @@ async def vk_listener(
                 parsed_post: dict[str, any] = parse_post(
                     post=update_wall, post_topic=topic)
                 if parsed_post:
-                    send_update(
-                        parsed_post=parsed_post,
-                        team_config=team_config,
-                        telegram_bot=telegram_bot)
-                    json_data_write(
-                        file_name='team_config.json',
-                        write_data=team_config)
+                    if 'post_text' in parsed_post:
+                        send_update(
+                            parsed_post=parsed_post,
+                            team_config=team_config,
+                            telegram_bot=telegram_bot)
+                        json_data_write(
+                            file_name='team_config.json',
+                            write_data=team_config)
                     json_data_write(
                         file_name='last_vk_wall_id.json',
                         write_data={'last_vk_wall_id': parsed_post['post_id']})
