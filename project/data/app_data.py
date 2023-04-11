@@ -4,6 +4,7 @@ from telegram import InlineKeyboardButton
 
 load_dotenv()
 
+TEAM_CAPITAN_PROP: str = os.getenv('TEAM_CAPITAN_PROP')
 TEAM_NAME: str = os.getenv('TEAM_NAME')
 TELEGRAM_BOT_TOKEN: str = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_TEAM_CHAT: str = os.getenv('TELEGRAM_TEAM_CHAT')
@@ -144,5 +145,14 @@ TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
             InlineKeyboardButton(text='🚫', callback_data='0 +1')]]}
 
 TEAM_GUEST: str = '(приглашенный гость)'
+
+TEAM_REGISTER_LOOKUP: str = 'Регистрация команды «На кону хороший вечер»'
+TEAM_REGISTER_TEXT: str = (
+    '\nДля подтверждения брони необходимо в течении дня оплатить участие в игре.'
+    f'Оплата производится капитану команды по номеру {TEAM_CAPITAN_PROP} в размере 500 рублей.\n\n'
+    'Если команда отменяет участие менее, чем за сутки, оплата не возвращается.\n\n'
+    'Если в составе команды будут дополнительные игроки, оплатить участие возможно по цене:\n'
+    '· 500 ₽ с человека — до дня игры,\n'
+    '· 600 ₽ с человека — в день игры.')
 
 VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
