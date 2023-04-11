@@ -10,10 +10,10 @@ from tests.vk_wall_examples import (
     EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW, EXAMPLE_RATING, EXAMPLE_TEAMS)
 
 from project.app_vk import (
-    findall, define_post_topic, game_dates_add_weekday_place,
-    get_post_image_url, parse_post, parse_post_checkin,
-    parse_post_game_results, parse_post_preview, parse_post_stop_list,
-    split_post_text)
+    findall, define_post_topic, _game_dates_add_weekday_place,
+    _get_post_image_url, parse_post, _parse_post_checkin,
+    _parse_post_game_results, _parse_post_preview, _parse_post_stop_list,
+    _split_post_text)
 
 
 def test_define_post_topic():
@@ -60,7 +60,7 @@ def test_game_dates_add_weekday_place():
         '(16-я лин. B.O., 83, ст.м. Василеостровская)',
         '31 декабря (вс), 23:59 — секретное место в нигде',
         '01 января (пн), 00:00 — ']
-    date_format: list = game_dates_add_weekday_place(
+    date_format: list = _game_dates_add_weekday_place(
         game_dates=game_dates_input)
     errors: list = []
     for date in range(len(game_dates_expected)):
@@ -143,7 +143,7 @@ def test_get_post_image_url():
     for test_name in post_photo_urls:
         try:
             test_data: dict = post_photo_urls[test_name]
-            result: str = get_post_image_url(
+            result: str = _get_post_image_url(
                 post=test_data['input'], block=test_data['input_type'])
             expected: str = test_data['expected']
             assert result == expected
@@ -168,21 +168,21 @@ def test_parse_post():
             'post_topic': 'checkin',
             'expected_results': {
                 'post_id': EXAMPLE_CHECKIN['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=EXAMPLE_CHECKIN, block='photo'),
-                'post_text': parse_post_checkin(
+                'post_text': _parse_post_checkin(
                     post_id=EXAMPLE_CHECKIN['id'],
-                    split_text=split_post_text(EXAMPLE_CHECKIN['text'])),
+                    split_text=_split_post_text(EXAMPLE_CHECKIN['text'])),
                 'game_dates': None}},
         'GAME_RESULTS': {
             'post': EXAMPLE_GAME_RESULTS,
             'post_topic': 'game_results',
             'expected_results': {
                 'post_id': EXAMPLE_GAME_RESULTS['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=EXAMPLE_GAME_RESULTS, block='photo'),
-                'post_text': parse_post_game_results(
-                    split_text=split_post_text(EXAMPLE_GAME_RESULTS['text']),
+                'post_text': _parse_post_game_results(
+                    split_text=_split_post_text(EXAMPLE_GAME_RESULTS['text']),
                     team_name=TEAM_NAME),
                 'game_dates': None}},
         'OTHER': {
@@ -190,9 +190,9 @@ def test_parse_post():
             'post_topic': 'other',
             'expected_results': {
                 'post_id': EXAMPLE_OTHER['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=EXAMPLE_OTHER, block='album'),
-                'post_text': split_post_text(post_text=EXAMPLE_OTHER['text']),
+                'post_text': _split_post_text(post_text=EXAMPLE_OTHER['text']),
                 'game_dates': None}},
         'EXAMPLE_PRIZE_RESULTS': {
             'post': EXAMPLE_PRIZE_RESULTS,
@@ -200,7 +200,7 @@ def test_parse_post():
             'expected_results': {
                 'post_id': EXAMPLE_PRIZE_RESULTS['id'],
                 'post_image_url': VK_GROUP_TARGET_LOGO,
-                'post_text': split_post_text(
+                'post_text': _split_post_text(
                     post_text=EXAMPLE_PRIZE_RESULTS['text']),
                 'game_dates': None}},
         'EXAMPLE_PREVIEW': {
@@ -208,12 +208,12 @@ def test_parse_post():
             'post_topic': 'preview',
             'expected_results': {
                 'post_id': EXAMPLE_PREVIEW['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=EXAMPLE_PREVIEW, block='photo'),
-                'post_text': parse_post_preview(
+                'post_text': _parse_post_preview(
                     post_text=EXAMPLE_PREVIEW['text'],
-                    split_text=split_post_text(EXAMPLE_PREVIEW['text']))[1],
-                'game_dates': game_dates_add_weekday_place(
+                    split_text=_split_post_text(EXAMPLE_PREVIEW['text']))[1],
+                'game_dates': _game_dates_add_weekday_place(
                     game_dates=findall(
                         r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
                         EXAMPLE_PREVIEW['text']))}},
@@ -222,10 +222,10 @@ def test_parse_post():
             'post_topic': 'rating',
             'expected_results': {
                 'post_id': EXAMPLE_RATING['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=EXAMPLE_RATING, block='photo'),
                 'post_text': (
-                    split_post_text(EXAMPLE_RATING['text'])
+                    _split_post_text(EXAMPLE_RATING['text'])
                     + [f"{VK_POST_LINK}{VK_GROUP_TARGET}_"
                        f"{EXAMPLE_RATING['id']}"]),
                 'game_dates': None}},
@@ -234,20 +234,20 @@ def test_parse_post():
             'post_topic': 'teams',
             'expected_results': {
                 'post_id': EXAMPLE_TEAMS['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=EXAMPLE_TEAMS, block='photo'),
-                'post_text': split_post_text(EXAMPLE_TEAMS['text'])[:2],
+                'post_text': _split_post_text(EXAMPLE_TEAMS['text'])[:2],
                 'game_dates': None}},
         'STOP_LIST': {
             'post': DETECTIT_STOP_LIST,
             'post_topic': 'stop-list',
             'expected_results': {
                 'post_id': DETECTIT_STOP_LIST['id'],
-                'post_image_url': get_post_image_url(
+                'post_image_url': _get_post_image_url(
                     post=DETECTIT_STOP_LIST, block='photo'),
-                'post_text': parse_post_stop_list(
+                'post_text': _parse_post_stop_list(
                     post=DETECTIT_STOP_LIST,
-                    split_text=split_post_text(DETECTIT_STOP_LIST['text']),
+                    split_text=_split_post_text(DETECTIT_STOP_LIST['text']),
                     team_name=TEAM_NAME),
                 'game_dates': None}}}
     errors: list = []
@@ -291,7 +291,7 @@ def test_parse_post():
 
 def test_parse_post_checkin():
     post_id: int = 100500
-    split_text: list[str] = split_post_text(EXAMPLE_CHECKIN['text'])
+    split_text: list[str] = _split_post_text(EXAMPLE_CHECKIN['text'])
     expected_text: list[str] = [
         'Регистрация. India',
         'Ссылка на регистрацию:',
@@ -301,7 +301,7 @@ def test_parse_post_checkin():
         'репост этой записи:\n\n'
         f"{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}"]
     errors: list = []
-    result_text = parse_post_checkin(split_text=split_text, post_id=post_id)
+    result_text = _parse_post_checkin(split_text=split_text, post_id=post_id)
     try:
         assert len(result_text) == len(expected_text)
     except AssertionError:
@@ -377,10 +377,10 @@ def test_parse_post_game_results():
     errors: list = []
     for team in expected_dict:
         try:
-            split_text: list[str] = split_post_text(
+            split_text: list[str] = _split_post_text(
                 EXAMPLE_GAME_RESULTS['text'])
             data: dict[str] = expected_dict[team]
-            result_text: list = parse_post_game_results(
+            result_text: list = _parse_post_game_results(
                 split_text=split_text, team_name=data['team_name'])
             result: int = len(result_text)
             expected: int = data['expected_len']
@@ -439,9 +439,9 @@ def test_parse_post_preview():
         # 'на обновления группы.,
         # '#alibispb #alibi_preview #новыйпроект #СообщениеоПреступлении'
     ]
-    result_game_dates, result_text = parse_post_preview(
+    result_game_dates, result_text = _parse_post_preview(
         post_text=EXAMPLE_PREVIEW['text'],
-        split_text=split_post_text(post_text=EXAMPLE_PREVIEW['text']))
+        split_text=_split_post_text(post_text=EXAMPLE_PREVIEW['text']))
     errors: list = []
     for result, expected in zip(
             result_game_dates + result_text,
@@ -479,7 +479,7 @@ def test_parse_post_stop_list():
     for team in teams:
         try:
             data: list = teams[team]
-            result: list = parse_post_stop_list(
+            result: list = _parse_post_stop_list(
                 post=DETECTIT_STOP_LIST,
                 split_text=split_text,
                 team_name=data[0])
@@ -515,7 +515,7 @@ def test_split_post_text() -> bool:
         'Ссылка на регистрацию:',
         'https://vk.com/app5619682_-40914100']
     errors: list = []
-    result_text = split_post_text(post_text=post_text)
+    result_text = _split_post_text(post_text=post_text)
     try:
         assert len(result_text) == len(expected_text)
     except AssertionError:

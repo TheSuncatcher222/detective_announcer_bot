@@ -35,7 +35,7 @@ def get_vk_chat_update(
         if message_id > last_vk_message_id['last_vk_message_id']:
             message_text: str = message['items'][0]['text']
             if TEAM_REGISTER_LOOKUP in message_text:
-                message_text: list[str] = split_post_text(message_text)[1:2]
+                message_text: list[str] = _split_post_text(message_text)[1:2]
                 message_text.append(TEAM_REGISTER_TEXT)
                 last_vk_message_id['last_vk_message_id'] = message_id
                 return '\n'.join(message_text)
@@ -84,7 +84,7 @@ def define_post_topic(post: dict) -> str:
     return 'other'
 
 
-def game_dates_add_weekday_place(game_dates: list) -> list:
+def _game_dates_add_weekday_place(game_dates: list) -> list:
     """Add day of the week to each date and formate location."""
     DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
     MONTH_NUM: tuple[str] = (
@@ -110,13 +110,13 @@ def game_dates_add_weekday_place(game_dates: list) -> list:
     return game_dates_format
 
 
-def split_post_text(post_text: str) -> list:
+def _split_post_text(post_text: str) -> list:
     """Split text into paragraphs."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
     return fixed_text.split('\n')[:-1]
 
 
-def get_post_image_url(block: str, post: dict) -> str:
+def _get_post_image_url(block: str, post: dict) -> str:
     """Get image URL from the given post."""
     try:
         if block == 'photo':
@@ -135,7 +135,7 @@ def get_post_image_url(block: str, post: dict) -> str:
     return VK_GROUP_TARGET_LOGO
 
 
-def parse_post_stop_list(
+def _parse_post_stop_list(
         post: dict, split_text: list, team_name=TEAM_NAME) -> list:
     """Parse post's text if the topic is 'stop-list'.
     Read attached PDF with stop-list and search team."""
@@ -158,10 +158,10 @@ def parse_post_stop_list(
     return [text_verdict] + split_text[:len(split_text)-1]
 
 
-def parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
+def _parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
     """Parse post's text if the topic is 'preview'.
     Separately return list with game dates and text."""
-    game_dates: list[str] = game_dates_add_weekday_place(
+    game_dates: list[str] = _game_dates_add_weekday_place(
         game_dates=findall(
             r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
             post_text))
@@ -169,7 +169,7 @@ def parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
     return game_dates, post_text
 
 
-def parse_post_checkin(post_id: int, split_text: str) -> list[str]:
+def _parse_post_checkin(post_id: int, split_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
         split_text[0],
@@ -180,7 +180,7 @@ def parse_post_checkin(post_id: int, split_text: str) -> list[str]:
         f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
-def parse_post_game_results(split_text: str, team_name=TEAM_NAME):
+def _parse_post_game_results(split_text: str, team_name=TEAM_NAME):
     """Parse post's text if the topic is 'game_results'."""
     reg_exp = fr'\d\sместо: «{team_name}»'
     for paragraph in split_text:
@@ -197,18 +197,18 @@ def parse_post(post: dict, post_topic: str) -> dict:
     post_text: list = None
     post_image_url: str = None
     game_dates: list = None
-    split_text = split_post_text(post_text=post['text'])
+    split_text = _split_post_text(post_text=post['text'])
     if post_topic == 'stop-list':
-        post_text = parse_post_stop_list(post=post, split_text=split_text)
+        post_text = _parse_post_stop_list(post=post, split_text=split_text)
     elif post_topic == 'preview':
-        game_dates, post_text = parse_post_preview(
+        game_dates, post_text = _parse_post_preview(
             post_text=post['text'], split_text=split_text)
     elif post_topic == 'checkin':
-        post_text = parse_post_checkin(post_id=post_id, split_text=split_text)
+        post_text = _parse_post_checkin(post_id=post_id, split_text=split_text)
     elif post_topic == 'teams':
         post_text = split_text[:2]
     elif post_topic == 'game_results' and TEAM_NAME in post['text']:
-        post_text = parse_post_game_results(split_text=split_text)
+        post_text = _parse_post_game_results(split_text=split_text)
     elif post_topic == 'prize_results':
         post_text = split_text
     elif post_topic == 'photos' or post_topic == 'rating':
@@ -218,9 +218,10 @@ def parse_post(post: dict, post_topic: str) -> dict:
     if not post_text:
         return None
     if post_topic == 'photos':
-        post_image_url = get_post_image_url(post=post, block='album')
+        block: str = 'album'
     else:
-        post_image_url = get_post_image_url(post=post, block='photo')
+        block: str = 'photo'
+    post_image_url = _get_post_image_url(post=post, block=block)
     parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
