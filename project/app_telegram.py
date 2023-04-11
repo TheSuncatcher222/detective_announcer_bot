@@ -27,7 +27,7 @@ def init_telegram_bot(token: str) -> telegram.Bot:
 
 
 def create_new_team_config_game_dates(
-        game_dates: list, team_config: dict) -> None:
+        game_dates: list[str], team_config: dict[str, any]) -> None:
     """Create new data in team_config for new game_dates."""
     team_config['game_count'] = len(game_dates)
     team_config['game_dates'] = {
@@ -43,12 +43,12 @@ def create_new_team_config_game_dates(
 
 def edit_message(
         bot,
-        team_config: dict,
+        team_config: dict[str, any],
         chat_id: str = TELEGRAM_TEAM_CHAT,
         enable_markup: bool = True) -> None:
     """Edit target message in target telegram user/chat.
     If enable_markup is True add markup to message."""
-    keys = TEAM_CONFIG_BUTTONS.get(
+    keys: list[list[InlineKeyboardButton]] | None = TEAM_CONFIG_BUTTONS.get(
         team_config['game_count'], None) if enable_markup else None
     bot.edit_message_text(
         chat_id=chat_id,
@@ -59,11 +59,11 @@ def edit_message(
 
 
 def rebuild_team_config_game_dates(
-        team_config: dict,
-        teammate_decision: dict) -> bool:
+        team_config: dict[str, any],
+        teammate_decision: dict[str, str | int]) -> bool:
     """Rebuild data in team_config according teammate decision."""
     if not teammate_decision:
-        return
+        return False
     teammate: str = teammate_decision['teammate']
     game_num: int = teammate_decision['game_num']
     decision: int = teammate_decision['decision']
@@ -116,9 +116,9 @@ def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
         bot.send_message(
             chat_id=chat_id,
             text=message)
+        return
     except TelegramError:
         raise Exception("Bot can't send the message!")
-    return
 
 
 def send_message_for_game_dates(
@@ -129,13 +129,13 @@ def send_message_for_game_dates(
     """Send message with game dates and keyboard to target telegram user/chat.
     Return message id."""
     try:
-        message = bot.send_message(
+        message: any = bot.send_message(
             chat_id=chat_id,
             reply_markup=InlineKeyboardMarkup(keyboard),
             text=message)
+        return message.message_id
     except TelegramError as err:
         raise Exception(f"Bot can't send the message! {err}")
-    return message.message_id
 
 
 def send_photo(
@@ -154,7 +154,10 @@ def send_photo(
     return
 
 
-def send_update(parsed_post: dict, team_config: dict, telegram_bot) -> None:
+def send_update(
+        parsed_post: dict[str, any],
+        team_config: dict[str, any],
+        telegram_bot) -> None:
     """Send update from VK group wall to target telegram chat."""
     send_photo(
         bot=telegram_bot,

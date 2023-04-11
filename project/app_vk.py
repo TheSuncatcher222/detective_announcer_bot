@@ -12,20 +12,20 @@ from project.data.app_data import (
     VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO, VK_POST_LINK)
 
 
-def init_vk_bot(token: str, user_id: int) -> any:
+def init_vk_bot(token: str, user_id: int) -> vk_api.VkApi.method:
     """Check VK API. Create a session."""
-    session = vk_api.VkApi(token=token)
-    vk = session.get_api()
     try:
+        session: vk_api.VkApi = vk_api.VkApi(token=token)
+        vk: vk_api.VkApi.method = session.get_api()
         vk.status.get(user_id=user_id)
+        return vk
     except vk_api.exceptions.ApiError:
         raise SystemExit('VK token is invalid!')
-    return vk
 
 
 def get_vk_chat_update(
-        last_vk_message_id: dict,
-        vk_bot: vk_api.VkApi.method) -> str:
+        last_vk_message_id: dict[str, int], vk_bot: vk_api.VkApi.method
+        ) -> str | None:
     """Check for new message from target VK chat.
     Looking only for 'Team successfully registered' message subject."""
     try:
@@ -40,34 +40,31 @@ def get_vk_chat_update(
                 last_vk_message_id['last_vk_message_id'] = message_id
                 return '\n'.join(message_text)
             last_vk_message_id['last_vk_message_id'] = message_id
-            return None
+        return
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
 
 
 def get_vk_wall_update(
-        last_vk_wall_id: int,
-        vk_bot: vk_api.VkApi.method,
-        vk_group_id: int) -> dict:
+        last_vk_wall_id: int, vk_bot: vk_api.VkApi.method, vk_group_id: int
+        ) -> dict[str, any] | None:
     """Check for a new post in VK group."""
     try:
-        wall: dict = vk_bot.wall.get(
+        wall: dict[str, any] = vk_bot.wall.get(
             owner_id=f'-{vk_group_id}', count=2)
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
-    update: dict = None
     for num in (NON_PINNED_POST_ID, PINNED_POST_ID):
         try:
             if wall['items'][num]['id'] > last_vk_wall_id:
-                update = wall['items'][num]
-                break
+                return wall['items'][num]
         except IndexError:
             pass
         except KeyError:
             raise Exception(
                 "Post's json from VK wall has unknown structure!"
                 f"Try ['items'][{num}]['id'].")
-    return update
+    return None
 
 
 def define_post_topic(post: dict) -> str:
@@ -84,7 +81,7 @@ def define_post_topic(post: dict) -> str:
     return 'other'
 
 
-def _game_dates_add_weekday_place(game_dates: list) -> list:
+def _game_dates_add_weekday_place(game_dates: list[str]) -> list[str]:
     """Add day of the week to each date and formate location."""
     DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
     MONTH_NUM: tuple[str] = (
@@ -105,25 +102,25 @@ def _game_dates_add_weekday_place(game_dates: list) -> list:
         date_digits: str = f'{day} {month} {year}'
         date_obj: datetime = datetime.strptime(date_digits, "%d %m %Y")
         day_name: str = DAYS_WEEK[date_obj.weekday()]
-        location = LOCATIONS.get(location, location)
+        location: str = LOCATIONS.get(location, location)
         game_dates_format.append(f'{date} ({day_name}), {time} — {location}')
     return game_dates_format
 
 
-def _split_post_text(post_text: str) -> list:
+def _split_post_text(post_text: str) -> list[str]:
     """Split text into paragraphs."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
     return fixed_text.split('\n')[:-1]
 
 
-def _get_post_image_url(block: str, post: dict) -> str:
+def _get_post_image_url(block: str, post: dict[str, any]) -> str:
     """Get image URL from the given post."""
     try:
         if block == 'photo':
-            post_image_url = (
+            post_image_url: str = (
                 post['attachments'][0]['photo']['sizes'][4]['url'])
         elif block == 'album':
-            post_image_url = (
+            post_image_url: str = (
                 post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
         if not post_image_url.startswith('http'):
             raise ValueError
@@ -136,7 +133,8 @@ def _get_post_image_url(block: str, post: dict) -> str:
 
 
 def _parse_post_stop_list(
-        post: dict, split_text: list, team_name=TEAM_NAME) -> list:
+        post: dict[str, any], split_text: list[str], team_name: str = TEAM_NAME
+        ) -> list[str]:
     """Parse post's text if the topic is 'stop-list'.
     Read attached PDF with stop-list and search team."""
     try:
@@ -180,9 +178,10 @@ def _parse_post_checkin(post_id: int, split_text: str) -> list[str]:
         f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
 
 
-def _parse_post_game_results(split_text: str, team_name=TEAM_NAME):
+def _parse_post_game_results(
+        split_text: str, team_name: str = TEAM_NAME) -> str:
     """Parse post's text if the topic is 'game_results'."""
-    reg_exp = fr'\d\sместо: «{team_name}»'
+    reg_exp: str = fr'\d\sместо: «{team_name}»'
     for paragraph in split_text:
         reg_search = search(reg_exp, paragraph)
         if reg_search:
@@ -191,13 +190,13 @@ def _parse_post_game_results(split_text: str, team_name=TEAM_NAME):
     return split_text
 
 
-def parse_post(post: dict, post_topic: str) -> dict:
+def parse_post(post: dict[str, any], post_topic: str) -> dict[str, any]:
     """Manage post parsing."""
     post_id: int = post['id']
-    post_text: list = None
+    post_text: list[str] = None
     post_image_url: str = None
-    game_dates: list = None
-    split_text = _split_post_text(post_text=post['text'])
+    game_dates: list[str] = None
+    split_text: list[str] = _split_post_text(post_text=post['text'])
     if post_topic == 'stop-list':
         post_text = _parse_post_stop_list(post=post, split_text=split_text)
     elif post_topic == 'preview':
@@ -221,7 +220,7 @@ def parse_post(post: dict, post_topic: str) -> dict:
         block: str = 'album'
     else:
         block: str = 'photo'
-    post_image_url = _get_post_image_url(post=post, block=block)
+    post_image_url: str = _get_post_image_url(post=post, block=block)
     parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
