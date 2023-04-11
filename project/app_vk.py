@@ -8,8 +8,8 @@ from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
     APP_JSON_FOLDER, LOCATIONS, MEDALS, NON_PINNED_POST_ID, PINNED_POST_ID,
-    POST_TOPICS, TEAM_NAME, VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO,
-    VK_POST_LINK)
+    POST_TOPICS, TEAM_NAME, TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT,
+    VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO, VK_POST_LINK)
 
 
 def init_vk_bot(token: str, user_id: int) -> any:
@@ -21,6 +21,27 @@ def init_vk_bot(token: str, user_id: int) -> any:
     except vk_api.exceptions.ApiError:
         raise SystemExit('VK token is invalid!')
     return vk
+
+
+def get_vk_chat_update(
+        last_vk_message_id: dict,
+        vk_bot: vk_api.VkApi.method) -> str:
+    """Check for new message from target VK chat.
+    Looking only for 'Team successfully registered' message subject."""
+    try:
+        message: dict = vk_bot.messages.getHistory(
+            count=1, peer_id=-VK_GROUP_TARGET,
+            offset=13)
+        message_id: int = message['items'][0]['id']
+        if message_id > last_vk_message_id['last_vk_message_id']:
+            message_text: str = message['items'][0]['text']
+            if TEAM_REGISTER_LOOKUP in message_text:
+                message_text: list[str] = split_post_text(message_text)[1:2]
+                message_text.append(TEAM_REGISTER_TEXT)
+            last_vk_message_id['last_vk_message_id'] = message_id
+    except ApiError:
+        raise SystemExit('VK group ID is invalid!')
+    return '\n'.join(message_text)
 
 
 def get_vk_wall_update(
