@@ -57,12 +57,12 @@ POST_TOPICS: dict[str, str] = {
     '#alibi_checkin': 'checkin',
     '#ГонорарДетектива': 'rating',
     '#alibispb_results': 'game_results',
+    '#alibi_photos': 'photos',
     'Итоги розыгрыша': 'prize_results',
     '#alibi_preview': 'preview',
     '#detectit_teams': 'teams'}
 # Пока что нет данных для категорий:
 #     None: 'stop-list'
-#     None: 'photos'
 
 TEAM_CONFIG: dict[dict[any]] = {
         'last_message_id': None,
