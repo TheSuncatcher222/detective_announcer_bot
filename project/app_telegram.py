@@ -46,7 +46,7 @@ def edit_message(
         team_config: dict[str, any],
         chat_id: str = TELEGRAM_TEAM_CHAT,
         enable_markup: bool = True) -> None:
-    """Edit target message in target telegram user/chat.
+    """Edit target message in target telegram chat.
     If enable_markup is True add markup to message."""
     keys: list[list[InlineKeyboardButton]] | None = TEAM_CONFIG_BUTTONS.get(
         team_config['game_count'], None) if enable_markup else None
@@ -107,8 +107,20 @@ def form_game_dates_text(game_dates: dict) -> str:
     return '\n'.join(abstracts)
 
 
+def _pin_message(
+        bot,
+        message_id: int,
+        chat_id: int = TELEGRAM_TEAM_CHAT,
+        unpin: bool = False) -> None:
+    """Pin / unpin message in telegram chat."""
+    if not unpin:
+        bot.pinChatMessage(chat_id=chat_id, message_id=message_id)
+    else:
+        bot.unpinChatMessage(chat_id=chat_id, message_id=message_id)
+
+
 def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
-    """Send message to target telegram user/chat."""
+    """Send message to target telegram chat."""
     try:
         bot.send_message(
             chat_id=chat_id,
@@ -123,7 +135,7 @@ def send_message_for_game_dates(
         message: str,
         keyboard: list[list[InlineKeyboardButton]],
         chat_id: int = TELEGRAM_TEAM_CHAT) -> int:
-    """Send message with game dates and keyboard to target telegram user/chat.
+    """Send message with game dates and keyboard to target telegram chat.
     Return message id."""
     try:
         message: any = bot.send_message(
@@ -140,7 +152,7 @@ def send_photo(
         photo_url: str,
         message: str = None,
         chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
-    """Send photo with optional message to target telegram user/chat."""
+    """Send photo with optional message to target telegram chat."""
     try:
         bot.send_photo(
             caption=message,
@@ -162,6 +174,10 @@ def send_update(
         photo_url=parsed_post['post_image_url'])
     if parsed_post['game_dates']:
         if team_config['last_message_id']:
+            _pin_message(
+                bot=telegram_bot,
+                message_id=team_config['last_message_id'],
+                unpin=True)
             edit_message(
                 bot=telegram_bot, team_config=team_config, enable_markup=False)
         create_new_team_config_game_dates(
@@ -170,4 +186,6 @@ def send_update(
             bot=telegram_bot,
             message=form_game_dates_text(game_dates=team_config['game_dates']),
             keyboard=TEAM_CONFIG_BUTTONS.get(team_config['game_count'], None))
+        _pin_message(
+            bot=telegram_bot, message_id=team_config['last_message_id'])
     return
