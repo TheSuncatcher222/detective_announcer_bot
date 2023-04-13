@@ -81,6 +81,53 @@ def define_post_topic(post: dict) -> str:
     return 'other'
 
 
+def parse_post(
+        post: dict[str, any], post_topic: str) -> dict[str, any] | None | int:
+    """Manage post parsing."""
+    post_id: int = post['id']
+    post_text: list[str] = None
+    post_image_url: str = None
+    game_dates: list[str] = None
+    split_text: list[str] = _split_post_text(post_text=post['text'])
+    if post_topic == 'checkin':
+        post_text = _parse_post_checkin(post_id=post_id, split_text=split_text)
+    elif post_topic == 'game_results':
+        if TEAM_NAME in post['text']:
+            post_text = _parse_post_game_results(split_text=split_text)
+        else:
+            return {'post_id': post_id}
+    elif post_topic == 'other':
+        post_text = split_text
+    elif post_topic == 'photos' or post_topic == 'rating':
+        post_text = split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
+    elif post_topic == 'preview':
+        game_dates, post_text = _parse_post_preview(
+            post_text=post['text'], split_text=split_text)
+    elif post_topic == 'prize_results':
+        post_text = split_text
+    # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фотографии
+    # elif post_topic == 'rating':
+    #     post_text = None
+    elif post_topic == 'stop-list':
+        post_text = _parse_post_stop_list(post=post, split_text=split_text)
+    elif post_topic == 'teams':
+        post_text = split_text[:2]
+    if not post_text:
+        return None
+    if post_topic == 'photos':
+        block: str = 'album'
+    else:
+        block: str = 'photo'
+    post_image_url: str = _get_post_image_url(post=post, block=block)
+    parsed_post: dict[str, any] = {
+        'post_id': post_id,
+        'post_image_url': post_image_url,
+        'post_text': post_text}
+    if 'game_dates':
+        parsed_post['game_dates'] = game_dates
+    return parsed_post
+
+
 def _game_dates_add_weekday_place(game_dates: list[str]) -> list[str]:
     """Add day of the week to each date and formate location."""
     DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
@@ -105,12 +152,6 @@ def _game_dates_add_weekday_place(game_dates: list[str]) -> list[str]:
         location: str = LOCATIONS.get(location, location)
         game_dates_format.append(f'{date} ({day_name}), {time} — {location}')
     return game_dates_format
-
-
-def _split_post_text(post_text: str) -> list[str]:
-    """Split text into paragraphs."""
-    fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
-    return fixed_text.split('\n')[:-1]
 
 
 def _get_post_image_url(block: str, post: dict[str, any]) -> str:
@@ -190,48 +231,7 @@ def _parse_post_stop_list(
     return [text_verdict] + split_text[:len(split_text)-1]
 
 
-def parse_post(post: dict[str, any], post_topic: str
-        ) -> dict[str, any] | None | int:
-    """Manage post parsing."""
-    post_id: int = post['id']
-    post_text: list[str] = None
-    post_image_url: str = None
-    game_dates: list[str] = None
-    split_text: list[str] = _split_post_text(post_text=post['text'])
-    if post_topic == 'checkin':
-        post_text = _parse_post_checkin(post_id=post_id, split_text=split_text)
-    elif post_topic == 'game_results':
-        if TEAM_NAME in post['text']:
-            post_text = _parse_post_game_results(split_text=split_text)
-        else:
-            return {'post_id': post_id}
-    elif post_topic == 'other':
-        post_text = split_text
-    elif post_topic == 'photos' or post_topic == 'rating':
-        post_text = split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
-    elif post_topic == 'preview':
-        game_dates, post_text = _parse_post_preview(
-            post_text=post['text'], split_text=split_text)
-    elif post_topic == 'prize_results':
-        post_text = split_text
-    # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фотографии
-    # elif post_topic == 'rating':
-    #     post_text = None
-    elif post_topic == 'stop-list':
-        post_text = _parse_post_stop_list(post=post, split_text=split_text)
-    elif post_topic == 'teams':
-        post_text = split_text[:2]
-    if not post_text:
-        return None
-    if post_topic == 'photos':
-        block: str = 'album'
-    else:
-        block: str = 'photo'
-    post_image_url: str = _get_post_image_url(post=post, block=block)
-    parsed_post: dict[str, any] = {
-        'post_id': post_id,
-        'post_image_url': post_image_url,
-        'post_text': post_text}
-    if 'game_dates':
-        parsed_post['game_dates'] = game_dates
-    return parsed_post
+def _split_post_text(post_text: str) -> list[str]:
+    """Split text into paragraphs."""
+    fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
+    return fixed_text.split('\n')[:-1]

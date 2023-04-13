@@ -1,6 +1,6 @@
 from project.app_telegram import (
-    create_new_team_config_game_dates,
-    form_game_dates_text, rebuild_team_config_game_dates)
+    _create_new_team_config_game_dates,
+    _form_game_dates_text, rebuild_team_config_game_dates)
 
 from project.data.app_data import TEAM_CONFIG, TEAM_GUEST
 
@@ -10,7 +10,7 @@ from tests.test_main import GAP, GAP_DASH, GREEN_PASSED, NL, RED_FAILED
 def test_create_new_team_config_game_dates():
     team_config = TEAM_CONFIG
     game_dates = ['Игра № 2', 'Игра № 1', 'Игра № 3']
-    create_new_team_config_game_dates(
+    _create_new_team_config_game_dates(
         game_dates=game_dates, team_config=team_config)
     expected_dict = {
         'last_message_id': None,
@@ -75,7 +75,7 @@ def test_form_game_dates_text():
         0: {
                 'date_location': 'Не смогу быть',
                 'teammates': {}}}
-    result = form_game_dates_text(game_dates)
+    result = _form_game_dates_text(game_dates)
     expected: str = (
         '1️⃣ Какая-та локация №1\n'
         '• user_1\n'

@@ -26,21 +26,6 @@ def init_telegram_bot(token: str) -> telegram.Bot:
     return telegram.Bot(token=token)
 
 
-def create_new_team_config_game_dates(
-        game_dates: list[str], team_config: dict[str, any]) -> None:
-    """Create new data in team_config for new game_dates."""
-    team_config['game_count'] = len(game_dates)
-    team_config['game_dates'] = {
-        **{
-            i + 1: {
-                'date_location': game,
-                'teammates': {}} for i, game in enumerate(game_dates)},
-        0: {
-            'date_location': 'Не смогу быть',
-            'teammates': {}}}
-    return
-
-
 def edit_message(
         bot,
         team_config: dict[str, any],
@@ -53,7 +38,7 @@ def edit_message(
     bot.edit_message_text(
         chat_id=chat_id,
         message_id=team_config['last_message_id'],
-        text=form_game_dates_text(game_dates=team_config['game_dates']),
+        text=_form_game_dates_text(game_dates=team_config['game_dates']),
         reply_markup=InlineKeyboardMarkup(keys) if keys else None)
     return
 
@@ -91,7 +76,33 @@ def rebuild_team_config_game_dates(
     return False
 
 
-def form_game_dates_text(game_dates: dict) -> str:
+def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
+    """Send message to target telegram chat."""
+    try:
+        bot.send_message(
+            chat_id=chat_id,
+            text=message)
+        return
+    except TelegramError:
+        raise Exception("Bot can't send the message!")
+
+
+def _create_new_team_config_game_dates(
+        game_dates: list[str], team_config: dict[str, any]) -> None:
+    """Create new data in team_config for new game_dates."""
+    team_config['game_count'] = len(game_dates)
+    team_config['game_dates'] = {
+        **{
+            i + 1: {
+                'date_location': game,
+                'teammates': {}} for i, game in enumerate(game_dates)},
+        0: {
+            'date_location': 'Не смогу быть',
+            'teammates': {}}}
+    return
+
+
+def _form_game_dates_text(game_dates: dict) -> str:
     """Form text message from game_dates."""
     abstracts: list[str] = []
     for num in game_dates:
@@ -119,18 +130,7 @@ def _pin_message(
         bot.unpinChatMessage(chat_id=chat_id, message_id=message_id)
 
 
-def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
-    """Send message to target telegram chat."""
-    try:
-        bot.send_message(
-            chat_id=chat_id,
-            text=message)
-        return
-    except TelegramError:
-        raise Exception("Bot can't send the message!")
-
-
-def send_message_for_game_dates(
+def _send_message_for_game_dates(
         bot,
         message: str,
         keyboard: list[list[InlineKeyboardButton]],
@@ -147,7 +147,7 @@ def send_message_for_game_dates(
         raise Exception(f"Bot can't send the message! {err}")
 
 
-def send_photo(
+def _send_photo(
         bot,
         photo_url: str,
         message: str = None,
@@ -168,7 +168,7 @@ def send_update(
         team_config: dict[str, any],
         telegram_bot) -> None:
     """Send update from VK group wall to target telegram chat."""
-    send_photo(
+    _send_photo(
         bot=telegram_bot,
         message='\n\n'.join(s for s in parsed_post['post_text']),
         photo_url=parsed_post['post_image_url'])
@@ -180,11 +180,12 @@ def send_update(
                 unpin=True)
             edit_message(
                 bot=telegram_bot, team_config=team_config, enable_markup=False)
-        create_new_team_config_game_dates(
+        _create_new_team_config_game_dates(
             game_dates=parsed_post['game_dates'], team_config=team_config)
-        team_config['last_message_id'] = send_message_for_game_dates(
+        team_config['last_message_id'] = _send_message_for_game_dates(
             bot=telegram_bot,
-            message=form_game_dates_text(game_dates=team_config['game_dates']),
+            message=_form_game_dates_text(
+                game_dates=team_config['game_dates']),
             keyboard=TEAM_CONFIG_BUTTONS.get(team_config['game_count'], None))
         _pin_message(
             bot=telegram_bot, message_id=team_config['last_message_id'])
