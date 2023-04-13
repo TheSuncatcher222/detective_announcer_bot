@@ -85,7 +85,9 @@ async def vk_listener(
                 parsed_post: dict[str, any] = parse_post(
                     post=update_wall, post_topic=topic)
                 if parsed_post:
+                    logger.info(f"Post's topic is: '{topic}'")
                     if 'post_text' in parsed_post:
+                        logger.info('Sending update to telegram.')
                         send_update(
                             parsed_post=parsed_post,
                             team_config=team_config,
@@ -97,6 +99,7 @@ async def vk_listener(
                         file_name='last_vk_wall_id.json',
                         write_data={'last_vk_wall_id': parsed_post['post_id']})
                     last_vk_wall_id['last_vk_wall_id'] = parsed_post['post_id']
+                    logger.info('Done!')
             logger.debug('Try to receive data from VK group chat.')
             update_message: str = get_vk_chat_update(
                 last_vk_message_id=last_vk_message_id, vk_bot=vk_bot)
@@ -106,6 +109,7 @@ async def vk_listener(
                 json_data_write(
                     file_name='last_vk_message_id.json',
                     write_data=last_vk_message_id)
+                logger.info('Done!')
         except Exception as err:
             """Error on the API side.
             The program will continue to run normally."""
@@ -116,7 +120,7 @@ async def vk_listener(
                 logger.warning(err)
                 send_message(
                     bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
-        logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
+        logger.info(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
