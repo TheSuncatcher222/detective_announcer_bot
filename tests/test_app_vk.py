@@ -171,7 +171,7 @@ def test_parse_post():
                 'post_image_url': _get_post_image_url(
                     post=EXAMPLE_CHECKIN, block='photo'),
                 'post_text': _parse_post_checkin(
-                    post_id=EXAMPLE_CHECKIN['id'],
+                    pinned_post_id=0,
                     split_text=_split_post_text(EXAMPLE_CHECKIN['text'])),
                 'game_dates': None}},
         'GAME_RESULTS': {
@@ -255,7 +255,9 @@ def test_parse_post():
     for post_type in expected_results:
         post_data: dict = expected_results[post_type]
         result_post: dict = parse_post(
-            post=post_data['post'], post_topic=post_data['post_topic'])
+            pinned_post_id=0,
+            post=post_data['post'],
+            post_topic=post_data['post_topic'])
         for expected_key in post_data['expected_results']:
             try:
                 result: any = result_post.get(expected_key, None)
@@ -297,7 +299,8 @@ def test_parse_post_checkin():
         'репост этой записи:\n\n'
         f"{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}"]
     errors: list = []
-    result_text = _parse_post_checkin(split_text=split_text, post_id=post_id)
+    result_text = _parse_post_checkin(
+        split_text=split_text, pinned_post_id=post_id)
     try:
         assert len(result_text) == len(expected_text)
     except AssertionError:
