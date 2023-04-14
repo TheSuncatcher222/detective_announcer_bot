@@ -77,8 +77,7 @@ async def vk_listener(
             logger.debug('Try to receive data from VK group wall.')
             update_wall: dict[str, any] = get_vk_wall_update(
                 last_vk_wall_id=last_vk_wall_id['last_vk_wall_id'],
-                vk_bot=vk_bot,
-                vk_group_id=VK_GROUP_TARGET)
+                vk_bot=vk_bot)
             if update_wall:
                 logger.info('New post available!')
                 topic: str = define_post_topic(post=update_wall)

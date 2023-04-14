@@ -46,8 +46,9 @@ def get_vk_chat_update(
 
 
 def get_vk_wall_update(
-        last_vk_wall_id: int, vk_bot: vk_api.VkApi.method, vk_group_id: int
-        ) -> dict[str, any] | None:
+        last_vk_wall_id: int,
+        vk_bot: vk_api.VkApi.method,
+        vk_group_id: int = VK_GROUP_TARGET) -> dict[str, any] | None:
     """Check for a new post in VK group."""
     try:
         wall: dict[str, any] = vk_bot.wall.get(
@@ -82,7 +83,8 @@ def define_post_topic(post: dict) -> str:
 
 
 def parse_post(
-        post: dict[str, any], post_topic: str) -> dict[str, any] | None | int:
+        post: dict[str, any],
+        post_topic: str) -> dict[str, any] | None | int:
     """Manage post parsing."""
     post_id: int = post['id']
     post_text: list[str] = None
