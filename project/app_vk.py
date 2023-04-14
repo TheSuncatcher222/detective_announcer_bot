@@ -48,14 +48,20 @@ def get_vk_chat_update(
 def get_vk_wall_update(
         last_vk_wall_id: int,
         vk_bot: vk_api.VkApi.method,
+        get_pinned_only: bool = False,
         vk_group_id: int = VK_GROUP_TARGET) -> dict[str, any] | None:
-    """Check for a new post in VK group."""
+    """Check for a new post in VK group.
+    If get_pinned_only - check only pinned post."""
     try:
         wall: dict[str, any] = vk_bot.wall.get(
             owner_id=f'-{vk_group_id}', count=2)
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
-    for num in (NON_PINNED_POST_ID, PINNED_POST_ID):
+    if not get_pinned_only:
+        post_range: list[int] = [NON_PINNED_POST_ID, PINNED_POST_ID]
+    else:
+        post_range: list[int] = [PINNED_POST_ID]
+    for num in post_range:
         try:
             if wall['items'][num]['id'] > last_vk_wall_id:
                 return wall['items'][num]
@@ -83,8 +89,9 @@ def define_post_topic(post: dict) -> str:
 
 
 def parse_post(
+        pinned_post_id: int,
         post: dict[str, any],
-        post_topic: str) -> dict[str, any] | None | int:
+        post_topic: str,) -> dict[str, any] | None | int:
     """Manage post parsing."""
     post_id: int = post['id']
     post_text: list[str] = None
@@ -92,7 +99,8 @@ def parse_post(
     game_dates: list[str] = None
     split_text: list[str] = _split_post_text(post_text=post['text'])
     if post_topic == 'checkin':
-        post_text = _parse_post_checkin(post_id=post_id, split_text=split_text)
+        post_text = _parse_post_checkin(
+            pinned_post_id=pinned_post_id, split_text=split_text)
     elif post_topic == 'game_results':
         if TEAM_NAME in post['text']:
             post_text = _parse_post_game_results(split_text=split_text)
@@ -175,7 +183,7 @@ def _get_post_image_url(block: str, post: dict[str, any]) -> str:
     return VK_GROUP_TARGET_LOGO
 
 
-def _parse_post_checkin(post_id: int, split_text: str) -> list[str]:
+def _parse_post_checkin(pinned_post_id: int, split_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
         split_text[0],
@@ -183,7 +191,7 @@ def _parse_post_checkin(post_id: int, split_text: str) -> list[str]:
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:\n\n'
-        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
+        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{pinned_post_id}']
 
 
 def _parse_post_game_results(

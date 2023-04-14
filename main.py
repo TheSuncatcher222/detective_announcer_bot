@@ -81,8 +81,16 @@ async def vk_listener(
             if update_wall:
                 logger.info('New post available!')
                 topic: str = define_post_topic(post=update_wall)
+                pinned_post_id = None
+                if topic == 'checkin':
+                    pinned_post_id = get_vk_wall_update(
+                        last_vk_wall_id=0,
+                        vk_bot=vk_bot,
+                        get_pinned_only=True)['id']
                 parsed_post: dict[str, any] = parse_post(
-                    post=update_wall, post_topic=topic)
+                    post=update_wall,
+                    post_topic=topic,
+                    pinned_post_id=pinned_post_id)
                 if parsed_post:
                     logger.info(f"Post's topic is: '{topic}'")
                     if 'post_text' in parsed_post:
