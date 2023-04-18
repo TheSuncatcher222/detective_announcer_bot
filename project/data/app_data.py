@@ -34,6 +34,8 @@ EMOJI_SYMBOLS: dict[int, str] = {
     5: '5️⃣',
     6: '6️⃣'}
 
+LAST_API_ERR_DEL_SEC = 60 * 60
+
 LOCATIONS: dict[str, str] = {
     'секретное место на Горьковской':
         'ParkKing (Александровский Парк, 4, ст.м. Горьковская)',
