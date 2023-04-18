@@ -145,7 +145,7 @@ async def vk_listener(
             json_data_write(
                 file_name='last_api_error.json',
                 write_data=err_str)
-        logger.info(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
+        logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
