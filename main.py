@@ -142,6 +142,9 @@ async def vk_listener(
                 logger.warning(err)
                 send_message(
                     bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
+            json_data_write(
+                file_name='last_api_error.json',
+                write_data=err_str)
         logger.info(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
