@@ -3,12 +3,14 @@
 import asyncio
 import json
 import logging
+import os
 from telegram.ext import Updater, CallbackQueryHandler
 
 from project.data.app_data import (
-    APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, TEAM_CONFIG,
-    TEAM_NAME, TELEGRAM_BOT_TOKEN, TELEGRAM_TEAM_CHAT, TELEGRAM_USER,
-    VK_TOKEN_ADMIN, VK_USER, VK_GROUP_TARGET)
+    APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, 
+    LAST_API_ERR_DEL_SEC, TEAM_CONFIG, TEAM_NAME, TELEGRAM_BOT_TOKEN,
+    TELEGRAM_TEAM_CHAT, TELEGRAM_USER, VK_TOKEN_ADMIN, VK_USER,
+    VK_GROUP_TARGET)
 
 import project.app_logger as app_logger
 from project.app_telegram import (
@@ -61,6 +63,19 @@ def json_data_write(file_name: str, write_data: dict) -> None:
     with open(f'{APP_JSON_FOLDER}{file_name}', 'w') as write_file:
         json.dump(write_data, write_file)
     return
+
+
+def remove_data_file(file_name):
+    try:
+        os.remove(f'{APP_JSON_FOLDER}{file_name}')
+    except FileNotFoundError:
+        pass
+
+
+async def last_api_error_delete():
+    while 1:
+        remove_data_file('last_api_error.json')
+        await asyncio.sleep(LAST_API_ERR_DEL_SEC)
 
 
 async def vk_listener(
@@ -196,6 +211,7 @@ async def main():
     else:
         team_config = TEAM_CONFIG
     logger.info('All data are available. Start asyncio API polling.')
+    task_delete_last_api_error = asyncio.create_task(last_api_error_delete())
     task_telegram = asyncio.create_task(
         telegram_listener(team_config=team_config, telegram_bot=telegram_bot))
     task_vk = asyncio.create_task(
@@ -205,7 +221,7 @@ async def main():
             team_config=team_config,
             telegram_bot=telegram_bot,
             vk_bot=vk_bot))
-    await asyncio.gather(task_telegram, task_vk)
+    await asyncio.gather(task_delete_last_api_error, task_telegram, task_vk)
 
 
 if __name__ == '__main__':
