@@ -99,29 +99,30 @@ def parse_post(
     game_dates: list[str] = None
     split_text: list[str] = _split_post_text(post_text=post['text'])
     if post_topic == 'checkin':
-        post_text = _parse_post_checkin(
+        post_text: list[str] = _parse_post_checkin(
             pinned_post_id=pinned_post_id, split_text=split_text)
     elif post_topic == 'game_results':
         if TEAM_NAME in post['text']:
-            post_text = _parse_post_game_results(split_text=split_text)
+            post_text: list[str] = _parse_post_game_results(
+                split_text=split_text)
         else:
             return {'post_id': post_id}
-    elif post_topic == 'other':
-        post_text = split_text
-    elif post_topic == 'photos' or post_topic == 'rating':
-        post_text = split_text + [f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
+    elif post_topic in ('other', 'prize_results'):
+        post_text: list[str] = split_text
+    elif post_topic in ('photos', 'rating', 'tasks'):
+        post_text: list[str] = split_text + [
+            f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
     elif post_topic == 'preview':
         game_dates, post_text = _parse_post_preview(
             post_text=post['text'], split_text=split_text)
-    elif post_topic == 'prize_results':
-        post_text = split_text
     # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фотографии
     # elif post_topic == 'rating':
     #     post_text = None
     elif post_topic == 'stop-list':
-        post_text = _parse_post_stop_list(post=post, split_text=split_text)
+        post_text: list[str] = _parse_post_stop_list(
+            post=post, split_text=split_text)
     elif post_topic == 'teams':
-        post_text = split_text[:2]
+        post_text: list[str] = split_text[:2]
     if not post_text:
         return None
     if post_topic == 'photos':
