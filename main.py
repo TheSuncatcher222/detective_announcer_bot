@@ -87,6 +87,7 @@ async def vk_listener(
     """Use VK API for checking updates from target VK group.
     If new post available - parse it and sent to target telegram chat."""
     last_api_error: str = None
+    count_min: int = 0
     while 1:
         try:
             logger.debug('Try to receive data from VK group wall.')
@@ -145,46 +146,50 @@ async def vk_listener(
             json_data_write(
                 file_name='last_api_error.json',
                 write_data=err_str)
-        logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
+        if count_min >= 60:
+            logger.info(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
+            count_min: int = 0
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
 async def telegram_listener(team_config: dict, telegram_bot) -> None:
     """Use Telegram API for handle callback query from target chat."""
-    def handle_callback_query(update, context) -> None:
+    
+    def __handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
-        try:
-            query: any = update.callback_query
-            username: str = (
-                query.from_user.username if query.from_user.username
-                else query.from_user.first_name)
-            game_num, decision = query.data.split()
-            rebuild: bool = rebuild_team_config_game_dates(
-                team_config=team_config,
-                teammate_decision={
-                    'teammate': username,
-                    'game_num': int(game_num),
-                    'decision': int(decision)})
-            if rebuild:
-                edit_message(
-                    bot=telegram_bot,
-                    team_config=team_config)
-        except Exception as err:
-            """Error on the API side.
-            The program will continue to run normally."""
-            last_api_error: str = json_data_read(
-                file_name='last_api_error.json')
-            err_str: str = str(err)
-            if err_str != last_api_error:
-                logger.warning(err)
-                send_message(
-                    bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
+        query: any = update.callback_query
+        username: str = (
+            query.from_user.username if query.from_user.username
+            else query.from_user.first_name)
+        game_num, decision = query.data.split()
+        rebuild: bool = rebuild_team_config_game_dates(
+            team_config=team_config,
+            teammate_decision={
+                'teammate': username,
+                'game_num': int(game_num),
+                'decision': int(decision)})
+        if rebuild:
+            edit_message(
+                bot=telegram_bot,
+                team_config=team_config)
         return
-
-    updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
-    dispatcher: Updater.dispatcher = updater.dispatcher
-    dispatcher.add_handler(CallbackQueryHandler(handle_callback_query))
-    updater.start_polling(poll_interval=API_TELEGRAM_UPDATE_SEC)
+    
+    try:
+        updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
+        dispatcher: Updater.dispatcher = updater.dispatcher
+        dispatcher.add_handler(CallbackQueryHandler(__handle_callback_query))
+        updater.start_polling(poll_interval=API_TELEGRAM_UPDATE_SEC)
+    except Exception as err:
+        """Error on the API side.
+        The program will continue to run normally."""
+        last_api_error: str = json_data_read(
+            file_name='last_api_error.json')
+        err_str: str = str(err)
+        if err_str != last_api_error:
+            logger.warning(err)
+            send_message(
+                bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
+        telegram_listener(team_config=team_config, telegram_bot=telegram_bot)
 
 
 async def main():
