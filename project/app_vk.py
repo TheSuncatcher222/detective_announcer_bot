@@ -185,7 +185,6 @@ def _get_post_image_url(block: str, post: dict[str, any]) -> str:
 
 def _parse_post_checkin(pinned_post_id: int, split_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
-    reg_exp: str = r'Результаты будут в ночь с \d+ на \d+ \w+\.'
     return [
         split_text[0],
         *split_text[-4:-2],
@@ -193,15 +192,16 @@ def _parse_post_checkin(pinned_post_id: int, split_text: str) -> list[str]:
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:',
         f'{VK_POST_LINK}{VK_GROUP_TARGET}_{pinned_post_id}',
-        search(reg_exp, split_text[-1]).group(0)]
+        search(
+            r'Результаты будут в ночь с \d+ на \d+ \w+\.',
+            split_text[-1]).group(0)]
 
 
 def _parse_post_game_results(
         split_text: str, team_name: str = TEAM_NAME) -> str:
     """Parse post's text if the topic is 'game_results'."""
-    reg_exp: str = fr'\d\sместо: «{team_name}»'
     for paragraph in split_text:
-        reg_search = search(reg_exp, paragraph)
+        reg_search = search(fr'\d\sместо: «{team_name}»', paragraph)
         if reg_search:
             split_text += MEDALS[f'{reg_search.group(0)[0]}th']
             break
