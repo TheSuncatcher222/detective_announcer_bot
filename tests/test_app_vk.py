@@ -248,7 +248,7 @@ def test_parse_post():
                 'post_id': EXAMPLE_TEAMS['id'],
                 'post_image_url': _get_post_image_url(
                     post=EXAMPLE_TEAMS, block='photo'),
-                'post_text': _split_post_text(EXAMPLE_TEAMS['text'])[:2],
+                'post_text': _split_post_text(EXAMPLE_TEAMS['text'])[1:2],
                 'game_dates': None}},
         'STOP_LIST': {
             'post': DETECTIT_STOP_LIST,
