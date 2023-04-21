@@ -7,7 +7,8 @@ from tests.test_main import (
 from tests.vk_wall_examples import (
     DETECTIT_STOP_LIST,
     EXAMPLE_CHECKIN, EXAMPLE_GAME_RESULTS, EXAMPLE_OTHER,
-    EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW, EXAMPLE_RATING, EXAMPLE_TEAMS)
+    EXAMPLE_PRIZE_RESULTS, EXAMPLE_PREVIEW, EXAMPLE_RATING,
+    EXAMPLE_TASKS, EXAMPLE_TEAMS)
 
 from project.app_vk import (
     findall, define_post_topic, _game_dates_add_weekday_place,
@@ -194,7 +195,7 @@ def test_parse_post():
                     post=EXAMPLE_OTHER, block='album'),
                 'post_text': _split_post_text(post_text=EXAMPLE_OTHER['text']),
                 'game_dates': None}},
-        'EXAMPLE_PRIZE_RESULTS': {
+        'PRIZE_RESULTS': {
             'post': EXAMPLE_PRIZE_RESULTS,
             'post_topic': 'prize_results',
             'expected_results': {
@@ -203,7 +204,7 @@ def test_parse_post():
                 'post_text': _split_post_text(
                     post_text=EXAMPLE_PRIZE_RESULTS['text']),
                 'game_dates': None}},
-        'EXAMPLE_PREVIEW': {
+        'PREVIEW': {
             'post': EXAMPLE_PREVIEW,
             'post_topic': 'preview',
             'expected_results': {
@@ -229,7 +230,18 @@ def test_parse_post():
                     + [f"{VK_POST_LINK}{VK_GROUP_TARGET}_"
                        f"{EXAMPLE_RATING['id']}"]),
                 'game_dates': None}},
-        'EXAMPLE_TEAMS': {
+        'TASKS': {
+            'post': EXAMPLE_TASKS,
+            'post_topic': 'tasks',
+            'expected_results': {
+                'post_id': EXAMPLE_TASKS['id'],
+                'post_image_url': _get_post_image_url(
+                    post=EXAMPLE_TASKS, block='photo'),
+                'post_text': (
+                    _split_post_text(EXAMPLE_TASKS['text'])
+                    + ['https://vk.com/alibigames?w=wall-40914100_13380']),
+                'game_dates': None}},
+        'TEAMS': {
             'post': EXAMPLE_TEAMS,
             'post_topic': 'teams',
             'expected_results': {
