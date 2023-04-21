@@ -62,6 +62,7 @@ POST_TOPICS: dict[str, str] = {
     '#alibi_results': 'game_results',
     '#alibi_photos': 'photos',
     '#alibi_preview': 'preview',
+    '#alibitasks': 'tasks',
     '#alibi_teams': 'teams',
     '#alibispb_checkin': 'checkin',
     '#alibispb_results': 'game_results',
