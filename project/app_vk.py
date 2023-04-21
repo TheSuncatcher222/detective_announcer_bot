@@ -185,13 +185,15 @@ def _get_post_image_url(block: str, post: dict[str, any]) -> str:
 
 def _parse_post_checkin(pinned_post_id: int, split_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
+    reg_exp: str = r'Результаты будут в ночь с \d+ на \d+ \w+\.'
     return [
         split_text[0],
         *split_text[-4:-2],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
-        'репост этой записи:\n\n'
-        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{pinned_post_id}']
+        'репост этой записи:',
+        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{pinned_post_id}',
+        search(reg_exp, split_text[-1]).group(0)]
 
 
 def _parse_post_game_results(
