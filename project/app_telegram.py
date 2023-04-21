@@ -79,9 +79,7 @@ def rebuild_team_config_game_dates(
 def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
     """Send message to target telegram chat."""
     try:
-        bot.send_message(
-            chat_id=chat_id,
-            text=message)
+        bot.send_message(chat_id=chat_id, text=message)
         return
     except TelegramError:
         raise Exception("Bot can't send the message!")
@@ -154,10 +152,7 @@ def _send_photo(
         chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
     """Send photo with optional message to target telegram chat."""
     try:
-        bot.send_photo(
-            caption=message,
-            chat_id=chat_id,
-            photo=photo_url)
+        bot.send_photo(caption=message, chat_id=chat_id, photo=photo_url)
     except TelegramError as err:
         raise Exception(f'Bot failed to send photo-message! Error: {err}')
     return
