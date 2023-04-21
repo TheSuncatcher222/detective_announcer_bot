@@ -296,8 +296,9 @@ def test_parse_post_checkin():
         'https://vk.com/app5619682_-40914100',
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
-        'репост этой записи:\n\n'
-        f"{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}"]
+        'репост этой записи:',
+        f"{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}",
+        'Результаты будут в ночь с 26 на 27 марта.']
     errors: list = []
     result_text = _parse_post_checkin(
         split_text=split_text, pinned_post_id=post_id)
