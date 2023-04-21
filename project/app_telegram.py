@@ -153,9 +153,9 @@ def _send_photo(
     """Send photo with optional message to target telegram chat."""
     try:
         bot.send_photo(caption=message, chat_id=chat_id, photo=photo_url)
+        return
     except TelegramError as err:
         raise Exception(f'Bot failed to send photo-message! Error: {err}')
-    return
 
 
 def send_update(
