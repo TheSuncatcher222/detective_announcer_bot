@@ -7,7 +7,7 @@ import os
 from telegram.ext import Updater, CallbackQueryHandler
 
 from project.data.app_data import (
-    APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, 
+    APP_JSON_FOLDER, API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC,
     LAST_API_ERR_DEL_SEC, TEAM_CONFIG, TEAM_NAME, TELEGRAM_BOT_TOKEN,
     TELEGRAM_TEAM_CHAT, TELEGRAM_USER, VK_TOKEN_ADMIN, VK_USER,
     VK_GROUP_TARGET)
@@ -154,7 +154,7 @@ async def vk_listener(
 
 async def telegram_listener(team_config: dict, telegram_bot) -> None:
     """Use Telegram API for handle callback query from target chat."""
-    
+
     def __handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
         query: any = update.callback_query
@@ -173,7 +173,7 @@ async def telegram_listener(team_config: dict, telegram_bot) -> None:
                 bot=telegram_bot,
                 team_config=team_config)
         return
-    
+
     try:
         updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
         dispatcher: Updater.dispatcher = updater.dispatcher
@@ -198,8 +198,7 @@ async def main():
         logger.info('Program is running.')
         check_env(data=ALL_DATA)
         check_telegram_bot_response(token=TELEGRAM_BOT_TOKEN)
-        vk_bot = init_vk_bot(
-            token=VK_TOKEN_ADMIN, user_id=VK_USER)
+        vk_bot = init_vk_bot(token=VK_TOKEN_ADMIN, user_id=VK_USER)
         telegram_bot = init_telegram_bot(token=TELEGRAM_BOT_TOKEN)
     except SystemExit as err:
         """Error in code. Program execution is not possible."""
