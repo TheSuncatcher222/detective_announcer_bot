@@ -122,7 +122,7 @@ def parse_post(
         post_text: list[str] = _parse_post_stop_list(
             post=post, split_text=split_text)
     elif post_topic == 'teams':
-        post_text: list[str] = split_text[:2]
+        post_text: list[str] = split_text[1:2]
     if not post_text:
         return None
     if post_topic == 'photos':
