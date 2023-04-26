@@ -170,6 +170,7 @@ TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
 TEAM_GUEST: str = '(приглашенный гость)'
 
 TEAM_REGISTER_LOOKUP: str = f'Регистрация команды «{TEAM_NAME}»'
+GAME_REMINDER_LOOKUP: str = 'Напоминаем, что завтра'
 TEAM_REGISTER_TEXT: str = (
     '\nДля подтверждения брони необходимо в течении суток оплатить участие в игре. '
     f'Оплата производится капитану команды по номеру {TEAM_CAPITAN_PROP} в размере 500 рублей.\n\n'

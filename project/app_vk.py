@@ -7,9 +7,10 @@ import vk_api
 from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
-    APP_JSON_FOLDER, LOCATIONS, MEDALS, NON_PINNED_POST_ID, PINNED_POST_ID,
-    POST_TOPICS, TEAM_NAME, TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT,
-    VK_GROUP_TARGET, VK_GROUP_TARGET_LOGO, VK_POST_LINK)
+    APP_JSON_FOLDER, GAME_REMINDER_LOOKUP, LOCATIONS, MEDALS,
+    NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS, TEAM_NAME,
+    TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT, VK_GROUP_TARGET,
+    VK_GROUP_TARGET_LOGO, VK_POST_LINK)
 
 
 def init_vk_bot(token: str, user_id: int) -> vk_api.VkApi.method:
@@ -27,19 +28,21 @@ def get_vk_chat_update(
         last_vk_message_id: dict[str, int], vk_bot: vk_api.VkApi.method
         ) -> str | None:
     """Check for new message from target VK chat.
-    Looking only for 'Team successfully registered' message subject."""
+    Looking only for 'Team successfully registered' message subject
+    or 'Game reminder'."""
     try:
         message: dict = vk_bot.messages.getHistory(
             count=1, peer_id=-VK_GROUP_TARGET)
         message_id: int = message['items'][0]['id']
         if message_id > last_vk_message_id['last_vk_message_id']:
             message_text: str = message['items'][0]['text']
+            last_vk_message_id['last_vk_message_id'] = message_id
             if TEAM_REGISTER_LOOKUP in message_text:
                 message_text: list[str] = _split_post_text(message_text)[1:2]
                 message_text.append(TEAM_REGISTER_TEXT)
-                last_vk_message_id['last_vk_message_id'] = message_id
                 return '\n'.join(message_text)
-            last_vk_message_id['last_vk_message_id'] = message_id
+            elif GAME_REMINDER_LOOKUP in message_text:
+                return _split_post_text(message_text)[1:]
         return
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
