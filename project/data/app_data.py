@@ -55,27 +55,37 @@ MEDALS: dict[str, list[str]] = {
 PINNED_POST_ID: int = 0
 NON_PINNED_POST_ID: int = 1
 
+
 POST_TOPICS: dict[str, str] = {
     'Итоги розыгрыша': 'prize_results',
-    '#ГонорарДетектива': 'rating',
-    '#alibi_checkin': 'checkin',
-    '#alibi_results': 'game_results',
-    '#alibi_photos': 'photos',
-    '#alibi_preview': 'preview',
-    '#alibi_tasks': 'tasks',
-    '#alibi_teams': 'teams',
-    '#alibicheckin': 'checkin',
-    '#alibiresults': 'game_results',
-    '#alibiphotos': 'photos',
-    '#alibipreview': 'preview',
-    '#alibitasks': 'tasks',
-    '#alibiteams': 'teams',
-    '#alibispb_checkin': 'checkin',
-    '#alibispb_results': 'game_results',
-    '#alibispb_photos': 'photos',
-    '#alibispb_preview': 'preview',
-    '#alibispb_tasks': 'tasks',
-    '#alibispb_teams': 'teams'}
+    'ГонорарДетектива': 'rating',
+    'checkin': 'checkin',
+    'results': 'game_results',
+    'photos': 'photos',
+    'preview': 'preview',
+    'tasks': 'tasks',
+    'teams': 'teams'}
+# POST_TOPICS: dict[str, str] = {
+#     'Итоги розыгрыша': 'prize_results',
+#     '#ГонорарДетектива': 'rating',
+#     '#alibi_checkin': 'checkin',
+#     '#alibi_results': 'game_results',
+#     '#alibi_photos': 'photos',
+#     '#alibi_preview': 'preview',
+#     '#alibi_tasks': 'tasks',
+#     '#alibi_teams': 'teams',
+#     '#alibicheckin': 'checkin',
+#     '#alibiresults': 'game_results',
+#     '#alibiphotos': 'photos',
+#     '#alibipreview': 'preview',
+#     '#alibitasks': 'tasks',
+#     '#alibiteams': 'teams',
+#     '#alibispb_checkin': 'checkin',
+#     '#alibispb_results': 'game_results',
+#     '#alibispb_photos': 'photos',
+#     '#alibispb_preview': 'preview',
+#     '#alibispb_tasks': 'tasks',
+#     '#alibispb_teams': 'teams'}
 # Пока что нет данных для категорий:
 #     None: 'stop-list'
 
