@@ -42,7 +42,7 @@ def get_vk_chat_update(
                 message_text.append(TEAM_REGISTER_TEXT)
                 return '\n'.join(message_text)
             elif GAME_REMINDER_LOOKUP in message_text:
-                return _split_post_text(message_text)[1:]
+                return _split_post_text(message_text)[1]
         return
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
