@@ -3,78 +3,18 @@ import os
 from PyPDF2 import PdfReader
 from re import findall, search, sub
 import requests
-import vk_api
+from vk_api import VkApi
 from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
-    APP_JSON_FOLDER, GAME_REMINDER_LOOKUP, LOCATIONS, MEDALS,
-    NON_PINNED_POST_ID, PINNED_POST_ID, POST_TOPICS, TEAM_NAME,
-    TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT, VK_GROUP_TARGET,
-    VK_GROUP_TARGET_LOGO, VK_POST_LINK)
+    ALIBI, ALIBI_GROUP_ID, ALIBI_GROUP_LOGO, ALIBI_POST_LINK,
+    DETECTIT, DETECTIT_GROUP_ID, DETECTIT_GROUP_LOGO, DETECTIT_POST_LINK,
 
+    GAME_REMINDER_LOOKUP, TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT,
 
-def init_vk_bot(token: str, user_id: int) -> vk_api.VkApi.method:
-    """Check VK API. Create a session."""
-    try:
-        session: vk_api.VkApi = vk_api.VkApi(token=token)
-        vk: vk_api.VkApi.method = session.get_api()
-        vk.status.get(user_id=user_id)
-        return vk
-    except vk_api.exceptions.ApiError:
-        raise SystemExit('VK token is invalid!')
+    LOCATIONS, MEDALS, TEAM_NAME,
 
-
-def get_vk_chat_update(
-        last_vk_message_id: dict[str, int], vk_bot: vk_api.VkApi.method
-        ) -> str | None:
-    """Check for new message from target VK chat.
-    Looking only for 'Team successfully registered' message subject
-    or 'Game reminder'."""
-    try:
-        message: dict = vk_bot.messages.getHistory(
-            count=1, peer_id=-VK_GROUP_TARGET)
-        message_id: int = message['items'][0]['id']
-        if message_id > last_vk_message_id['last_vk_message_id']:
-            message_text: str = message['items'][0]['text']
-            last_vk_message_id['last_vk_message_id'] = message_id
-            if TEAM_REGISTER_LOOKUP in message_text:
-                message_text: list[str] = _split_post_text(message_text)[1:2]
-                message_text.append(TEAM_REGISTER_TEXT)
-                return '\n'.join(message_text)
-            elif GAME_REMINDER_LOOKUP in message_text:
-                return _split_post_text(message_text)[1]
-        return
-    except ApiError:
-        raise SystemExit('VK group ID is invalid!')
-
-
-def get_vk_wall_update(
-        last_vk_wall_id: int,
-        vk_bot: vk_api.VkApi.method,
-        get_pinned_only: bool = False,
-        vk_group_id: int = VK_GROUP_TARGET) -> dict[str, any] | None:
-    """Check for a new post in VK group.
-    If get_pinned_only - check only pinned post."""
-    try:
-        wall: dict[str, any] = vk_bot.wall.get(
-            owner_id=f'-{vk_group_id}', count=2)
-    except ApiError:
-        raise SystemExit('VK group ID is invalid!')
-    if not get_pinned_only:
-        post_range: list[int] = [NON_PINNED_POST_ID, PINNED_POST_ID]
-    else:
-        post_range: list[int] = [PINNED_POST_ID]
-    for num in post_range:
-        try:
-            if wall['items'][num]['id'] > last_vk_wall_id:
-                return wall['items'][num]
-        except IndexError:
-            pass
-        except KeyError:
-            raise Exception(
-                "Post's json from VK wall has unknown structure!"
-                f"Try ['items'][{num}]['id'].")
-    return None
+    DATA_FOLDER, POST_TOPICS, PINNED_POST_ORDER, NON_PINNED_POST_ORDER)
 
 
 def define_post_topic(post: dict) -> str:
@@ -84,55 +24,134 @@ def define_post_topic(post: dict) -> str:
     except KeyError:
         raise Exception(
             "Post's json from VK wall has unknown structure!"
-            "Try ['items'][0]['text'].")
+            "Try 'text' key.")
     for key_tag in POST_TOPICS:
         if key_tag in post_text:
             return POST_TOPICS[key_tag]
     return 'other'
 
 
+def init_vk_bot(token: str, user_id: int) -> VkApi.method:
+    """Check VK API. Create a session."""
+    try:
+        session: VkApi = VkApi(token=token)
+        vk: VkApi.method = session.get_api()
+        vk.status.get(user_id=user_id)
+        return vk
+    except ApiError:
+        raise SystemExit('VK token is invalid!')
+
+
+def get_vk_chat_update_groups(
+        last_message_id_alibi: int,
+        last_message_id_detectit: int,
+        vk_bot: VkApi.method) -> tuple[str, dict[str, any] | None]:
+    """Manage get_vk_chat_update function: search vk groups for a new private
+    message and return the first one if it match or None if there are no
+    updates щк the message does not match."""
+    group_name: str = ALIBI
+    message_update: dict[str, any] | None = _get_vk_chat_update(
+        group_name=group_name,
+        last_message_id=last_message_id_alibi,
+        vk_bot=vk_bot,
+        vk_group_id=ALIBI_GROUP_ID)
+    if not message_update:
+        group_name: str = DETECTIT
+        message_update: dict[str, any] | None = _get_vk_chat_update(
+            group_name=group_name,
+            last_message_id=last_message_id_detectit,
+            vk_bot=vk_bot,
+            vk_group_id=DETECTIT_GROUP_ID)
+    return group_name, message_update
+
+
+def get_vk_wall_update_groups(
+        last_wall_id_alibi: int,
+        last_wall_id_detectit: int,
+        vk_bot: VkApi.method) -> tuple[str, dict[str, any] | None]:
+    """Manage get_vk_wall_update function: search vk groups for a new post and
+    return the first one or None if there are no updates."""
+    group_name: str = ALIBI
+    update_wall: dict[str, any] | None = _get_vk_wall_update(
+            last_wall_id=last_wall_id_alibi,
+            vk_bot=vk_bot,
+            vk_group_id=ALIBI_GROUP_ID)
+    if not update_wall:
+        group_name: str = DETECTIT
+        update_wall: dict[str, any] | None = _get_vk_wall_update(
+            last_wall_id=last_wall_id_detectit,
+            vk_bot=vk_bot,
+            vk_group_id=DETECTIT_GROUP_ID)
+    return group_name, update_wall
+
+
+def parse_message(group_name: str, message: dict[any]) -> str | None:
+    """Check if lookup in message text. If true return complete message text to
+    send to the telegram chat. If not return None."""
+    message_text: str = message['items'][0]['text']
+    if TEAM_REGISTER_LOOKUP in message_text:
+        money_amount: str = search(
+            r'Стоимость участия: \d+', message_text).group(0)[-3:]
+        splitted_text: list[str] = _split_post_text(
+            group_name=group_name, post_text=message_text)[0:3]
+        message_text: list[str] = (
+            splitted_text[:1]
+            + splitted_text[2:3]
+            + [TEAM_REGISTER_TEXT.format(money_amount=money_amount)])
+        return '\n'.join(message_text)
+    elif GAME_REMINDER_LOOKUP in message_text:
+        splitted_text: list[str] = _split_post_text(
+            group_name=group_name, post_text=message_text)
+        message_text: list[str] = splitted_text[:1] + splitted_text[2:3]
+        return '\n'.join(message_text)
+    return
+
+
 def parse_post(
-        pinned_post_id: int,
+        group_name: str,
         post: dict[str, any],
-        post_topic: str,) -> dict[str, any] | None | int:
+        post_topic: str) -> dict[str, any] | None:
     """Manage post parsing."""
     post_id: int = post['id']
     post_text: list[str] = None
     post_image_url: str = None
     game_dates: list[str] = None
-    split_text: list[str] = _split_post_text(post_text=post['text'])
+    split_text: list[str] = _split_post_text(
+        group_name=group_name,
+        post_text=post['text'])
     if post_topic == 'checkin':
         post_text: list[str] = _parse_post_checkin(
-            pinned_post_id=pinned_post_id, split_text=split_text)
-    elif post_topic == 'game_results':
-        if TEAM_NAME in post['text']:
-            post_text: list[str] = _parse_post_game_results(
-                split_text=split_text)
-        else:
-            return {'post_id': post_id}
+            group_name=group_name, post_id=post_id, split_text=split_text)
+    elif post_topic == 'game_results' and TEAM_NAME in post['text']:
+        post_text: list[str] = _parse_post_game_results(split_text=split_text)
     elif post_topic in ('other', 'prize_results'):
         post_text: list[str] = split_text
     elif post_topic in ('photos', 'rating', 'tasks'):
-        post_text: list[str] = split_text + [
-            f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}']
+        post_text: list[str] = (
+            split_text
+            + [_make_link_to_post(group_name=group_name, post_id=post_id)])
     elif post_topic == 'preview':
         game_dates, post_text = _parse_post_preview(
             post_text=post['text'], split_text=split_text)
-    # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фотографии
-    # elif post_topic == 'rating':
-    #     post_text = None
+    elif post_topic == 'rating':
+        # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фото
+        pass
     elif post_topic == 'stop-list':
         post_text: list[str] = _parse_post_stop_list(
             post=post, split_text=split_text)
     elif post_topic == 'teams':
         post_text: list[str] = split_text[1:2]
     if not post_text:
-        return None
+        """No need to send post to telegram chat."""
+        return
+    # If video in: # Или в _get_post_image_url это
+        block = 'video'
     if post_topic == 'photos':
         block: str = 'album'
     else:
         block: str = 'photo'
-    post_image_url: str = _get_post_image_url(post=post, block=block)
+    post_image_url: str = _get_post_image_url(
+        block=block, group_name=group_name, post=post)
     parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
@@ -168,7 +187,8 @@ def _game_dates_add_weekday_place(game_dates: list[str]) -> list[str]:
     return game_dates_format
 
 
-def _get_post_image_url(block: str, post: dict[str, any]) -> str:
+def _get_post_image_url(
+        block: str, group_name: str, post: dict[str, any]) -> str:
     """Get image URL from the given post."""
     try:
         if block == 'photo':
@@ -184,18 +204,73 @@ def _get_post_image_url(block: str, post: dict[str, any]) -> str:
         f"Post's json for {block} from VK wall has unknown structure!"
     except ValueError:
         f"['url'] for {block}: data does not contain 'http' link."
-    return VK_GROUP_TARGET_LOGO
+    if group_name == ALIBI:
+        return ALIBI_GROUP_LOGO
+    return DETECTIT_GROUP_LOGO
 
 
-def _parse_post_checkin(pinned_post_id: int, split_text: str) -> list[str]:
+def _get_vk_chat_update(
+        last_message_id: int,
+        vk_bot: VkApi.method,
+        vk_group_id: int) -> dict[any] | None:
+    """Check for new message from target VK chat.
+    Looking only for 'Team successfully registered' message subject
+    or 'Game reminder'."""
+    try:
+        message: dict[any] = vk_bot.messages.getHistory(
+            count=1, peer_id=-vk_group_id)
+        message_id: int = message['items'][0]['id']
+        if message_id > last_message_id:
+            return message
+        return
+    except ApiError:
+        raise SystemExit('VK group ID is invalid!')
+
+
+def _get_vk_wall_update(
+        last_wall_id: int,
+        vk_bot: VkApi.method,
+        vk_group: int) -> dict[str, any] | None:
+    """Check for a new post in VK group."""
+    try:
+        wall: dict[str, any] = vk_bot.wall.get(
+            owner_id=f'-{vk_group}', count=2)
+    except ApiError:
+        raise SystemExit('VK group ID is invalid!')
+    for num in [NON_PINNED_POST_ORDER, PINNED_POST_ORDER]:
+        try:
+            if wall['items'][num]['id'] > last_wall_id:
+                return wall['items'][num]
+        except IndexError:
+            pass
+        except KeyError:
+            raise Exception(
+                "Post's json from VK wall has unknown structure!"
+                f"Try ['items'][{num}]['id'].")
+    return None
+
+
+def _make_link_to_post(group_name: str, post_id: int) -> str:
+    """Return link to the vk post with given post_id of target group."""
+    if group_name == ALIBI:
+        VK_GROUP_TARGET: str = ALIBI_GROUP_ID
+        VK_POST_LINK: str = ALIBI_POST_LINK
+    else:
+        VK_GROUP_TARGET: str = DETECTIT_GROUP_ID
+        VK_POST_LINK: str = DETECTIT_POST_LINK
+    return f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}'
+
+
+def _parse_post_checkin(
+        group_name: str, post_id: int, split_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
-        split_text[0],
+        *split_text[:2],
         *split_text[-4:-2],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:',
-        f'{VK_POST_LINK}{VK_GROUP_TARGET}_{pinned_post_id}',
+        _make_link_to_post(group_name=group_name, post_id=post_id),
         search(
             r'Результаты будут в ночь с \d+ на \d+ \w+\.',
             split_text[-1]).group(0)]
@@ -217,15 +292,16 @@ def _parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
     Separately return list with game dates and text."""
     game_dates: list[str] = _game_dates_add_weekday_place(
         game_dates=findall(
-            r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+',
+            r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+(?:\s\w+)?',
             post_text))
-    post_text: list[str] = split_text[0:4] + split_text[-2:-1]
+    post_text: list[str] = split_text[0:5] + split_text[-2:-1]
     return game_dates, post_text
 
 
 def _parse_post_stop_list(
-        post: dict[str, any], split_text: list[str], team_name: str = TEAM_NAME
-        ) -> list[str]:
+        post: dict[str, any],
+        split_text: list[str],
+        team_name: str = TEAM_NAME) -> list[str]:
     """Parse post's text if the topic is 'stop-list'.
     Read attached PDF with stop-list and search team."""
     try:
@@ -234,20 +310,20 @@ def _parse_post_stop_list(
         raise Exception(
             "Post's json from VK wall has unknown structure!"
             "Try ['items'][0]['attachments'][1]['doc']['url'].")
-    filename: str = f'{APP_JSON_FOLDER}stop-list.pdf'
+    filename: str = f'{DATA_FOLDER}stop-list.pdf'
     with open(filename, 'wb') as write_file:
         write_file.write(response.content)
     reader: PdfReader = PdfReader(filename)
-    text_verdict: str = 'Команда допущена к регистрации на серию игр!'
+    text_verdict: str = '✅ Команда допущена к регистрации на серию игр!'
     for i in range(len(reader.pages)):
         if team_name in reader.pages[i].extract_text():
-            text_verdict = 'Команда уже была на представленной серии игр!'
+            text_verdict = '⛔️ Команда уже была на представленной серии игр!'
             break
     os.remove(filename)
     return [text_verdict] + split_text[:len(split_text)-1]
 
 
-def _split_post_text(post_text: str) -> list[str]:
+def _split_post_text(group_name: str, post_text: str) -> list[str]:
     """Split text into paragraphs."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
-    return fixed_text.split('\n')[:-1]
+    return [group_name] + fixed_text.split('\n')[:-1]

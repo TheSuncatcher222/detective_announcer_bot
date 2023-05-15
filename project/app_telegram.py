@@ -1,11 +1,12 @@
 from http import HTTPStatus
 import requests
-import telegram
-from telegram import TelegramError, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import (
+    Bot as TelegramBot,
+    TelegramError, InlineKeyboardMarkup, InlineKeyboardButton)
 
 from project.data.app_data import (
-    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_CONFIG_BUTTONS, TEAM_GUEST,
-    TELEGRAM_TEAM_CHAT)
+    ALIBI, BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
+    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_TEAM_CHAT)
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -21,86 +22,23 @@ def check_telegram_bot_response(token: str) -> None:
         raise SystemExit('Telegram API is unavaliable!')
 
 
-def init_telegram_bot(token: str) -> telegram.Bot:
-    """Initialize telegram bot."""
-    return telegram.Bot(token=token)
-
-
 def edit_message(
         bot,
-        team_config: dict[str, any],
+        message_id: int,
+        new_text: str,
         chat_id: str = TELEGRAM_TEAM_CHAT,
-        enable_markup: bool = True) -> None:
-    """Edit target message in target telegram chat.
-    If enable_markup is True add markup to message."""
-    keys: list[list[InlineKeyboardButton]] | None = TEAM_CONFIG_BUTTONS.get(
-        team_config['game_count'], None) if enable_markup else None
+        reply_markup: bool = None) -> None:
+    """Edit target message in the telegram chat.
+    Add reply_markup to the message if reply_markup is not None."""
     bot.edit_message_text(
         chat_id=chat_id,
-        message_id=team_config['last_message_id'],
-        text=_form_game_dates_text(game_dates=team_config['game_dates']),
-        reply_markup=InlineKeyboardMarkup(keys) if keys else None)
+        message_id=message_id,
+        text=new_text,
+        reply_markup=reply_markup)
     return
 
 
-def rebuild_team_config_game_dates(
-        team_config: dict[str, any],
-        teammate_decision: dict[str, str | int]) -> bool:
-    """Rebuild data in team_config according teammate decision."""
-    if not teammate_decision:
-        return False
-    teammate: str = teammate_decision['teammate']
-    game_num: int = teammate_decision['game_num']
-    decision: int = teammate_decision['decision']
-    if decision == 1:
-        if game_num == 0 and teammate not in team_config[
-                'game_dates'][game_num]['teammates']:
-            team_config['game_dates'][game_num]['teammates'][teammate] = 1
-            for i in range(1, team_config['game_count']):
-                team_config['game_dates'][i]['teammates'].pop(teammate, None)
-            return True
-        elif game_num != 0:
-            team_config['game_dates'][0]['teammates'].pop(teammate, None)
-            if teammate not in team_config[
-                    'game_dates'][game_num]['teammates']:
-                team_config[
-                    'game_dates'][game_num]['teammates'][teammate] = 0
-            team_config['game_dates'][game_num]['teammates'][teammate] += 1
-            return True
-    else:
-        if teammate in team_config['game_dates'][game_num]['teammates']:
-            team_config['game_dates'][game_num]['teammates'][teammate] -= 1
-            if team_config['game_dates'][game_num]['teammates'][teammate] == 0:
-                del team_config['game_dates'][game_num]['teammates'][teammate]
-            return True
-    return False
-
-
-def send_message(bot, message: str, chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
-    """Send message to target telegram chat."""
-    try:
-        bot.send_message(chat_id=chat_id, text=message)
-        return
-    except TelegramError:
-        raise Exception("Bot can't send the message!")
-
-
-def _create_new_team_config_game_dates(
-        game_dates: list[str], team_config: dict[str, any]) -> None:
-    """Create new data in team_config for new game_dates."""
-    team_config['game_count'] = len(game_dates)
-    team_config['game_dates'] = {
-        **{
-            i + 1: {
-                'date_location': game,
-                'teammates': {}} for i, game in enumerate(game_dates)},
-        0: {
-            'date_location': 'Не смогу быть',
-            'teammates': {}}}
-    return
-
-
-def _form_game_dates_text(game_dates: dict) -> str:
+def form_game_dates_text(game_dates: dict) -> str:
     """Form text message from game_dates."""
     abstracts: list[str] = []
     for num in game_dates:
@@ -114,6 +52,136 @@ def _form_game_dates_text(game_dates: dict) -> str:
                 abstracts.append(f'• {teammate} {TEAM_GUEST}')
         abstracts.append('')
     return '\n'.join(abstracts)
+
+
+def init_telegram_bot(token: str) -> TelegramBot:
+    """Initialize telegram bot."""
+    return TelegramBot(token=token)
+
+
+def rebuild_team_config(
+        team_config: dict[str, any],
+        teammate_decision: dict[str, str | int]) -> dict[str, any]:
+    """Rebuild data in team_config according teammate decision and return."""
+    if not teammate_decision:
+        return None
+    teammate: str = teammate_decision['teammate']
+    game_num: int = teammate_decision['game_num']
+    decision: int = teammate_decision['decision']
+    if decision == 1:
+        if game_num == 0 and teammate not in team_config[
+                'game_dates'][game_num]['teammates']:
+            team_config['game_dates'][game_num]['teammates'][teammate] = 1
+            for i in range(1, team_config['game_count']):
+                team_config['game_dates'][i]['teammates'].pop(teammate, None)
+        elif game_num != 0:
+            team_config['game_dates'][0]['teammates'].pop(teammate, None)
+            if teammate not in team_config[
+                    'game_dates'][game_num]['teammates']:
+                team_config[
+                    'game_dates'][game_num]['teammates'][teammate] = 0
+            team_config['game_dates'][game_num]['teammates'][teammate] += 1
+    else:
+        if teammate in team_config['game_dates'][game_num]['teammates']:
+            team_config['game_dates'][game_num]['teammates'][teammate] -= 1
+            if team_config['game_dates'][game_num]['teammates'][teammate] == 0:
+                del team_config['game_dates'][game_num]['teammates'][teammate]
+    return team_config
+
+
+def send_message(
+        bot,
+        message: str,
+        chat_id: int = TELEGRAM_TEAM_CHAT,
+        return_message_id: bool = False) -> None | int:
+    """Send message to target telegram chat.
+    If return_message_id return sended message id."""
+    try:
+        message: any = bot.send_message(chat_id=chat_id, text=message)
+        if return_message_id:
+            return message.message_id
+        return
+    except TelegramError:
+        raise Exception("Bot can't send the message!")
+
+
+def send_update_message(
+        group_name: str,
+        message: str,
+        saved_data: dict[str, int | dict[str, any]],
+        telegram_bot: TelegramBot) -> None:
+    """Send update from VK group chat to the telegram chat."""
+    if group_name == ALIBI:
+        key_team: str = 'pinned_vk_message_id_alibi'
+    else:
+        key_team: str = 'pinned_vk_message_id_detectit'
+    pinned_message_id: int = saved_data[key_team]
+    if pinned_message_id:
+        _pin_message(
+            bot=telegram_bot,
+            message_id=pinned_message_id,
+            unpin=True)
+    new_pinned_message: int = send_message(
+        bot=telegram_bot, message=message, return_message_id=True)
+    _pin_message(bot=telegram_bot, message_id=new_pinned_message)
+    saved_data[key_team] = new_pinned_message
+    return
+
+
+def send_update_wall(
+        group_name: str,
+        parsed_post: dict[str, any],
+        saved_data: dict[str, int | dict[str, any]],
+        telegram_bot) -> None:
+    """Send update from VK group wall to the telegram chat."""
+    _send_photo(
+        bot=telegram_bot,
+        message='\n\n'.join(abstract for abstract in parsed_post['post_text']),
+        photo_url=parsed_post['post_image_url'])
+    if not parsed_post['game_dates']:
+        return
+    if group_name == ALIBI:
+        buttons = BUTTONS_TEAM_CONFIG_ALIBI
+        key_team: str = 'team_config_alibi'
+    else:
+        buttons = BUTTONS_TEAM_CONFIG_DETECTIT
+        key_team: str = 'team_config_detectit'
+    pinned_message_id: int = saved_data[key_team].get(
+        'pinned_telegram_message_id', False)
+    if pinned_message_id:
+        edit_message(
+            bot=telegram_bot,
+            message_id=pinned_message_id,
+            new_text=form_game_dates_text(
+                game_dates=saved_data[key_team]['game_dates']))
+        _pin_message(
+            bot=telegram_bot,
+            message_id=pinned_message_id,
+            unpin=True)
+    new_game_dates: dict[int, dict[str, any]] = (
+        _create_new_team_config_game_dates(
+            game_dates=parsed_post['game_dates']))
+    new_pinned_message: int = _send_message_for_game_dates(
+        bot=telegram_bot,
+        message=form_game_dates_text(game_dates=new_game_dates),
+        keyboard=buttons.get(len(new_game_dates), None))
+    _pin_message(bot=telegram_bot, message_id=new_pinned_message)
+    saved_data[key_team]['game_dates'] = new_game_dates
+    saved_data[key_team]['pinned_telegram_message_id'] = new_pinned_message
+    return
+
+
+def _create_new_team_config_game_dates(
+        game_dates: list[str]) -> dict[int, dict[str, any]]:
+    """Create new data in team_config for new game_dates."""
+    return {
+        **{
+            i + 1: {
+                'date_location': game,
+                'teammates': {}} for i, game in enumerate(game_dates)},
+        0: {
+            'date_location': 'Не смогу быть',
+            'teammates': {}}}
 
 
 def _pin_message(
@@ -156,32 +224,3 @@ def _send_photo(
         return
     except TelegramError as err:
         raise Exception(f'Bot failed to send photo-message! Error: {err}')
-
-
-def send_update(
-        parsed_post: dict[str, any],
-        team_config: dict[str, any],
-        telegram_bot) -> None:
-    """Send update from VK group wall to target telegram chat."""
-    _send_photo(
-        bot=telegram_bot,
-        message='\n\n'.join(s for s in parsed_post['post_text']),
-        photo_url=parsed_post['post_image_url'])
-    if parsed_post['game_dates']:
-        if team_config['last_message_id']:
-            _pin_message(
-                bot=telegram_bot,
-                message_id=team_config['last_message_id'],
-                unpin=True)
-            edit_message(
-                bot=telegram_bot, team_config=team_config, enable_markup=False)
-        _create_new_team_config_game_dates(
-            game_dates=parsed_post['game_dates'], team_config=team_config)
-        team_config['last_message_id'] = _send_message_for_game_dates(
-            bot=telegram_bot,
-            message=_form_game_dates_text(
-                game_dates=team_config['game_dates']),
-            keyboard=TEAM_CONFIG_BUTTONS.get(team_config['game_count'], None))
-        _pin_message(
-            bot=telegram_bot, message_id=team_config['last_message_id'])
-    return
