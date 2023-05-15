@@ -4,6 +4,8 @@ from telegram import InlineKeyboardButton
 
 load_dotenv()
 
+"""Env data."""
+
 TEAM_CAPITAN_PROP: str = os.getenv('TEAM_CAPITAN_PROP')
 TEAM_NAME: str = os.getenv('TEAM_NAME')
 TELEGRAM_BOT_TOKEN: str = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -11,38 +13,126 @@ TELEGRAM_TEAM_CHAT: str = os.getenv('TELEGRAM_TEAM_CHAT')
 TELEGRAM_USER: str = os.getenv('TELEGRAM_USER')
 VK_TOKEN_ADMIN: str = os.getenv('VK_TOKEN_ADMIN')
 VK_USER: str = os.getenv('VK_USER')
-VK_GROUP_TARGET: int = 40914100
-VK_GROUP_TARGET_LOGO: str = (
-    'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
-    'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
-    'e8310f98da4ff095adb5e46ba20eef2d&type=album')
+
+"""App settings."""
 
 API_TELEGRAM_UPDATE_SEC: int = 1
 API_VK_UPDATE_SEC: int = 60
 
-APP_JSON_FOLDER: str = 'project/data/'
+TEAM_CONFIG_DEFAULT: dict[str, any] = {
+    'pinned_telegram_message_id': None,
+    'game_dates': {}}
 
-DATE_HEADLIGHT: str = (
-    '{number} {date_location}')
+DATA_FOLDER: str = 'project/data/'
+SAVED_DATA_JSON_NAME: str = 'saved_data.json'
+SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
+    'last_vk_message_id_alibi': 0,
+    'last_vk_message_id_detectit': 0,
+    'last_vk_wall_id_alibi': 0,
+    'last_vk_wall_id_detectit': 0,
+    'pinned_vk_message_id_alibi': 0,
+    'pinned_vk_message_id_detectit': 0,
+    'team_config_alibi': TEAM_CONFIG_DEFAULT,
+    'team_config_detectit': TEAM_CONFIG_DEFAULT}
+
+LAST_API_ERR_DEL_SEC: int = 60 * 60
+
+"""Groups main info data."""
+
+ALIBI: str = '🟣 Alibi\n'
+ALIBI_GROUP_ID: int = 40914100
+ALIBI_GROUP_LOGO: str = (
+    'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
+    'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
+    'e8310f98da4ff095adb5e46ba20eef2d&type=album')
+ALIBI_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
+DETECTIT: str = '⚫️ Detectit\n'
+DETECTIT_GROUP_ID: int = 219311078
+DETECTIT_GROUP_LOGO: str = (
+    'https://sun9-40.userapi.com/impg/frYTaWRpxfjOS8eVZayKsugTQILb9MM0uYggNQ/'
+    'UhQlYUWdBh0.jpg?size=800x768&quality=95&sign='
+    'bb10ce9b1e4f2328a2382faba0981c2c&type=album')
+DETECTIT_POST_LINK: str = 'https://vk.com/detectitspb?w=wall-'
+
+PINNED_POST_ORDER: int = 0
+NON_PINNED_POST_ORDER: int = 1
+
+"""Data to text parsing."""
 
 EMOJI_SYMBOLS: dict[int, str] = {
-    0: '🚫',
     1: '1️⃣',
     2: '2️⃣',
     3: '3️⃣',
     4: '4️⃣',
     5: '5️⃣',
-    6: '6️⃣'}
+    6: '6️⃣',
+    ALIBI: {
+        'true': '✅',
+        'false': '❌',
+        'skip': '🚫',
+        'pref': 'A'},
+    DETECTIT: {
+        'true': '❇️',
+        'false': '⭕️',
+        'skip': '⛔️',
+        'pref': 'D'}}
 
-LAST_API_ERR_DEL_SEC = 60 * 60
+
+def _create_inline_buttons(
+        group_name: str
+        ) -> dict[int, list[list[InlineKeyboardButton]]]:
+    """Create inline keyboard buttons for given group."""
+    if group_name == ALIBI:
+        but_true, but_false, but_skip, pref = EMOJI_SYMBOLS[ALIBI].values()
+    else:
+        but_true, but_false, but_skip, pref = EMOJI_SYMBOLS[DETECTIT].values()
+    inline_buttons: dict[int, list[list[InlineKeyboardButton]]] = {}
+    for game_num in range(1, 7):
+        buttons_row: list[list[InlineKeyboardButton]] = []
+        buttons: list[InlineKeyboardButton] = []
+        for j in range(1, game_num+1):
+            if j != 1 and j % 2 == 1:
+                buttons_row.append(buttons)
+                buttons: list[InlineKeyboardButton] = []
+            for action in [[but_true, '+1'], [but_false, '-1']]:
+                buttons.append(
+                    InlineKeyboardButton(
+                        text=f'{EMOJI_SYMBOLS[j]}{action[0]}',
+                        callback_data=f'{j} {action[1]} {pref}'))
+        if j % 2 == 1:
+            buttons += [
+                InlineKeyboardButton(
+                    text=' ', callback_data=f'1 0 {pref}'),
+                InlineKeyboardButton(
+                    text=but_skip, callback_data=f'0 +1 {pref}')]
+        else:
+            buttons_row.append(buttons)
+            buttons: list[InlineKeyboardButton] = [
+                InlineKeyboardButton(
+                    text=but_skip,
+                    callback_data=f'0 +1 {pref}')]
+        buttons_row.append(buttons)
+        inline_buttons[game_num] = buttons_row
+    return inline_buttons
+
+
+BUTTONS_TEAM_CONFIG_ALIBI: dict[int, list[list[InlineKeyboardButton]]] = (
+    _create_inline_buttons(group_name=ALIBI))
+BUTTONS_TEAM_CONFIG_DETECTIT: dict[int, list[list[InlineKeyboardButton]]] = (
+    _create_inline_buttons(group_name=DETECTIT))
+
+DATE_HEADLIGHT: str = (
+    '{number} {date_location}')
 
 LOCATIONS: dict[str, str] = {
+    'секретное место на Василеостровской':
+        'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)',
     'секретное место на Горьковской':
         'ParkKing (Александровский Парк, 4, ст.м. Горьковская)',
+    'секретное место на Площади Ленина':
+        'Центр Kod (ул. Комсомола, 2, ст.м. Площадь Ленина)',
     'секретное место на Чернышевской':
-        'Дворец «Олимпия» (Литейный пр., д. 14, ст.м. Чернышевская)',
-    'секретное место на Василеостровской':
-        'Цинь (16-я лин. B.O., 83, ст.м. Василеостровская)'}
+        'Дворец «Олимпия» (Литейный пр., д. 14, ст.м. Чернышевская)'}
 
 MEDALS: dict[str, list[str]] = {
     '1th': ['#medal #gold_medal'],
@@ -51,132 +141,32 @@ MEDALS: dict[str, list[str]] = {
     '4th': ['#medal #iron_medal'],
     '5th': ['#medal #wood_medal']}
 
-
-PINNED_POST_ID: int = 0
-NON_PINNED_POST_ID: int = 1
-
-
 POST_TOPICS: dict[str, str] = {
-    'Итоги розыгрыша': 'prize_results',
-    'ГонорарДетектива': 'rating',
-    'checkin': 'checkin',
-    'results': 'game_results',
-    'photos': 'photos',
-    'preview': 'preview',
     'tasks': 'tasks',
-    'teams': 'teams'}
-# POST_TOPICS: dict[str, str] = {
-#     'Итоги розыгрыша': 'prize_results',
-#     '#ГонорарДетектива': 'rating',
-#     '#alibi_checkin': 'checkin',
-#     '#alibi_results': 'game_results',
-#     '#alibi_photos': 'photos',
-#     '#alibi_preview': 'preview',
-#     '#alibi_tasks': 'tasks',
-#     '#alibi_teams': 'teams',
-#     '#alibicheckin': 'checkin',
-#     '#alibiresults': 'game_results',
-#     '#alibiphotos': 'photos',
-#     '#alibipreview': 'preview',
-#     '#alibitasks': 'tasks',
-#     '#alibiteams': 'teams',
-#     '#alibispb_checkin': 'checkin',
-#     '#alibispb_results': 'game_results',
-#     '#alibispb_photos': 'photos',
-#     '#alibispb_preview': 'preview',
-#     '#alibispb_tasks': 'tasks',
-#     '#alibispb_teams': 'teams'}
-# Пока что нет данных для категорий:
-#     None: 'stop-list'
+    'photos': 'photos',
+    'results': 'game_results',
+    'ГонорарДетектива': 'rating',
+    'preview': 'preview',
+    'стоп_лист': 'stop-list',
+    'checkin': 'checkin',
+    'teams': 'teams',
+    'Итоги розыгрыша': 'prize_results'}
 
-TEAM_CONFIG: dict[dict[any]] = {
-        'last_message_id': None,
-        'game_count': 0,
-        'game_dates': {}}
-TEAM_CONFIG_BUTTONS: dict[str, list[list[InlineKeyboardButton]]] = {
-    1: [
-        [
-            InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
-            InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
-            InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    2: [
-        [
-            InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
-            InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
-            InlineKeyboardButton(text='2️⃣✅', callback_data='2 +1'),
-            InlineKeyboardButton(text='2️⃣❌', callback_data='2 -1')],
-        [
-            InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    3: [
-        [
-            InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
-            InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
-            InlineKeyboardButton(text='2️⃣✅', callback_data='2 +1'),
-            InlineKeyboardButton(text='2️⃣❌', callback_data='2 -1')],
-        [
-            InlineKeyboardButton(text='3️⃣✅', callback_data='3 +1'),
-            InlineKeyboardButton(text='3️⃣❌', callback_data='3 -1'),
-            InlineKeyboardButton(text=' ', callback_data='1 0'),
-            InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    4: [
-        [
-            InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
-            InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
-            InlineKeyboardButton(text='2️⃣✅', callback_data='2 +1'),
-            InlineKeyboardButton(text='2️⃣❌', callback_data='2 -1')],
-        [
-            InlineKeyboardButton(text='3️⃣✅', callback_data='3 +1'),
-            InlineKeyboardButton(text='3️⃣❌', callback_data='3 -1'),
-            InlineKeyboardButton(text='4️⃣✅', callback_data='4 +1'),
-            InlineKeyboardButton(text='4️⃣❌', callback_data='4 -1')],
-        [
-            InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    5: [
-        [
-            InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
-            InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
-            InlineKeyboardButton(text='2️⃣✅', callback_data='2 +1'),
-            InlineKeyboardButton(text='2️⃣❌', callback_data='2 -1')],
-        [
-            InlineKeyboardButton(text='3️⃣✅', callback_data='3 +1'),
-            InlineKeyboardButton(text='3️⃣❌', callback_data='3 -1'),
-            InlineKeyboardButton(text='4️⃣✅', callback_data='4 +1'),
-            InlineKeyboardButton(text='4️⃣❌', callback_data='4 -1')],
-        [
-            InlineKeyboardButton(text='5️⃣✅', callback_data='5 +1'),
-            InlineKeyboardButton(text='5️⃣❌', callback_data='5 -1'),
-            InlineKeyboardButton(text=' ', callback_data='1 0'),
-            InlineKeyboardButton(text='🚫', callback_data='0 +1')]],
-    6: [
-        [
-            InlineKeyboardButton(text='1️⃣✅', callback_data='1 +1'),
-            InlineKeyboardButton(text='1️⃣❌', callback_data='1 -1'),
-            InlineKeyboardButton(text='2️⃣✅', callback_data='2 +1'),
-            InlineKeyboardButton(text='2️⃣❌', callback_data='2 -1')
-        ],
-        [
-            InlineKeyboardButton(text='3️⃣✅', callback_data='3 +1'),
-            InlineKeyboardButton(text='3️⃣❌', callback_data='3 -1'),
-            InlineKeyboardButton(text='4️⃣✅', callback_data='4 +1'),
-            InlineKeyboardButton(text='4️⃣❌', callback_data='4 -1')],
-        [
-            InlineKeyboardButton(text='5️⃣✅', callback_data='5 +1'),
-            InlineKeyboardButton(text='5️⃣❌', callback_data='5 -1'),
-            InlineKeyboardButton(text='6️⃣✅', callback_data='6 +1'),
-            InlineKeyboardButton(text='6️⃣❌', callback_data='6 -1')],
-        [
-            InlineKeyboardButton(text='🚫', callback_data='0 +1')]]}
+TEAM_GUEST: str = '(гость)'
 
-TEAM_GUEST: str = '(приглашенный гость)'
-
-TEAM_REGISTER_LOOKUP: str = f'Регистрация команды «{TEAM_NAME}»'
 GAME_REMINDER_LOOKUP: str = 'Напоминаем, что завтра'
+TEAM_REGISTER_LOOKUP: str = f'Регистрация команды «{TEAM_NAME}»'
+
 TEAM_REGISTER_TEXT: str = (
-    '\nДля подтверждения брони необходимо в течении суток оплатить участие в игре. '
-    f'Оплата производится капитану команды по номеру {TEAM_CAPITAN_PROP} в размере 500 рублей.\n\n'
-    'Если команда отменяет участие менее, чем за сутки, оплата не возвращается.\n\n'
-    'Если в составе команды будут дополнительные игроки, оплатить участие возможно по цене:\n'
+    '\nДля подтверждения брони необходимо в течении суток оплатить участие '
+    'в игре. Оплата производится капитану команды по номеру '
+    f'{TEAM_CAPITAN_PROP} в размере '
+    '{money_amount} рублей.\n\n'
+
+    'Если команда отменяет участие менее, чем за сутки, оплата '
+    'не возвращается.\n\n'
+
+    'Если в составе команды будут дополнительные игроки, оплатить участие '
+    'возможно по цене:\n'
     '· 500 ₽ с человека — до дня игры,\n'
     '· 600 ₽ с человека — в день игры.')
-
-VK_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
