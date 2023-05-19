@@ -56,12 +56,14 @@ EMOJI_SYMBOLS: dict[int, str] = {
         'true': '✅',
         'false': '❌',
         'skip': '🚫',
-        'pref': 'A'},
+        'pref': ALIBI},
     DETECTIT: {
         'true': '❇️',
         'false': '⭕️',
-        'skip': '⛔️',
-        'pref': 'D'}}
+        'deny': '⛔️',
+        'pref': DETECTIT}}
+
+CALLBACK_DATA_NONE: str = 'None'
 
 
 def _create_inline_buttons(
@@ -69,9 +71,9 @@ def _create_inline_buttons(
         ) -> dict[int, list[list[InlineKeyboardButton]]]:
     """Create inline keyboard buttons for given group."""
     if group_name == ALIBI:
-        but_true, but_false, but_skip, pref = EMOJI_SYMBOLS[ALIBI].values()
+        but_true, but_false, but_deny, pref = EMOJI_SYMBOLS[ALIBI].values()
     else:
-        but_true, but_false, but_skip, pref = EMOJI_SYMBOLS[DETECTIT].values()
+        but_true, but_false, but_deny, pref = EMOJI_SYMBOLS[DETECTIT].values()
     inline_buttons: dict[int, list[list[InlineKeyboardButton]]] = {}
     for game_num in range(1, 7):
         buttons_row: list[list[InlineKeyboardButton]] = []
@@ -88,14 +90,14 @@ def _create_inline_buttons(
         if j % 2 == 1:
             buttons += [
                 InlineKeyboardButton(
-                    text=' ', callback_data=f'1 0 {pref}'),
+                    text=' ', callback_data=CALLBACK_DATA_NONE),
                 InlineKeyboardButton(
-                    text=but_skip, callback_data=f'0 +1 {pref}')]
+                    text=but_deny, callback_data=f'0 +1 {pref}')]
         else:
             buttons_row.append(buttons)
             buttons: list[InlineKeyboardButton] = [
                 InlineKeyboardButton(
-                    text=but_skip,
+                    text=but_deny,
                     callback_data=f'0 +1 {pref}')]
         buttons_row.append(buttons)
         inline_buttons[game_num] = buttons_row
