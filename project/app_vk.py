@@ -7,8 +7,9 @@ from vk_api import VkApi
 from vk_api.exceptions import ApiError
 
 from project.data.app_data import (
-    ALIBI, ALIBI_GROUP_ID, ALIBI_GROUP_LOGO, ALIBI_POST_LINK,
+    ALIBI, ALIBI_GROUP_ID, ALIBI_GROUP_LOGO, ALIBI_POST_LINK, ALIBI_TAG,
     DETECTIT, DETECTIT_GROUP_ID, DETECTIT_GROUP_LOGO, DETECTIT_POST_LINK,
+    DETECTIT_TAG,
 
     GAME_REMINDER_LOOKUP, TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT,
 
@@ -326,4 +327,6 @@ def _parse_post_stop_list(
 def _split_post_text(group_name: str, post_text: str) -> list[str]:
     """Split text into paragraphs."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
-    return [group_name] + fixed_text.split('\n')[:-1]
+    if group_name == ALIBI:
+        return [ALIBI_TAG] + fixed_text.split('\n')[:-1]
+    return [DETECTIT_TAG] + fixed_text.split('\n')[:-1]
