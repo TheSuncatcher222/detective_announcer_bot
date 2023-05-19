@@ -15,6 +15,7 @@ from project.data.app_data import (
     VK_TOKEN_ADMIN, VK_USER,
 
     ALIBI, BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
+    CALLBACK_DATA_NONE,
 
     DATA_FOLDER, SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
     TEAM_NAME, TEAM_CAPITAN_PROP)
@@ -189,11 +190,13 @@ async def telegram_listener(
     def __handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
         query: any = update.callback_query
+        if query.data == CALLBACK_DATA_NONE:
+            return
         username: str = (
             query.from_user.username if query.from_user.username
             else query.from_user.first_name)
         game_num, decision, pref = query.data.split()
-        if pref == 'A':
+        if pref == ALIBI:
             buttons: dict[int, list[list[InlineKeyboardButton]]] = (
                 BUTTONS_TEAM_CONFIG_ALIBI)
             key_team: str = 'team_config_alibi'
