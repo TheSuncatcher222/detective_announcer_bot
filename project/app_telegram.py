@@ -220,7 +220,11 @@ def _send_photo(
         chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
     """Send photo with optional message to target telegram chat."""
     try:
-        bot.send_photo(caption=message, chat_id=chat_id, photo=photo_url)
+        bot.send_photo(
+            caption=message if len(message) < 1024 else (
+                message[:1000] + ' ... (сообщение слишком длинное)'),
+            chat_id=chat_id,
+            photo=photo_url)
         return
     except TelegramError as err:
-        raise Exception(f'Bot failed to send photo-message! Error: {err}')
+        raise Exception(f'Bot failed to send photo-message! Error: "{err}"')
