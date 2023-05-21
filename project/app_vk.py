@@ -137,6 +137,8 @@ def parse_post(
     elif post_topic == 'rating':
         # У рейтинга есть ссылки: https://vk.com/@alibigames-1, а там - фото
         pass
+    elif post_topic == 'feedback':
+        pass
     elif post_topic == 'stop-list':
         post_text: list[str] = _parse_post_stop_list(
             post=post, split_text=split_text)
@@ -145,8 +147,8 @@ def parse_post(
     if not post_text:
         """No need to send post to telegram chat."""
         return
-    # If video in: # Или в _get_post_image_url это
-        block = 'video'
+    # if video in: # Или в _get_post_image_url это
+    #     block: str = 'video'
     if post_topic == 'photos':
         block: str = 'album'
     else:
