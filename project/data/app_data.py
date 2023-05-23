@@ -130,15 +130,17 @@ MEDALS: dict[str, list[str]] = {
     '5th': ['#medal #wood_medal']}
 
 POST_TOPICS: dict[str, str] = {
+    'ГонорарДетектива': 'rating',
     'tasks': 'tasks',
     'photos': 'photos',
     'results': 'game_results',
-    'ГонорарДетектива': 'rating',
     'preview': 'preview',
     'стоп_лист': 'stop-list',
+    'Stop-list': 'stop-list',
     'checkin': 'checkin',
     'teams': 'teams',
     'Итоги розыгрыша': 'prize_results',
+    'Результаты розыгрыша': 'prize_results',
     'Отзыв от команды': 'feedback',}
 
 TEAM_GUEST: str = '(гость)'
