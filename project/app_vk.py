@@ -290,13 +290,17 @@ def _parse_post_game_results(
     return split_text
 
 
-def _parse_post_preview(post_text: str, split_text: list) -> tuple[list[str]]:
+def _parse_post_preview(group_name: str, split_text: list) -> tuple[list[str]]:
     """Parse post's text if the topic is 'preview'.
     Separately return list with game dates and text."""
-    game_dates: list[str] = _game_dates_add_weekday_place(
-        game_dates=findall(
-            r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+(?:\s\w+)?',
-            post_text))
+    if group_name == ALIBI:
+        game_dates: list[str] = _game_dates_add_weekday_place(
+            # Обновить регулярное выражение
+            game_dates=findall(
+                r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+(?:\s\w+)?',
+                post_text))
+    else:
+        game_dates=findall(r'(\d{1,2} \w+ \(\w+\), \d{2}:\d{2}, [^\n]+)')
     post_text: list[str] = split_text[0:5] + split_text[-2:-1]
     return game_dates, post_text
 
