@@ -49,7 +49,7 @@ def get_vk_chat_update_groups(
         vk_bot: VkApi.method) -> tuple[str, dict[str, any] | None]:
     """Manage get_vk_chat_update function: search vk groups for a new private
     message and return the first one if it match or None if there are no
-    updates щк the message does not match."""
+    updates or the message does not match."""
     group_name: str = ALIBI
     message_update: dict[str, any] | None = _get_vk_chat_update(
         group_name=group_name,
