@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from project.app_vk import (
-    define_post_topic, )
+    define_post_topic, parse_message)
 
 from vk_wall_examples import (
     A_EXAMPLE_CHECKIN, A_EXAMPLE_GAME_RESULTS, A_EXAMPLE_OTHER,
@@ -45,7 +45,21 @@ def test_define_post_topic(post_example, expected_topic) -> None:
     assert define_post_topic(post_example) == expected_topic
 
 
-@pytest.mark.skip(reason='Currently no way to test it!')
+@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
 def test_init_vk_bot() -> None:
     """Test init_vk_bot func from app_vk."""
+    pass
+
+
+@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
+def test_get_vk_chat_update_groups():
+    pass
+
+
+@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
+def test_get_vk_wall_update_groups():
+    pass
+
+
+def test_parse_message():
     pass
