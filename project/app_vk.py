@@ -56,7 +56,7 @@ def get_vk_chat_update_groups(
         last_message_id=last_message_id_alibi,
         vk_bot=vk_bot,
         vk_group_id=ALIBI_GROUP_ID)
-    if not message_update:
+    if message_update is None:
         group_name: str = DETECTIT
         message_update: dict[str, any] | None = _get_vk_chat_update(
             group_name=group_name,
