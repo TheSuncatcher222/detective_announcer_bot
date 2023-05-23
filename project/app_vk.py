@@ -77,7 +77,7 @@ def get_vk_wall_update_groups(
             last_wall_id=last_wall_id_alibi,
             vk_bot=vk_bot,
             vk_group_id=ALIBI_GROUP_ID)
-    if not update_wall:
+    if update_wall is None:
         group_name: str = DETECTIT
         update_wall: dict[str, any] | None = _get_vk_wall_update(
             last_wall_id=last_wall_id_detectit,
