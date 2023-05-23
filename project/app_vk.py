@@ -321,13 +321,16 @@ def _parse_post_stop_list(
     with open(filename, 'wb') as write_file:
         write_file.write(response.content)
     reader: PdfReader = PdfReader(filename)
-    text_verdict: str = '✅ Команда допущена к регистрации на серию игр!'
+    text_verdict: str = (
+        f"✅ Команда '{team_name}' допущена к регистрации на серию игр!")
     for i in range(len(reader.pages)):
         if team_name in reader.pages[i].extract_text():
-            text_verdict = '⛔️ Команда уже была на представленной серии игр!'
+            text_verdict = (
+                f"⛔️ Команда '{team_name}' уже была "
+                "на представленной серии игр!")
             break
     os.remove(filename)
-    return [text_verdict] + split_text[:len(split_text)-1]
+    return split_text[:len(split_text)-1] + [text_verdict]
 
 
 def _split_post_text(group_name: str, post_text: str) -> list[str]:
