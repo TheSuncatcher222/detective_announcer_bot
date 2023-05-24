@@ -6,7 +6,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from project.app_vk import (
-    define_post_topic, parse_message, _split_abstracts)
+    define_post_topic, parse_message, _game_dates_add_weekday_place,
+    _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -130,3 +131,27 @@ def test_parse_message(group_name, message, parsed_message):
     assert parse_message(
         group_name=group_name,
         message={'items': [{'text': message}]}) == parsed_message
+
+
+@pytest.mark.parametrize('game_date, expected', [
+    ('1 июня, 19:00 — секретное место на Василеостровской',
+     '1 июня (ЧТ), 19:00 — ресторан Цинь (16-я лин. B.O., 83)'),
+    ('7 июля, 19:30 — секретное место на Горьковской',
+     '7 июля (ПТ), 19:30 — ресторан Parkking (Александровский парк, 4)'),
+    ('22 августа, 12:13 — секретное место на Петроградской',
+     '22 августа (ВТ), 12:13 — ресторан Unity на Петроградской '
+     '(наб. Карповки, 5к17)'),
+    ('11 сентября, 00:00 — секретное место на Площади Ленина',
+     '11 сентября (ПН), 00:00 — Центр Kod (ул. Комсомола, 2)'),
+    ('18 октября, 23:59 — секретное место на Сенной',
+     '18 октября (СР), 23:59 — ресторан Unity на Сенной (пер. Гривцова, 4)'),
+    ('25 ноября, 11:11 — секретное место на Чернышевской',
+     '25 ноября (СБ), 11:11 — Дворец Олимпия (Литейный пр., 14)'),
+    ('31 декабря, 23:59 — секретное место в нигде',
+     '31 декабря (ВС), 23:59 — секретное место в нигде')])
+def test_game_dates_add_weekday_place(game_date, expected):
+    assert _game_dates_add_weekday_place([game_date]) == [expected], (
+        'In tested func datetime.datetime.now() is used! '
+        'Due to this - if error caused by abbreviation for the day of the '
+        'week - correct data according calendar in expected value or change '
+        'date in game_date.')
