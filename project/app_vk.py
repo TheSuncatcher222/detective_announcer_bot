@@ -92,19 +92,19 @@ def parse_message(group_name: str, message: dict[any]) -> str | None:
     message_text: str = message['items'][0]['text']
     if TEAM_REGISTER_LOOKUP in message_text:
         money_amount: str = search(
-            r'Стоимость участия: \d+', message_text).group(0)[-3:]
-        splitted_text: list[str] = _split_post_text(
-            group_name=group_name, post_text=message_text)[0:3]
+            r'Стоимость участия:\d+', message_text).group(0)[-3:]
+        splitted_text: list[str] = _split_abstracts(
+            group_name=group_name, text=message_text)[0:3]
         message_text: list[str] = (
             splitted_text[:1]
             + splitted_text[2:3]
             + [TEAM_REGISTER_TEXT.format(money_amount=money_amount)])
-        return '\n'.join(message_text)
+        return '\n\n'.join(message_text)
     elif GAME_REMINDER_LOOKUP in message_text:
-        splitted_text: list[str] = _split_post_text(
-            group_name=group_name, post_text=message_text)
-        message_text: list[str] = splitted_text[:1] + splitted_text[2:3]
-        return '\n'.join(message_text)
+        splitted_text: list[str] = _split_abstracts(
+            group_name=group_name, text=message_text)
+        message_text: list[str] = splitted_text[:1] + splitted_text[2:]
+        return '\n\n'.join(message_text)
     return
 
 
@@ -117,9 +117,9 @@ def parse_post(
     post_text: list[str] = None
     post_image_url: str = None
     game_dates: list[str] = None
-    split_text: list[str] = _split_post_text(
+    split_text: list[str] = _split_abstracts(
         group_name=group_name,
-        post_text=post['text'])
+        text=post['text'])
     if post_topic == 'checkin':
         post_text: list[str] = _parse_post_checkin(
             group_name=group_name, post_id=post_id, split_text=split_text)
@@ -333,9 +333,11 @@ def _parse_post_stop_list(
     return split_text[:len(split_text)-1] + [text_verdict]
 
 
-def _split_post_text(group_name: str, post_text: str) -> list[str]:
+def _split_abstracts(group_name: str, text: str) -> list[str]:
     """Split text into paragraphs."""
-    fixed_text: str = sub(r'(\n\s*\n)+', '\n', post_text.strip())
+    fixed_text: str = sub(r'(\n\s*\n)+', '\n', text.strip())
     if group_name == ALIBI:
-        return [ALIBI_TAG] + fixed_text.split('\n')[:-1]
-    return [DETECTIT_TAG] + fixed_text.split('\n')[:-1]
+        tag: str = ALIBI_TAG
+    else:
+        tag: str = DETECTIT_TAG
+    return [tag] + fixed_text.split('\n')
