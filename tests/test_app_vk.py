@@ -68,6 +68,7 @@ def test_define_post_topic(post_example, expected_topic) -> None:
     ('31 декабря, 23:59 — секретное место в нигде',
      '31 декабря (ВС), 23:59 — секретное место в нигде')])
 def test_game_dates_add_weekday_place(game_date, expected):
+    """Test _game_dates_add_weekday_place func from app_vk."""
     assert _game_dates_add_weekday_place([game_date]) == [expected], (
         'In tested func datetime.datetime.now() is used! '
         'Due to this - if error caused by abbreviation for the day of the '
@@ -107,6 +108,7 @@ def test_game_dates_add_weekday_place(game_date, expected):
     'UhQlYUWdBh0.jpg?size=800x768&quality=95&sign='
     'bb10ce9b1e4f2328a2382faba0981c2c&type=album')])
 def test_get_post_image_url(block, group_name, post, expected_url):
+    """Test _get_post_image_url func from app_vk."""
     assert _get_post_image_url(
         block=block, group_name=group_name, post=post) == expected_url
 
@@ -118,6 +120,7 @@ MESSAGE_GET_VK_CHAT_UPDATE: dict = {'items': [{'id': 2}]}
     (1, MESSAGE_GET_VK_CHAT_UPDATE),
     (2, None)])
 def test_get_vk_chat_update(last_message_id, expected, mocker):
+    """Test _get_vk_chat_update func from app_vk."""
     vk_bot_mock = mocker.Mock()
     vk_bot_mock.messages.getHistory.return_value = MESSAGE_GET_VK_CHAT_UPDATE
     assert _get_vk_chat_update(
@@ -134,6 +137,7 @@ POSTS_GET_VK_WALL_UPDATE: dict = {'items': [{'id': 3}, {'id': 2}]}
     (2, POSTS_GET_VK_WALL_UPDATE['items'][0]),
     (3, None)])
 def test_get_vk_wall_update(last_wall_id, expected, mocker):
+    """Test _get_vk_wall_update func from app_vk."""
     vk_bot_mock = mocker.Mock()
     vk_bot_mock.wall.get.return_value = POSTS_GET_VK_WALL_UPDATE
     assert _get_vk_wall_update(
@@ -147,6 +151,7 @@ def test_get_vk_wall_update(last_wall_id, expected, mocker):
     ('Detectit', 'https://vk.com/detectitspb?w=wall-219311078_0')
 ])
 def test_make_link_to_post(group_name, expected):
+    """Test _make_link_to_post func from app_vk."""
     assert _make_link_to_post(group_name=group_name, post_id=0) == expected
 
 
@@ -203,6 +208,7 @@ PARSED_MESSAGE_TEAM_REGISTER: str = (
     ('Detectit', MESSAGE_TEAM_REGISTER_LOOKUP,
      f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}")])
 def test_parse_message(group_name, message, parsed_message):
+    """Test parse_message func from app_vk."""
     assert parse_message(
         group_name=group_name,
         message={'items': [{'text': message}]}) == parsed_message
@@ -210,6 +216,7 @@ def test_parse_message(group_name, message, parsed_message):
 
 @pytest.mark.skip(reason='Coming soon..')
 def test_parse_post():
+    """Test parse_post func from app_vk."""
     pass
 
 
@@ -219,6 +226,7 @@ def test_parse_post():
     ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
      ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
 def test_split_abstracts(group_name, text, splitted_text):
+    """Test _split_abstracts func from app_vk."""
     assert _split_abstracts(group_name=group_name, text=text) == splitted_text
 
 
@@ -239,9 +247,11 @@ def test_init_vk_bot() -> None:
 
 @pytest.mark.skip(reason=SKIP_REASON_VK_API)
 def test_get_vk_chat_update_groups():
+    """Test get_vk_chat_update_groups func from app_vk."""
     pass
 
 
 @pytest.mark.skip(reason=SKIP_REASON_VK_API)
 def test_get_vk_wall_update_groups():
+    """Test get_vk_wall_update_groups func from app_vk."""
     pass
