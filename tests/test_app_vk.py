@@ -8,7 +8,8 @@ sys.path.append(BASE_DIR)
 
 from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
-    _get_post_image_url, _get_vk_chat_update, _split_abstracts)
+    _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
+    _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -119,16 +120,26 @@ MESSAGE_GET_VK_CHAT_UPDATE: dict = {'items': [{'id': 2}]}
 def test_get_vk_chat_update(last_message_id, expected, mocker):
     vk_bot_mock = mocker.Mock()
     vk_bot_mock.messages.getHistory.return_value = MESSAGE_GET_VK_CHAT_UPDATE
-    result = _get_vk_chat_update(
+    assert _get_vk_chat_update(
         last_message_id=last_message_id,
         vk_bot=vk_bot_mock,
-        vk_group_id=0)
-    assert result == expected
+        vk_group_id=0) == expected
 
 
-@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
-def test_get_vk_wall_update():
-    pass
+POSTS_GET_VK_WALL_UPDATE: dict = {'items': [{'id': 3}, {'id': 2}]}
+
+
+@pytest.mark.parametrize('last_wall_id, expected', [
+    (1, POSTS_GET_VK_WALL_UPDATE['items'][1]),
+    (2, POSTS_GET_VK_WALL_UPDATE['items'][0]),
+    (3, None)])
+def test_get_vk_wall_update(last_wall_id, expected, mocker):
+    vk_bot_mock = mocker.Mock()
+    vk_bot_mock.wall.get.return_value = POSTS_GET_VK_WALL_UPDATE
+    assert _get_vk_wall_update(
+        last_wall_id=last_wall_id,
+        vk_bot=vk_bot_mock,
+        vk_group=0) == expected
 
 
 MESSAGE_NO_LOOKUP: str = 'Просто сообщение.'
