@@ -7,7 +7,7 @@ sys.path.append(BASE_DIR)
 
 from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
-    _split_abstracts)
+    _get_post_image_url, _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -155,3 +155,40 @@ def test_game_dates_add_weekday_place(game_date, expected):
         'Due to this - if error caused by abbreviation for the day of the '
         'week - correct data according calendar in expected value or change '
         'date in game_date.')
+
+
+@pytest.mark.parametrize('block, group_name, post, expected_url', [
+    # Correct case: photo
+    ('photo',
+    'Alibi',
+    {'attachments': [{'photo': {'sizes': [0, 1, 2, 3, {
+        'url': 'http://url_1/'}]}}]},
+    'http://url_1/'),
+    # Correct case: album
+    ('album',
+    'Alibi',
+    {'attachments':[{'album': {'thumb': {'sizes': [0, 1, 2, {
+        'url': 'http://url_2/'}]}}}]},
+    'http://url_2/'),
+    # Incorrect case: AttributeError (Alibi default photo used)
+    # post_image_url = '' - because 'block' has unexpected value
+    ('unexpected_value',
+    'Alibi',
+    {'attachments':[{'album': {'thumb': {'sizes': [0, 1, 2, {
+        'url': 'http://url_1/'}]}}}]},
+    'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
+    'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
+    'e8310f98da4ff095adb5e46ba20eef2d&type=album'),
+    # Incorrect case: ValueError (Detectit default photo used)
+    # post_image_url = '' - because URL doesn't start with "http"
+    ('unexpected_value',
+    'Detectit',
+    {'attachments':[{'album': {'thumb': {'sizes': [0, 1, 2, {
+        'url': 'not_http'}]}}}]},
+    'https://sun9-40.userapi.com/impg/frYTaWRpxfjOS8eVZayKsugTQILb9MM0uYggNQ/'
+    'UhQlYUWdBh0.jpg?size=800x768&quality=95&sign='
+    'bb10ce9b1e4f2328a2382faba0981c2c&type=album')])
+def test_get_post_image_url(block, group_name, post, expected_url):
+    assert _get_post_image_url(
+        block=block, group_name=group_name, post=post) == expected_url
+
