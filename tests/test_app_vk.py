@@ -21,7 +21,7 @@ from vk_wall_examples import (
     D_EXAMPLE_PHOTOS, D_EXAMPLE_PREVIEW, D_EXAMPLE_PRIZE_RESULTS,
     D_EXAMPLE_RATING, D_EXAMPLE_STOP_LIST, D_EXAMPLE_TASKS, D_EXAMPLE_TEAMS)
 
-NL = '\n'
+NL: str = '\n'
 
 
 @pytest.mark.parametrize('post_example, expected_topic', [
@@ -48,100 +48,6 @@ NL = '\n'
 def test_define_post_topic(post_example, expected_topic) -> None:
     """Test define_post_topic func from app_vk."""
     assert define_post_topic(post_example) == expected_topic
-
-
-@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
-def test_init_vk_bot() -> None:
-    """Test init_vk_bot func from app_vk."""
-    pass
-
-
-MESSAGE_GET_VK_CHAT_UPDATE: dict = {'items': [{'id': 2}]}
-
-
-@pytest.mark.parametrize('last_message_id, expected', [
-    (1, MESSAGE_GET_VK_CHAT_UPDATE),
-    (2, None)])
-def test_get_vk_chat_update(last_message_id, expected, mocker):
-    vk_bot_mock = mocker.Mock()
-    vk_bot_mock.messages.getHistory.return_value = MESSAGE_GET_VK_CHAT_UPDATE
-    result = _get_vk_chat_update(
-        last_message_id=last_message_id,
-        vk_bot=vk_bot_mock,
-        vk_group_id=0)
-    assert result == expected
-
-
-@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
-def test_get_vk_wall_update_groups():
-    pass
-
-
-@pytest.mark.parametrize('group_name, text, splitted_text', [
-    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
-     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
-    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
-     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
-def test_split_abstracts(group_name, text, splitted_text):
-    assert _split_abstracts(group_name=group_name, text=text) == splitted_text
-
-
-MESSAGE_NO_LOOKUP: str = 'Просто сообщение.'
-MESSAGE_GAME_REMINDER_LOOKUP: str = (
-    'Здравствуйте, детектив!\n\n'
-
-    'Напоминаем, что завтра, 27 апреля, пройдёт расследование где-нибудь.\n'
-    'Сбор команд начинается в 19:00, в 19:30 начинается игра.')
-MESSAGE_TEAM_REGISTER_LOOKUP: str = (
-    'Здравствуйте, детектив!\n\n'
-
-    f'Регистрация команды «{TEAM_NAME}» в составе 4 игроков на расследование '
-    '17 мая, 19:30 где-нибудь прошла успешно!\n'
-    'Чтобы подтвердить бронь, вам нужно оплатить участие в течение 24 часов. '
-    'Если вы отменяете участие менее, чем за сутки, оплата не возвращается. '
-    'Стоимость участия: 123 ₽ с человека.\n\n'
-
-    'Оплатить можно переводом на номер: 8-888-888-88-8.\n'
-    'Какой-нибудь банк, на имя Имя Ф.\n'
-    '❗ комментариях к переводу ничего указывать не нужно.\n\n'
-
-    'Пожалуйста, пришлите скрин/квитанцию перевода в этот диалог :)')
-PARSED_MESSAGE_GAME_REMINDER: str = (
-    'Напоминаем, что завтра, 27 апреля, пройдёт расследование где-нибудь.\n\n'
-
-    'Сбор команд начинается в 19:00, в 19:30 начинается игра.')
-PARSED_MESSAGE_TEAM_REGISTER: str = (
-    f'Регистрация команды «{TEAM_NAME}» в составе 4 игроков на расследование '
-    '17 мая, 19:30 где-нибудь прошла успешно!\n\n'
-
-    'Для подтверждения брони необходимо в течении суток оплатить участие в '
-    f'игре. Оплата производится капитану команды по номеру {TEAM_CAPITAN_PROP}'
-    ' в размере 123 рублей.\n\n'
-
-    'Если команда отменяет участие менее, чем за сутки, оплата не '
-    'возвращается.\n\n'
-
-    'Если в составе команды будут дополнительные игроки, оплатить участие '
-    'возможно по цене:\n'
-    '· 500 ₽ с человека — до дня игры,\n'
-    '· 600 ₽ с человека — в день игры.')
-
-
-@pytest.mark.parametrize('group_name, message, parsed_message', [
-    ('Alibi', MESSAGE_NO_LOOKUP, None),
-    ('Alibi', MESSAGE_GAME_REMINDER_LOOKUP,
-     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_GAME_REMINDER}"),
-    ('Alibi', MESSAGE_TEAM_REGISTER_LOOKUP,
-     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}"),
-    ('Detectit', MESSAGE_NO_LOOKUP, None),
-    ('Detectit', MESSAGE_GAME_REMINDER_LOOKUP,
-     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_GAME_REMINDER}"),
-    ('Detectit', MESSAGE_TEAM_REGISTER_LOOKUP,
-     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}")])
-def test_parse_message(group_name, message, parsed_message):
-    assert parse_message(
-        group_name=group_name,
-        message={'items': [{'text': message}]}) == parsed_message
 
 
 @pytest.mark.parametrize('game_date, expected', [
@@ -204,15 +110,119 @@ def test_get_post_image_url(block, group_name, post, expected_url):
         block=block, group_name=group_name, post=post) == expected_url
 
 
+MESSAGE_GET_VK_CHAT_UPDATE: dict = {'items': [{'id': 2}]}
+
+
+@pytest.mark.parametrize('last_message_id, expected', [
+    (1, MESSAGE_GET_VK_CHAT_UPDATE),
+    (2, None)])
+def test_get_vk_chat_update(last_message_id, expected, mocker):
+    vk_bot_mock = mocker.Mock()
+    vk_bot_mock.messages.getHistory.return_value = MESSAGE_GET_VK_CHAT_UPDATE
+    result = _get_vk_chat_update(
+        last_message_id=last_message_id,
+        vk_bot=vk_bot_mock,
+        vk_group_id=0)
+    assert result == expected
+
+
 @pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
 def test_get_vk_wall_update():
     pass
+
+
+MESSAGE_NO_LOOKUP: str = 'Просто сообщение.'
+MESSAGE_GAME_REMINDER_LOOKUP: str = (
+    'Здравствуйте, детектив!\n\n'
+
+    'Напоминаем, что завтра, 27 апреля, пройдёт расследование где-нибудь.\n'
+    'Сбор команд начинается в 19:00, в 19:30 начинается игра.')
+MESSAGE_TEAM_REGISTER_LOOKUP: str = (
+    'Здравствуйте, детектив!\n\n'
+
+    f'Регистрация команды «{TEAM_NAME}» в составе 4 игроков на расследование '
+    '17 мая, 19:30 где-нибудь прошла успешно!\n'
+    'Чтобы подтвердить бронь, вам нужно оплатить участие в течение 24 часов. '
+    'Если вы отменяете участие менее, чем за сутки, оплата не возвращается. '
+    'Стоимость участия: 123 ₽ с человека.\n\n'
+
+    'Оплатить можно переводом на номер: 8-888-888-88-8.\n'
+    'Какой-нибудь банк, на имя Имя Ф.\n'
+    '❗ комментариях к переводу ничего указывать не нужно.\n\n'
+
+    'Пожалуйста, пришлите скрин/квитанцию перевода в этот диалог :)')
+PARSED_MESSAGE_GAME_REMINDER: str = (
+    'Напоминаем, что завтра, 27 апреля, пройдёт расследование где-нибудь.\n\n'
+
+    'Сбор команд начинается в 19:00, в 19:30 начинается игра.')
+PARSED_MESSAGE_TEAM_REGISTER: str = (
+    f'Регистрация команды «{TEAM_NAME}» в составе 4 игроков на расследование '
+    '17 мая, 19:30 где-нибудь прошла успешно!\n\n'
+
+    'Для подтверждения брони необходимо в течении суток оплатить участие в '
+    f'игре. Оплата производится капитану команды по номеру {TEAM_CAPITAN_PROP}'
+    ' в размере 123 рублей.\n\n'
+
+    'Если команда отменяет участие менее, чем за сутки, оплата не '
+    'возвращается.\n\n'
+
+    'Если в составе команды будут дополнительные игроки, оплатить участие '
+    'возможно по цене:\n'
+    '· 500 ₽ с человека — до дня игры,\n'
+    '· 600 ₽ с человека — в день игры.')
+
+
+@pytest.mark.parametrize('group_name, message, parsed_message', [
+    ('Alibi', MESSAGE_NO_LOOKUP, None),
+    ('Alibi', MESSAGE_GAME_REMINDER_LOOKUP,
+     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_GAME_REMINDER}"),
+    ('Alibi', MESSAGE_TEAM_REGISTER_LOOKUP,
+     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}"),
+    ('Detectit', MESSAGE_NO_LOOKUP, None),
+    ('Detectit', MESSAGE_GAME_REMINDER_LOOKUP,
+     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_GAME_REMINDER}"),
+    ('Detectit', MESSAGE_TEAM_REGISTER_LOOKUP,
+     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}")])
+def test_parse_message(group_name, message, parsed_message):
+    assert parse_message(
+        group_name=group_name,
+        message={'items': [{'text': message}]}) == parsed_message
+
+
+@pytest.mark.skip(reason='Coming soon..')
+def test_parse_post():
+    pass
+
+
+@pytest.mark.parametrize('group_name, text, splitted_text', [
+    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
+    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
+def test_split_abstracts(group_name, text, splitted_text):
+    assert _split_abstracts(group_name=group_name, text=text) == splitted_text
 
 
 """
 Skipped tests.
 The tested functions call other functions that use the VkApi.method.
 """
-@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
+SKIP_REASON_VK_API: str = (
+    'Currently no way to test it: '
+    'call other function that use the VkApi.method!')
+
+
+@pytest.mark.skip(reason=SKIP_REASON_VK_API)
+def test_init_vk_bot() -> None:
+    """Test init_vk_bot func from app_vk."""
+    pass
+
+
+@pytest.mark.skip(reason=SKIP_REASON_VK_API)
 def test_get_vk_chat_update_groups():
+    pass
+
+
+@pytest.mark.skip(reason=SKIP_REASON_VK_API)
+def test_get_vk_wall_update_groups():
     pass
