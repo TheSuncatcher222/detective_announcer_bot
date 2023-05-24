@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from project.app_vk import (
-    define_post_topic, parse_message)
+    define_post_topic, parse_message, _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -63,6 +63,15 @@ def test_get_vk_chat_update_groups():
 @pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
 def test_get_vk_wall_update_groups():
     pass
+
+
+@pytest.mark.parametrize('group_name, text, splitted_text', [
+    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
+    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
+def test_split_abstracts(group_name, text, splitted_text):
+    assert _split_abstracts(group_name=group_name, text=text) == splitted_text
 
 
 MESSAGE_NO_LOOKUP: str = 'Просто сообщение.'
