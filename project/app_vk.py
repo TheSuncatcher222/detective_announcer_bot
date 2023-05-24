@@ -268,18 +268,18 @@ def _make_link_to_post(group_name: str, post_id: int) -> str:
 
 
 def _parse_post_checkin(
-        group_name: str, post_id: int, split_text: str) -> list[str]:
+        group_name: str, post_id: int, splitted_text: str) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
-        *split_text[:2],
-        *split_text[-4:-2],
+        *splitted_text[:2],
+        *splitted_text[-5:-3],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:',
         _make_link_to_post(group_name=group_name, post_id=post_id),
         search(
             r'Результаты будут в ночь с \d+ на \d+ \w+\.',
-            split_text[-1]).group(0)]
+            splitted_text[-2]).group(0)]
 
 
 def _parse_post_game_results(
