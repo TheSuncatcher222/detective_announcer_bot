@@ -334,7 +334,7 @@ def _parse_post_stop_list(
 
 
 def _split_abstracts(group_name: str, text: str) -> list[str]:
-    """Split text into paragraphs."""
+    """Split text into paragraphs and add group tag to the top."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', text.strip())
     if group_name == ALIBI:
         tag: str = ALIBI_TAG
