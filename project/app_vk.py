@@ -283,14 +283,14 @@ def _parse_post_checkin(
 
 
 def _parse_post_game_results(
-        split_text: str, team_name: str = TEAM_NAME) -> str:
+        splitted_text: str, team_name: str = TEAM_NAME) -> list[str]:
     """Parse post's text if the topic is 'game_results'."""
-    for paragraph in split_text:
+    for paragraph in splitted_text:
         reg_search = search(fr'\d\sместо: «{team_name}»', paragraph)
         if reg_search:
-            split_text += MEDALS[f'{reg_search.group(0)[0]}th']
+            medals: list[str] = MEDALS[f'{reg_search.group(0)[0]}th']
             break
-    return split_text
+    return splitted_text[:-2] + medals
 
 
 def _parse_post_preview(group_name: str, split_text: list) -> tuple[list[str]]:
