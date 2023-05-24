@@ -73,11 +73,6 @@ def test_get_vk_chat_update(last_message_id, expected, mocker):
 
 
 @pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
-def test_get_vk_chat_update_groups():
-    pass
-
-
-@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
 def test_get_vk_wall_update_groups():
     pass
 
@@ -211,4 +206,13 @@ def test_get_post_image_url(block, group_name, post, expected_url):
 
 @pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
 def test_get_vk_wall_update():
+    pass
+
+
+"""
+Skipped tests.
+The tested functions call other functions that use the VkApi.method.
+"""
+@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
+def test_get_vk_chat_update_groups():
     pass
