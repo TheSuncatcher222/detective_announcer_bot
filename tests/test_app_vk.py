@@ -9,7 +9,7 @@ sys.path.append(BASE_DIR)
 from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
     _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
-    _split_abstracts)
+    _make_link_to_post, _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -140,6 +140,14 @@ def test_get_vk_wall_update(last_wall_id, expected, mocker):
         last_wall_id=last_wall_id,
         vk_bot=vk_bot_mock,
         vk_group=0) == expected
+
+
+@pytest.mark.parametrize('group_name, expected', [
+    ('Alibi', 'https://vk.com/alibigames?w=wall-40914100_0'),
+    ('Detectit', 'https://vk.com/detectitspb?w=wall-219311078_0')
+])
+def test_make_link_to_post(group_name, expected):
+    assert _make_link_to_post(group_name=group_name, post_id=0) == expected
 
 
 MESSAGE_NO_LOOKUP: str = 'Просто сообщение.'
