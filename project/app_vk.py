@@ -92,7 +92,7 @@ def parse_message(group_name: str, message: dict[any]) -> str | None:
     message_text: str = message['items'][0]['text']
     if TEAM_REGISTER_LOOKUP in message_text:
         money_amount: str = search(
-            r'Стоимость участия:\d+', message_text).group(0)[-3:]
+            r'Стоимость участия:(\s)?\d+', message_text).group(0)[-3:]
         splitted_text: list[str] = _split_abstracts(
             group_name=group_name, text=message_text)[0:3]
         message_text: list[str] = (
