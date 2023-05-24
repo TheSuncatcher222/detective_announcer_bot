@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import mocker
 import sys
 import os
 
@@ -7,7 +8,7 @@ sys.path.append(BASE_DIR)
 
 from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
-    _get_post_image_url, _split_abstracts)
+    _get_post_image_url, _get_vk_chat_update, _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -43,8 +44,7 @@ NL = '\n'
     # (D_EXAMPLE_RATING, TypeError),
     (D_EXAMPLE_STOP_LIST, 'stop-list'),
     # (D_EXAMPLE_TASKS, TypeError),
-    (D_EXAMPLE_TEAMS, 'teams'),
-])
+    (D_EXAMPLE_TEAMS, 'teams')])
 def test_define_post_topic(post_example, expected_topic) -> None:
     """Test define_post_topic func from app_vk."""
     assert define_post_topic(post_example) == expected_topic
@@ -54,6 +54,22 @@ def test_define_post_topic(post_example, expected_topic) -> None:
 def test_init_vk_bot() -> None:
     """Test init_vk_bot func from app_vk."""
     pass
+
+
+MESSAGE_GET_VK_CHAT_UPDATE: dict = {'items': [{'id': 2}]}
+
+
+@pytest.mark.parametrize('last_message_id, expected', [
+    (1, MESSAGE_GET_VK_CHAT_UPDATE),
+    (2, None)])
+def test_get_vk_chat_update(last_message_id, expected, mocker):
+    vk_bot_mock = mocker.Mock()
+    vk_bot_mock.messages.getHistory.return_value = MESSAGE_GET_VK_CHAT_UPDATE
+    result = _get_vk_chat_update(
+        last_message_id=last_message_id,
+        vk_bot=vk_bot_mock,
+        vk_group_id=0)
+    assert result == expected
 
 
 @pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
@@ -192,3 +208,7 @@ def test_get_post_image_url(block, group_name, post, expected_url):
     assert _get_post_image_url(
         block=block, group_name=group_name, post=post) == expected_url
 
+
+@pytest.mark.skip(reason='Currently no way to test it: uses VkApi.method!')
+def test_get_vk_wall_update():
+    pass
