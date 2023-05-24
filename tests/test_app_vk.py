@@ -9,7 +9,7 @@ sys.path.append(BASE_DIR)
 from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
     _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
-    _make_link_to_post, _split_abstracts)
+    _make_link_to_post, _parse_post_checkin, _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -218,6 +218,25 @@ def test_parse_message(group_name, message, parsed_message):
 def test_parse_post():
     """Test parse_post func from app_vk."""
     pass
+
+
+def test_parse_post_checkin():
+    """Test _parse_post_checkin func from app_vk."""
+    assert _parse_post_checkin(
+        group_name='Alibi',
+        post_id=0,
+        splitted_text=_split_abstracts(
+            group_name='Alibi',
+            text=A_EXAMPLE_CHECKIN['text'])) == [
+                '🟣 Alibi',
+                'Регистрация. India ',
+                'Ссылка на регистрацию: ',
+                'https://vk.com/app5619682_-40914100 ',
+                'Действует розыгрыш бесплатного входа на всю команду! '
+                'Чтобы принять в нем участие, нужно вступить в группу и '
+                'сделать репост этой записи:',
+                'https://vk.com/alibigames?w=wall-40914100_0',
+                'Результаты будут в ночь с 26 на 27 марта.']
 
 
 @pytest.mark.parametrize('group_name, text, splitted_text', [
