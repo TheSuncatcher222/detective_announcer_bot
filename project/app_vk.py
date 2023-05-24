@@ -166,7 +166,7 @@ def parse_post(
 
 def _game_dates_add_weekday_place(game_dates: list[str]) -> list[str]:
     """Add day of the week to each date and formate location."""
-    DAYS_WEEK: tuple[str] = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
+    DAYS_WEEK: tuple[str] = ('ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС')
     MONTH_NUM: tuple[str] = (
         None, 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля',
         'августа', 'сентября', 'октября', 'ноября', 'декабря')
