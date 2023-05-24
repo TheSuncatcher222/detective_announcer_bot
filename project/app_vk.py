@@ -194,22 +194,25 @@ def _get_post_image_url(
         block: str, group_name: str, post: dict[str, any]) -> str:
     """Get image URL from the given post."""
     try:
+        post_image_url = ''
         if block == 'photo':
             post_image_url: str = (
                 post['attachments'][0]['photo']['sizes'][4]['url'])
         elif block == 'album':
             post_image_url: str = (
                 post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
+        else:
+            raise ValueError
         if not post_image_url.startswith('http'):
             raise ValueError
         return post_image_url
-    except (KeyError, IndexError):
-        f"Post's json for {block} from VK wall has unknown structure!"
-    except ValueError:
-        f"['url'] for {block}: data does not contain 'http' link."
-    if group_name == ALIBI:
-        return ALIBI_GROUP_LOGO
-    return DETECTIT_GROUP_LOGO
+    except (AttributeError, KeyError, IndexError, ValueError):
+        """
+        AttributeError for 'NoneType' object has no attribute 'startswith'
+        """
+        if group_name == ALIBI:
+            return ALIBI_GROUP_LOGO
+        return DETECTIT_GROUP_LOGO
 
 
 def _get_vk_chat_update(
