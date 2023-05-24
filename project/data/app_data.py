@@ -30,7 +30,7 @@ ALIBI_GROUP_LOGO: str = (
     'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
     'e8310f98da4ff095adb5e46ba20eef2d&type=album')
 ALIBI_POST_LINK: str = 'https://vk.com/alibigames?w=wall-'
-ALIBI_TAG: str = '🟣 Alibi\n'
+ALIBI_TAG: str = '🟣 Alibi'
 DETECTIT: str = 'Detectit'
 DETECTIT_GROUP_ID: int = 219311078
 DETECTIT_GROUP_LOGO: str = (
@@ -38,7 +38,7 @@ DETECTIT_GROUP_LOGO: str = (
     'UhQlYUWdBh0.jpg?size=800x768&quality=95&sign='
     'bb10ce9b1e4f2328a2382faba0981c2c&type=album')
 DETECTIT_POST_LINK: str = 'https://vk.com/detectitspb?w=wall-'
-DETECTIT_TAG: str = '⚫️ Detectit\n'
+DETECTIT_TAG: str = '⚫️ Detectit'
 
 PINNED_POST_ORDER: int = 0
 NON_PINNED_POST_ORDER: int = 1
@@ -149,7 +149,7 @@ GAME_REMINDER_LOOKUP: str = 'Напоминаем, что завтра'
 TEAM_REGISTER_LOOKUP: str = f'Регистрация команды «{TEAM_NAME}»'
 
 TEAM_REGISTER_TEXT: str = (
-    '\nДля подтверждения брони необходимо в течении суток оплатить участие '
+    'Для подтверждения брони необходимо в течении суток оплатить участие '
     'в игре. Оплата производится капитану команды по номеру '
     f'{TEAM_CAPITAN_PROP} в размере '
     '{money_amount} рублей.\n\n'
