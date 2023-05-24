@@ -259,12 +259,12 @@ def _get_vk_wall_update(
 def _make_link_to_post(group_name: str, post_id: int) -> str:
     """Return link to the vk post with given post_id of target group."""
     if group_name == ALIBI:
-        VK_GROUP_TARGET: str = ALIBI_GROUP_ID
-        VK_POST_LINK: str = ALIBI_POST_LINK
+        group_id: str = ALIBI_GROUP_ID
+        group_post_link: str = ALIBI_POST_LINK
     else:
-        VK_GROUP_TARGET: str = DETECTIT_GROUP_ID
-        VK_POST_LINK: str = DETECTIT_POST_LINK
-    return f'{VK_POST_LINK}{VK_GROUP_TARGET}_{post_id}'
+        group_id: str = DETECTIT_GROUP_ID
+        group_post_link: str = DETECTIT_POST_LINK
+    return f'{group_post_link}{group_id}_{post_id}'
 
 
 def _parse_post_checkin(
