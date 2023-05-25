@@ -273,6 +273,7 @@ def test_parse_post_game_results():
 Skipped tests.
 The tested functions call other functions that use the VkApi.method.
 """
+
 SKIP_REASON_VK_API: str = (
     'Currently no way to test it: '
     'call other function that use the VkApi.method!')
