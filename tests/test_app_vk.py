@@ -1,5 +1,4 @@
 import pytest
-from pytest_mock import mocker
 import sys
 import os
 
@@ -9,7 +8,8 @@ sys.path.append(BASE_DIR)
 from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
     _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
-    _make_link_to_post, _parse_post_checkin, _split_abstracts)
+    _make_link_to_post, _parse_post_checkin, _parse_post_game_results,
+    _split_abstracts)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -79,34 +79,34 @@ def test_game_dates_add_weekday_place(game_date, expected):
 @pytest.mark.parametrize('block, group_name, post, expected_url', [
     # Correct case: photo
     ('photo',
-    'Alibi',
-    {'attachments': [{'photo': {'sizes': [0, 1, 2, 3, {
+     'Alibi',
+     {'attachments': [{'photo': {'sizes': [0, 1, 2, 3, {
         'url': 'http://url_1/'}]}}]},
-    'http://url_1/'),
+     'http://url_1/'),
     # Correct case: album
     ('album',
-    'Alibi',
-    {'attachments':[{'album': {'thumb': {'sizes': [0, 1, 2, {
-        'url': 'http://url_2/'}]}}}]},
-    'http://url_2/'),
+     'Alibi',
+     {'attachments': [{'album': {'thumb': {'sizes': [0, 1, 2, {
+         'url': 'http://url_2/'}]}}}]},
+     'http://url_2/'),
     # Incorrect case: AttributeError (Alibi default photo used)
     # post_image_url = '' - because 'block' has unexpected value
     ('unexpected_value',
-    'Alibi',
-    {'attachments':[{'album': {'thumb': {'sizes': [0, 1, 2, {
-        'url': 'http://url_1/'}]}}}]},
-    'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
-    'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
-    'e8310f98da4ff095adb5e46ba20eef2d&type=album'),
+     'Alibi',
+     {'attachments': [{'album': {'thumb': {'sizes': [0, 1, 2, {
+         'url': 'http://url_1/'}]}}}]},
+     'https://sun9-46.userapi.com/impg/LiT08C2tWC-QeeYRDjHqaHRFyXNOYyhxFacXQA/'
+     'JpfUXhL2n2s.jpg?size=674x781&quality=95&sign='
+     'e8310f98da4ff095adb5e46ba20eef2d&type=album'),
     # Incorrect case: ValueError (Detectit default photo used)
     # post_image_url = '' - because URL doesn't start with "http"
     ('unexpected_value',
-    'Detectit',
-    {'attachments':[{'album': {'thumb': {'sizes': [0, 1, 2, {
-        'url': 'not_http'}]}}}]},
-    'https://sun9-40.userapi.com/impg/frYTaWRpxfjOS8eVZayKsugTQILb9MM0uYggNQ/'
-    'UhQlYUWdBh0.jpg?size=800x768&quality=95&sign='
-    'bb10ce9b1e4f2328a2382faba0981c2c&type=album')])
+     'Detectit',
+     {'attachments': [
+         {'album': {'thumb': {'sizes': [0, 1, 2, {'url': 'not_http'}]}}}]},
+     'https://sun9-40.userapi.com/impg/frYTaWRpxfjOS8eVZayKsugTQILb9MM0uYggNQ/'
+     'UhQlYUWdBh0.jpg?size=800x768&quality=95&sign='
+     'bb10ce9b1e4f2328a2382faba0981c2c&type=album')])
 def test_get_post_image_url(block, group_name, post, expected_url):
     """Test _get_post_image_url func from app_vk."""
     assert _get_post_image_url(
@@ -239,14 +239,34 @@ def test_parse_post_checkin():
                 'Результаты будут в ночь с 26 на 27 марта.']
 
 
-@pytest.mark.parametrize('group_name, text, splitted_text', [
-    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
-     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
-    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
-     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
-def test_split_abstracts(group_name, text, splitted_text):
-    """Test _split_abstracts func from app_vk."""
-    assert _split_abstracts(group_name=group_name, text=text) == splitted_text
+def test_parse_post_game_results():
+    """Test _parse_post_game_results func from app_vk."""
+    assert _parse_post_game_results(
+        splitted_text=_split_abstracts(
+            group_name='Alibi',
+            text=A_EXAMPLE_GAME_RESULTS['text']),
+        team_name='Винтажный газогенератор') == [
+            '🟣 Alibi',
+            'Новая неделя — новые игры! В понедельник, в секретном месте '
+            'на Горьковской мы с вами начали серию India. И теперь готовы '
+            'поделиться результатами первой игры.',
+            '▪5 место: «Речевые аутисты»',
+            'Ну, благо речь на игре нужна в последнюю очередь — все '
+            'ответы принимаются в письменном виде. И с этим команда '
+            'справилась отлично 🎉',
+            '▪4 место: «Босс молокосос и компания»',
+            'Ох уж этот пятый тур… Но наш опыт показывает: те, кто '
+            'уверенно держался в течение всей игры, не особенно '
+            'пострадают от неудачи в самом конце. Так и вышло 🎊',
+            '▪3 место: «Котики Киану Ривза»',
+            'Всем котикам — по медали. Бронзовой! 🐱',
+            '▪2 место: «Мы так и думали»',
+            'Думать — это хорошо. Хорошо думать — ещё лучше. От этого '
+            'бывают первые места, награды и другие приятные штуки 😉',
+            '▪1 место: «Винтажный газогенератор»',
+            'Удивительная машина — генерирует умные мысли и '
+            'правильные ответы 🥂',
+            '#medal #gold_medal']
 
 
 """
