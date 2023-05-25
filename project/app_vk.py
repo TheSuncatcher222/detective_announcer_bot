@@ -52,14 +52,12 @@ def get_vk_chat_update_groups(
     updates or the message does not match to lookup."""
     group_name: str = ALIBI
     message_update: dict[str, any] | None = _get_vk_chat_update(
-        group_name=group_name,
         last_message_id=last_message_id_alibi,
         vk_bot=vk_bot,
         vk_group_id=ALIBI_GROUP_ID)
     if message_update is None:
         group_name: str = DETECTIT
         message_update: dict[str, any] | None = _get_vk_chat_update(
-            group_name=group_name,
             last_message_id=last_message_id_detectit,
             vk_bot=vk_bot,
             vk_group_id=DETECTIT_GROUP_ID)
@@ -200,7 +198,7 @@ def _get_post_image_url(
                 post['attachments'][0]['photo']['sizes'][4]['url'])
         elif block == 'album':
             post_image_url: str = (
-                post['attachments'][0]['album']['thumb']['sizes'][3]['url'])
+                post['attachments'][0]['photo']['sizes'][3]['url'])
         else:
             raise ValueError
         if not post_image_url.startswith('http'):
@@ -236,11 +234,11 @@ def _get_vk_chat_update(
 def _get_vk_wall_update(
         last_wall_id: int,
         vk_bot: VkApi.method,
-        vk_group: int) -> dict[str, any] | None:
+        vk_group_id: int) -> dict[str, any] | None:
     """Check for a new post in VK group."""
     try:
         wall: dict[str, any] = vk_bot.wall.get(
-            owner_id=f'-{vk_group}', count=2)
+            owner_id=f'-{vk_group_id}', count=2)
     except ApiError:
         raise SystemExit('VK group ID is invalid!')
     for num in [NON_PINNED_POST_ORDER, PINNED_POST_ORDER]:
@@ -293,7 +291,10 @@ def _parse_post_game_results(
     return splitted_text[:-2] + medals
 
 
-def _parse_post_preview(group_name: str, split_text: list) -> tuple[list[str]]:
+def _parse_post_preview(
+        group_name: str,
+        post_text: str,
+        splitted_text: list) -> tuple[list[str]]:
     """Parse post's text if the topic is 'preview'.
     Separately return list with game dates and text."""
     if group_name == ALIBI:
@@ -304,7 +305,7 @@ def _parse_post_preview(group_name: str, split_text: list) -> tuple[list[str]]:
                 post_text))
     else:
         game_dates=findall(r'(\d{1,2} \w+ \(\w+\), \d{2}:\d{2}, [^\n]+)')
-    post_text: list[str] = split_text[0:5] + split_text[-2:-1]
+    post_text: list[str] = splitted_text[0:5] + splitted_text[-3:-2]
     return game_dates, post_text
 
 
