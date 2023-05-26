@@ -238,14 +238,19 @@ def test_parse_post_checkin():
                 'https://vk.com/alibigames?w=wall-40914100_0',
                 'Результаты будут в ночь с 26 на 27 марта.']
 
-
-def test_parse_post_game_results():
+@pytest.mark.parametrize('team_name, expected_medals', [
+    ('Речевые аутисты', '#medal #wood_medal'),
+    ('Босс молокосос и компания', '#medal #iron_medal'),
+    ('Котики Киану Ривза', '#medal #bronze_medal'),
+    ('Мы так и думали', '#medal #silver_medal'),
+    ('Винтажный газогенератор', '#medal #gold_medal')])
+def test_parse_post_game_results(team_name, expected_medals):
     """Test _parse_post_game_results func from app_vk."""
     assert _parse_post_game_results(
         splitted_text=_split_abstracts(
             group_name='Alibi',
             text=A_EXAMPLE_GAME_RESULTS['text']),
-        team_name='Винтажный газогенератор') == [
+        team_name=team_name) == [
             '🟣 Alibi',
             'Новая неделя — новые игры! В понедельник, в секретном месте '
             'на Горьковской мы с вами начали серию India. И теперь готовы '
@@ -266,7 +271,7 @@ def test_parse_post_game_results():
             '▪1 место: «Винтажный газогенератор»',
             'Удивительная машина — генерирует умные мысли и '
             'правильные ответы 🥂',
-            '#medal #gold_medal']
+            expected_medals]
 
 
 A_PREVIEW_DATES_EXP: list[str] = [
