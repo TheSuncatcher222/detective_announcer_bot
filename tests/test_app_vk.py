@@ -87,8 +87,8 @@ def test_game_dates_add_weekday_place(game_date, expected):
     # Correct case: album
     ('album',
      'Alibi',
-     {'attachments': [{'album': {'thumb': {'sizes': [0, 1, 2, {
-         'url': 'http://url_2/'}]}}}]},
+     {'attachments': [{'photo': {'sizes': [0, 1, 2, {
+         'url': 'http://url_2/'}]}}]},
      'http://url_2/'),
     # Incorrect case: AttributeError (Alibi default photo used)
     # post_image_url = '' - because 'block' has unexpected value
