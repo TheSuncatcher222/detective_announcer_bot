@@ -8,9 +8,10 @@ sys.path.append(BASE_DIR)
 from project.app_vk import (
     define_post_topic, parse_message, parse_post,
     _game_dates_add_weekday_place, _get_post_image_url, _get_vk_chat_update,
-    _get_vk_wall_update, _make_link_to_post, _parse_post_checkin,
-    _parse_post_game_results, _parse_post_preview, _parse_post_stop_list,
-    _split_paragraphs)
+    _get_vk_wall_update, _make_link_to_post, _parse_post_add_link,
+    _parse_post_checkin, _parse_post_game_results, _parse_post_other,
+    _parse_post_preview, _parse_post_prize_results, _parse_post_teams,
+    _parse_post_stop_list, _split_paragraphs)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -214,7 +215,7 @@ def test_parse_message(group_name, message, parsed_message):
         group_name=group_name,
         message={'items': [{'text': message}]}) == parsed_message
 
-
+@pytest.mark.dependency(depends="test")
 @pytest.mark.skip(reason='Coming soon..')
 def test_parse_post():
     """Test parse_post func from app_vk."""
@@ -347,6 +348,15 @@ def test_parse_post_stop_list():
                 ['⚫️ Detectit', (f"✅ Команда '{TEAM_NAME}' допущена к "
                                  "регистрации на серию игр!")
                  ] + D_STOP_LIST_TEXT_EXP)
+
+
+@pytest.mark.parametrize('group_name, text, splitted_text', [
+    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
+    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
+def test_split_paragraphs(group_name, text, splitted_text):
+    assert _split_paragraphs(group_name=group_name, text=text) == splitted_text
 
 
 """
