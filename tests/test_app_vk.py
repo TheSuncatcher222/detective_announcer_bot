@@ -215,13 +215,14 @@ def test_parse_message(group_name, message, parsed_message):
         group_name=group_name,
         message={'items': [{'text': message}]}) == parsed_message
 
-@pytest.mark.dependency(depends="test")
+
 @pytest.mark.skip(reason='Coming soon..')
 def test_parse_post():
     """Test parse_post func from app_vk."""
     pass
 
 
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
 def test_parse_post_checkin():
     """Test _parse_post_checkin func from app_vk."""
     assert _parse_post_checkin(
@@ -241,6 +242,7 @@ def test_parse_post_checkin():
                 'Результаты будут в ночь с 26 на 27 марта.']
 
 
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('team_name, expected_medals', [
     ('Речевые аутисты', '#medal #wood_medal'),
     ('Босс молокосос и компания', '#medal #iron_medal'),
@@ -312,6 +314,7 @@ D_PREVIEW_TEXT_EXP: list[str] = [
     'Старт регистрации 25 мая в 12:05. ']
 
 
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
     ('Alibi', A_EXAMPLE_PREVIEW['text'],
      (A_PREVIEW_DATES_EXP, A_PREVIEW_TEXT_EXP)),
@@ -338,6 +341,7 @@ D_STOP_LIST_TEXT_EXP: list[str] = [
     'Detectit-Online, а также в 2021 году 12 и 14 октября). ']
 
 
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
 def test_parse_post_stop_list():
     """Test _parse_post_stop_list func from app_vk."""
     assert _parse_post_stop_list(
