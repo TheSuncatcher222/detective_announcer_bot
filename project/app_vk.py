@@ -309,7 +309,7 @@ def _parse_post_game_results(
 
 def _parse_post_other(splitted_text: list[str], **kwargs) -> list[str]:
     """Parse post's text if the topic is 'other'."""
-    return splitted_text[-1:]
+    return splitted_text[:-1]
 
 
 def _parse_post_preview(
