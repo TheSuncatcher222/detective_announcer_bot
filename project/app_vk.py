@@ -12,6 +12,7 @@ from project.data.app_data import (
     DETECTIT_TAG,
 
     GAME_REMINDER_LOOKUP, TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT,
+    STOP_LIST_ACCEPT, STOP_LIST_DENY,
 
     LOCATIONS, MEDALS, TEAM_NAME,
 
@@ -315,8 +316,7 @@ def _parse_post_preview(
 
 def _parse_post_stop_list(
         post: dict[str, any],
-        split_text: list[str],
-        team_name: str = TEAM_NAME) -> list[str]:
+        split_text: list[str]) -> list[str]:
     """Parse post's text if the topic is 'stop-list'.
     Read attached PDF with stop-list and search team."""
     try:
@@ -329,16 +329,13 @@ def _parse_post_stop_list(
     with open(filename, 'wb') as write_file:
         write_file.write(response.content)
     reader: PdfReader = PdfReader(filename)
-    text_verdict: str = (
-        f"✅ Команда '{team_name}' допущена к регистрации на серию игр!")
+    text_verdict: str = STOP_LIST_ACCEPT
     for i in range(len(reader.pages)):
-        if team_name in reader.pages[i].extract_text():
-            text_verdict = (
-                f"⛔️ Команда '{team_name}' уже была "
-                "на представленной серии игр!")
+        if TEAM_NAME in reader.pages[i].extract_text():
+            text_verdict = STOP_LIST_DENY
             break
     os.remove(filename)
-    return split_text[:len(split_text)-1] + [text_verdict]
+    return split_text[:1] + [text_verdict] + split_text[1:3]
 
 
 def _split_paragraphs(group_name: str, text: str) -> list[str]:
