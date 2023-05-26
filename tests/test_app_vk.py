@@ -273,25 +273,29 @@ def test_parse_post_add_link(group_name, post_text, expected):
             text=post_text)) == expected
 
 
+A_CHECKIN_EXP: list[str] = [
+    '🟣 Alibi',
+    'Регистрация. India ',
+    'Ссылка на регистрацию: ',
+    'https://vk.com/app5619682_-40914100 ',
+    'Действует розыгрыш бесплатного входа на всю команду! Чтобы принять в нем '
+    'участие, нужно вступить в группу и сделать репост этой записи:',
+    'https://vk.com/alibigames?w=wall-40914100_13233',
+    'Результаты будут в ночь с 26 на 27 марта.']
+
+
 @pytest.mark.dependency(name="test_parse_post_checkin")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
-def test_parse_post_checkin():
+@pytest.mark.parametrize('group_name, post, expected', [
+    ('Alibi', A_EXAMPLE_CHECKIN, A_CHECKIN_EXP),])
+def test_parse_post_checkin(group_name, post, expected):
     """Test _parse_post_checkin func from app_vk."""
     assert _parse_post_checkin(
-        group_name='Alibi',
-        post_id=0,
+        group_name=group_name,
+        post_id=post['id'],
         splitted_text=_split_paragraphs(
-            group_name='Alibi',
-            text=A_EXAMPLE_CHECKIN['text'])) == [
-                '🟣 Alibi',
-                'Регистрация. India ',
-                'Ссылка на регистрацию: ',
-                'https://vk.com/app5619682_-40914100 ',
-                'Действует розыгрыш бесплатного входа на всю команду! '
-                'Чтобы принять в нем участие, нужно вступить в группу и '
-                'сделать репост этой записи:',
-                'https://vk.com/alibigames?w=wall-40914100_0',
-                'Результаты будут в ночь с 26 на 27 марта.']
+            group_name=group_name,
+            text=post['text'])) == expected
 
 
 @pytest.mark.dependency(name="test_parse_post_game_results")
@@ -478,20 +482,35 @@ def test_parse_post_teams(group_name, post_text, expected):
             text=post_text)) == expected
 
 
-@pytest.mark.dependency(depends=[
-    "test_define_post_topic",
-    "test_get_post_image_url",
-    "test_parse_post_add_link",
-    "test_parse_post_checkin",
-    "test_parse_post_game_results",
-    "test_parse_post_other",
-    "test_parse_post_preview",
-    "test_parse_post_prize_results",
-    "test_parse_post_stop_list",
-    "test_parse_post_teams"])
-def test_parse_post():
+# @pytest.mark.dependency(depends=[
+#     "test_define_post_topic",
+#     "test_get_post_image_url",
+#     "test_parse_post_add_link",
+#     "test_parse_post_checkin",
+#     "test_parse_post_game_results",
+#     "test_parse_post_other",
+#     "test_parse_post_preview",
+#     "test_parse_post_prize_results",
+#     "test_parse_post_stop_list",
+#     "test_parse_post_teams"])
+@pytest.mark.parametrize('group_name, post, expected', [
+    ('Alibi', A_EXAMPLE_CHECKIN, {
+        'post_id': A_EXAMPLE_CHECKIN['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Alibi',
+            post=A_EXAMPLE_CHECKIN),
+        'post_text': A_CHECKIN_EXP,
+        'game_dates': None}),
+    # Указанная в .env команда (team_name) отсутствует в списке победителей.
+    ('Alibi', A_EXAMPLE_GAME_RESULTS, None),
+    ])
+def test_parse_post(group_name, post, expected):
     """Test parse_post func from app_vk."""
-    pass
+    assert parse_post(
+        group_name=group_name,
+        post=post,
+        post_topic=define_post_topic(post=post)) == expected
 
 
 """
