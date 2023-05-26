@@ -6,10 +6,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from project.app_vk import (
-    define_post_topic, parse_message, _game_dates_add_weekday_place,
-    _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
-    _make_link_to_post, _parse_post_checkin, _parse_post_game_results,
-    _parse_post_preview, _parse_post_stop_list, _split_paragraphs)
+    define_post_topic, parse_message, parse_post,
+    _game_dates_add_weekday_place, _get_post_image_url, _get_vk_chat_update,
+    _get_vk_wall_update, _make_link_to_post, _parse_post_checkin,
+    _parse_post_game_results, _parse_post_preview, _parse_post_stop_list,
+    _split_paragraphs)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
