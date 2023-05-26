@@ -132,6 +132,7 @@ def parse_post(
     if post_topic in get_post_text:
         post_text: list[str] = get_post_text[post_topic](
             group_name=group_name,
+            post=post,
             post_id=post_id,
             splitted_text=splitted_text)
     elif post_topic == 'preview':
@@ -142,7 +143,8 @@ def parse_post(
         return None
     # if video in: # Или в _get_post_image_url это
     #     block: str = 'video'
-    # https://vk.com/detectitspb?w=wall-219311078_373
+    # https://vk.com/detectitspb?w=wall-219311078_373 - тут как буд-то история
+    # https://vk.com/detectitspb?w=wall-219311078_312 - сравнить с этим
     if post_topic == 'photos':
         block: str = 'album'
     else:
@@ -264,14 +266,18 @@ def _make_link_to_post(group_name: str, post_id: int) -> str:
 def _parse_post_add_link(
         group_name: str,
         post_id: int,
-        splitted_text: list[str]) -> list[str]:
+        splitted_text: list[str],
+        **kwargs) -> list[str]:
     """Parse post's text if the topic is 'photos' or 'rating' or 'tasks'."""
     return (splitted_text[-1:]
             + [_make_link_to_post(group_name=group_name, post_id=post_id)])
 
 
 def _parse_post_checkin(
-        group_name: str, post_id: int, splitted_text: str) -> list[str]:
+        group_name: str,
+        post_id: int,
+        splitted_text: str,
+        **kwargs) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
     return [
         *splitted_text[:2],
@@ -286,7 +292,9 @@ def _parse_post_checkin(
 
 
 def _parse_post_game_results(
-        splitted_text: str, team_name: str = TEAM_NAME) -> list[str] | None:
+        splitted_text: str,
+        team_name: str = TEAM_NAME,
+        **kwargs) -> list[str] | None:
     """Parse post's text if the topic is 'game_results'.
     If TEAM_NAME not in text - return None."""
     for paragraph in splitted_text:
@@ -297,7 +305,7 @@ def _parse_post_game_results(
     return None
 
 
-def _parse_post_other(splitted_text: list[str]) -> list[str]:
+def _parse_post_other(splitted_text: list[str], **kwargs) -> list[str]:
     """Parse post's text if the topic is 'other'."""
     return splitted_text[-1:]
 
@@ -323,19 +331,20 @@ def _parse_post_preview(
     return game_dates, post_text
 
 
-def _parse_post_prize_results(splitted_text: list[str]) -> list[str]:
+def _parse_post_prize_results(splitted_text: list[str], **kwargs) -> list[str]:
     """Parse post's text if the topic is 'prize_results'."""
     return splitted_text[-1:]
 
 
-def _parse_post_teams(splitted_text: list[str]) -> list[str]:
+def _parse_post_teams(splitted_text: list[str], **kwargs) -> list[str]:
     """Parse post's text if the topic is 'teams'."""
     return splitted_text[:2]
 
 
 def _parse_post_stop_list(
         post: dict[str, any],
-        splitted_text: list[str]) -> list[str]:
+        splitted_text: list[str],
+        **kwargs) -> list[str]:
     """Parse post's text if the topic is 'stop-list'.
     Read attached PDF with stop-list and search team."""
     try:
