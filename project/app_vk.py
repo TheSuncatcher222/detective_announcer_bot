@@ -119,7 +119,7 @@ def parse_post(
     splitted_text: list[str] = _split_paragraphs(
         group_name=group_name,
         text=post['text'])
-    get_post_text: dict[str, function] = {
+    get_post_text: dict[str, callable] = {
         'checkin': _parse_post_checkin,
         'game_results': _parse_post_game_results,
         'other': _parse_post_other,
