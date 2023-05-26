@@ -300,12 +300,11 @@ def _parse_post_preview(
     Separately return list with game dates and text."""
     if group_name == ALIBI:
         game_dates: list[str] = _game_dates_add_weekday_place(
-            # Обновить регулярное выражение
             game_dates=findall(
-                r'\d+\s\w+,\s\d+\:\d+\s\—\s\w+\s\w+\s\w+\s\w+(?:\s\w+)?',
+                r'\d{1,2} \w+, \d{2}\:\d{2} \— \w+ \w+ \w+ \w+(?:\s\w+)?',
                 post_text))
     else:
-        game_dates=findall(
+        game_dates = findall(
             r'(\d{1,2} \w+ \(\w+\), \d{2}:\d{2}, [^\n\;]+)',
             post_text)
     post_text: list[str] = (
