@@ -335,7 +335,7 @@ def _parse_post_preview(
 
 def _parse_post_prize_results(splitted_text: list[str], **kwargs) -> list[str]:
     """Parse post's text if the topic is 'prize_results'."""
-    return splitted_text[-1:]
+    return splitted_text[:-1]
 
 
 def _parse_post_teams(splitted_text: list[str], **kwargs) -> list[str]:
