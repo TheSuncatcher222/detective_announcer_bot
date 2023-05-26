@@ -391,6 +391,28 @@ def test_parse_post_preview(group_name, post_text, expected):
             text=post_text)) == expected
 
 
+A_PRIZE_RESULTS_EXP: list[str] = [
+    '🟣 Alibi',
+    '▪Итоги розыгрыша▪',
+    'Подведение итогов в ночь перед первой игрой серии. '
+    'Кто же станет победителем сегодня? Перейдём же скорее к результатам.',
+    'Сегодня победителем становится...',
+    '[id118725724|Варя Халилова] 🕵\u200d♂',
+    'Мы вас поздравляем и рекомендуем в ближайшее время написать нам в личные '
+    'сообщения группы название своей команды! Участие для команды Вари будет '
+    'бесплатным в этой серии игр.']
+
+
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
+@pytest.mark.parametrize('group_name, post_text, expected', [
+    ('Alibi', A_EXAMPLE_PRIZE_RESULTS['text'], A_PRIZE_RESULTS_EXP),])
+def test_parse_post_prize_results(group_name, post_text, expected):
+    assert _parse_post_prize_results(
+        splitted_text=_split_paragraphs(
+            group_name=group_name,
+            text=post_text)) == expected
+
+
 D_STOP_LIST_TEXT_EXP: list[str] = [
     '⛔ Stop-list ⛔ ',
     'Представляем вашему вниманию список команд (в прикреплённом документе), '
