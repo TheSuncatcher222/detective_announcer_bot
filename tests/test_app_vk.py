@@ -26,6 +26,20 @@ from vk_wall_examples import (
 
 NL: str = '\n'
 
+"""The test test_split_paragraphs should go first, because the are other
+tests depended on it!"""
+
+
+@pytest.mark.dependency(name="test_split_paragraphs")
+@pytest.mark.parametrize('group_name, text, splitted_text', [
+    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
+    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
+     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
+def test_split_paragraphs(group_name, text, splitted_text):
+    """Test test_split_paragraphs func from app_vk."""
+    assert _split_paragraphs(group_name=group_name, text=text) == splitted_text
+
 
 @pytest.mark.parametrize('post_example, expected_topic', [
     (A_EXAMPLE_CHECKIN, 'checkin'),
@@ -198,6 +212,7 @@ PARSED_MESSAGE_TEAM_REGISTER: str = (
     '· 600 ₽ с человека — в день игры.')
 
 
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, message, parsed_message', [
     ('Alibi', MESSAGE_NO_LOOKUP, None),
     ('Alibi', MESSAGE_GAME_REMINDER_LOOKUP,
@@ -352,15 +367,6 @@ def test_parse_post_stop_list():
                 ['⚫️ Detectit', (f"✅ Команда '{TEAM_NAME}' допущена к "
                                  "регистрации на серию игр!")
                  ] + D_STOP_LIST_TEXT_EXP)
-
-
-@pytest.mark.parametrize('group_name, text, splitted_text', [
-    ('Alibi', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
-     ['🟣 Alibi', 'One', 'Two', 'Three', 'Four', 'End.']),
-    ('Detectit', 'One\nTwo\n\nThree\n\n\nFour\n\n\n\nEnd.',
-     ['⚫️ Detectit', 'One', 'Two', 'Three', 'Four', 'End.'])])
-def test_split_paragraphs(group_name, text, splitted_text):
-    assert _split_paragraphs(group_name=group_name, text=text) == splitted_text
 
 
 """
