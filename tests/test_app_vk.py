@@ -401,12 +401,22 @@ A_PRIZE_RESULTS_EXP: list[str] = [
     'Мы вас поздравляем и рекомендуем в ближайшее время написать нам в личные '
     'сообщения группы название своей команды! Участие для команды Вари будет '
     'бесплатным в этой серии игр.']
+D_PRIZE_RESULTS_EXP: list[str] = [
+    '⚫️ Detectit',
+    '▪Результаты розыгрыша▪ ',
+    'Наша традиция - радовать вас результатами розыгрыша.',
+    'Готовы? Победителем сегодня становится [id661684853|Коля Фомин]. ',
+    'Ваша команда выигрывает участие в деле "1998"!',
+    'Поздравляем и ждём вас в личке группы: там расскажем, что делать с '
+    'выигрышем!']
 
 
-@pytest.mark.dependency(depends=["test_split_paragraphs"])
+#@pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
-    ('Alibi', A_EXAMPLE_PRIZE_RESULTS['text'], A_PRIZE_RESULTS_EXP),])
+    ('Alibi', A_EXAMPLE_PRIZE_RESULTS['text'], A_PRIZE_RESULTS_EXP),
+    ('Detectit', D_EXAMPLE_PRIZE_RESULTS['text'], D_PRIZE_RESULTS_EXP)])
 def test_parse_post_prize_results(group_name, post_text, expected):
+    """Test _parse_post_prize_results func from app_vk."""
     assert _parse_post_prize_results(
         splitted_text=_split_paragraphs(
             group_name=group_name,
