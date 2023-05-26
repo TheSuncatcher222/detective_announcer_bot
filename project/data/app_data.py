@@ -183,3 +183,8 @@ SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
     'pinned_vk_message_id_detectit': 0,
     'team_config_alibi': TEAM_CONFIG_DEFAULT,
     'team_config_detectit': TEAM_CONFIG_DEFAULT}
+
+STOP_LIST_ACCEPT: str = (
+    f"✅ Команда '{TEAM_NAME}' допущена к регистрации на серию игр!")
+STOP_LIST_DENY: str = (
+    f"⛔️ Команда '{TEAM_NAME}' уже была на представленной серии игр!")
