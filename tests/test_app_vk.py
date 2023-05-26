@@ -304,9 +304,9 @@ D_PREVIEW_TEXT_EXP: list[str] = [
     'устои...',
     '...13 июня 1925 около полуночи несколько студентов обнаружили в парке '
     'два трупа. Суетливый Нью-Йорк не заметил бы двух жертв ',
-    'кольта 45 калибра. Но в редакции городских газет стали приходить ',
+    'кольта 45 калибра. Но в редакции городских газет стали приходить '
     'пугающие письма...',
-    'Старт регистрации 25 мая в 12:05.']
+    'Старт регистрации 25 мая в 12:05. ']
 
 
 @pytest.mark.parametrize('group_name, post_text, expected', [
@@ -320,7 +320,7 @@ def test_parse_post_preview(group_name, post_text, expected):
         post_text=post_text,
         splitted_text=_split_abstracts(
             group_name=group_name,
-            text=post_text))[0] == expected[0]
+            text=post_text))== expected
 
 
 """
