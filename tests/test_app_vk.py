@@ -9,7 +9,7 @@ from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
     _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
     _make_link_to_post, _parse_post_checkin, _parse_post_game_results,
-    _parse_post_preview, _split_abstracts)
+    _parse_post_preview, _split_paragraphs)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -225,7 +225,7 @@ def test_parse_post_checkin():
     assert _parse_post_checkin(
         group_name='Alibi',
         post_id=0,
-        splitted_text=_split_abstracts(
+        splitted_text=_split_paragraphs(
             group_name='Alibi',
             text=A_EXAMPLE_CHECKIN['text'])) == [
                 '🟣 Alibi',
@@ -247,7 +247,7 @@ def test_parse_post_checkin():
 def test_parse_post_game_results(team_name, expected_medals):
     """Test _parse_post_game_results func from app_vk."""
     assert _parse_post_game_results(
-        splitted_text=_split_abstracts(
+        splitted_text=_split_paragraphs(
             group_name='Alibi',
             text=A_EXAMPLE_GAME_RESULTS['text']),
         team_name=team_name) == [
@@ -318,7 +318,7 @@ def test_parse_post_preview(group_name, post_text, expected):
     assert _parse_post_preview(
         group_name=group_name,
         post_text=post_text,
-        splitted_text=_split_abstracts(
+        splitted_text=_split_paragraphs(
             group_name=group_name,
             text=post_text))== expected
 

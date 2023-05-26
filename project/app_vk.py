@@ -91,7 +91,7 @@ def parse_message(group_name: str, message: dict[any]) -> str | None:
     if TEAM_REGISTER_LOOKUP in message_text:
         money_amount: str = search(
             r'Стоимость участия:(\s)?\d+', message_text).group(0)[-3:]
-        splitted_text: list[str] = _split_abstracts(
+        splitted_text: list[str] = _split_paragraphs(
             group_name=group_name, text=message_text)[0:3]
         message_text: list[str] = (
             splitted_text[:1]
@@ -99,7 +99,7 @@ def parse_message(group_name: str, message: dict[any]) -> str | None:
             + [TEAM_REGISTER_TEXT.format(money_amount=money_amount)])
         return '\n\n'.join(message_text)
     elif GAME_REMINDER_LOOKUP in message_text:
-        splitted_text: list[str] = _split_abstracts(
+        splitted_text: list[str] = _split_paragraphs(
             group_name=group_name, text=message_text)
         message_text: list[str] = splitted_text[:1] + splitted_text[2:]
         return '\n\n'.join(message_text)
@@ -115,7 +115,7 @@ def parse_post(
     post_text: list[str] = None
     post_image_url: str = None
     game_dates: list[str] = None
-    split_text: list[str] = _split_abstracts(
+    split_text: list[str] = _split_paragraphs(
         group_name=group_name,
         text=post['text'])
     if post_topic == 'checkin':
@@ -341,7 +341,7 @@ def _parse_post_stop_list(
     return split_text[:len(split_text)-1] + [text_verdict]
 
 
-def _split_abstracts(group_name: str, text: str) -> list[str]:
+def _split_paragraphs(group_name: str, text: str) -> list[str]:
     """Split text into paragraphs and add group tag to the top."""
     fixed_text: str = sub(r'(\n\s*\n)+', '\n', text.strip())
     if group_name == ALIBI:
