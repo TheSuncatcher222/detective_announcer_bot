@@ -9,18 +9,18 @@ from project.app_vk import (
     define_post_topic, parse_message, _game_dates_add_weekday_place,
     _get_post_image_url, _get_vk_chat_update, _get_vk_wall_update,
     _make_link_to_post, _parse_post_checkin, _parse_post_game_results,
-    _parse_post_preview, _split_paragraphs)
+    _parse_post_preview, _parse_post_stop_list, _split_paragraphs)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
 from vk_wall_examples import (
     A_EXAMPLE_CHECKIN, A_EXAMPLE_GAME_RESULTS, A_EXAMPLE_OTHER,
     A_EXAMPLE_PHOTOS, A_EXAMPLE_PREVIEW, A_EXAMPLE_PRIZE_RESULTS,
-    A_EXAMPLE_RATING, A_EXAMPLE_STOP_LIST, A_EXAMPLE_TASKS, A_EXAMPLE_TEAMS,
+    A_EXAMPLE_RATING, A_EXAMPLE_TASKS, A_EXAMPLE_TEAMS,
 
     D_EXAMPLE_CHECKIN, D_EXAMPLE_GAME_RESULTS, D_EXAMPLE_OTHER,
     D_EXAMPLE_PHOTOS, D_EXAMPLE_PREVIEW, D_EXAMPLE_PRIZE_RESULTS,
-    D_EXAMPLE_RATING, D_EXAMPLE_STOP_LIST, D_EXAMPLE_TASKS, D_EXAMPLE_TEAMS)
+    D_EXAMPLE_STOP_LIST, D_EXAMPLE_TEAMS)
 
 NL: str = '\n'
 
@@ -238,6 +238,7 @@ def test_parse_post_checkin():
                 'https://vk.com/alibigames?w=wall-40914100_0',
                 'Результаты будут в ночь с 26 на 27 марта.']
 
+
 @pytest.mark.parametrize('team_name, expected_medals', [
     ('Речевые аутисты', '#medal #wood_medal'),
     ('Босс молокосос и компания', '#medal #iron_medal'),
@@ -315,12 +316,36 @@ D_PREVIEW_TEXT_EXP: list[str] = [
     ('Detectit', D_EXAMPLE_PREVIEW['text'],
      (D_PREVIEW_DATES_EXP, D_PREVIEW_TEXT_EXP))])
 def test_parse_post_preview(group_name, post_text, expected):
+    """Test _parse_post_preview func from app_vk."""
     assert _parse_post_preview(
         group_name=group_name,
         post_text=post_text,
         splitted_text=_split_paragraphs(
             group_name=group_name,
-            text=post_text))== expected
+            text=post_text)) == expected
+
+
+D_STOP_LIST_TEXT_EXP: list[str] = [
+    '⛔ Stop-list ⛔ ',
+    'Представляем вашему вниманию список команд (в прикреплённом документе), '
+    'которые уже расследовали дела 18 серии Detectit! 5, 6 и 7 февраля они не '
+    'смогут принять участие в расследовании. Если у вашей команды есть '
+    'сомнения насчёт участия в прошлой в игре — обратитесь к администратору '
+    'сообщества, либо проверьте сами (серия была в 2018 году 25 ноября и 2 '
+    'декабря, в 2019 году 18, 19 и 20 ноября, в 2020 году 25 июня в формате '
+    'Detectit-Online, а также в 2021 году 12 и 14 октября). ']
+
+
+def test_parse_post_stop_list():
+    """Test _parse_post_stop_list func from app_vk."""
+    assert _parse_post_stop_list(
+        post=D_EXAMPLE_STOP_LIST,
+        split_text=_split_paragraphs(
+            group_name='Detectit',
+            text=D_EXAMPLE_STOP_LIST['text'])) == (
+                ['⚫️ Detectit', (f"✅ Команда '{TEAM_NAME}' допущена к "
+                                 "регистрации на серию игр!")
+                 ] + D_STOP_LIST_TEXT_EXP)
 
 
 """
