@@ -448,11 +448,13 @@ def test_parse_post_stop_list():
 
 
 A_TEAMS_EXP: list[str] = ['🟣 Alibi', '🖇Списки команд🖇 ']
+D_TEAMS_EXP: list[str] = ['⚫️ Detectit', '🖇Списки команд🖇 ']
 
 
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
-    ('Alibi', A_EXAMPLE_TEAMS['text'], A_TEAMS_EXP),])
+    ('Alibi', A_EXAMPLE_TEAMS['text'], A_TEAMS_EXP),
+    ('Detectit', D_EXAMPLE_TEAMS['text'], D_TEAMS_EXP)])
 def test_parse_post_teams(group_name, post_text, expected):
     assert _parse_post_teams(
         splitted_text=_split_paragraphs(
