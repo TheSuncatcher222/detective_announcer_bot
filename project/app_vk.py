@@ -144,6 +144,8 @@ def parse_post(
     # if video in: # Или в _get_post_image_url это
     #     block: str = 'video'
     # https://vk.com/detectitspb?w=wall-219311078_373 - тут как буд-то история
+    #   '(<iframe src="https://vk.com/video_ext.php?oid='
+    #   '-219311078&id=456239024&hash=370738d6e6ed0137"'
     # https://vk.com/detectitspb?w=wall-219311078_312 - сравнить с этим
     if post_topic == 'photos':
         block: str = 'album'
