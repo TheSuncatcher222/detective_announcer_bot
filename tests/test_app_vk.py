@@ -227,6 +227,7 @@ def test_parse_message(group_name, message, parsed_message):
         group_name=group_name,
         message={'items': [{'text': message}]}) == parsed_message
 
+
 A_RATING_EXP: list[str] = [
     '🟣 Alibi',
     'Детективы, самая первая серия игр Alibi окончена! Спасибо, что остаетесь '
@@ -322,6 +323,21 @@ def test_parse_post_game_results(team_name, expected_medals):
             'Удивительная машина — генерирует умные мысли и '
             'правильные ответы 🥂',
             expected_medals]
+
+
+A_OTHER_EXP: list[str] = [
+    '🟣 Alibi',
+    'Новый формат уже в следующей серии игр.']
+
+
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
+@pytest.mark.parametrize('group_name, post_text, expected', [
+    ('Alibi', A_EXAMPLE_OTHER['text'], A_OTHER_EXP),])
+def test_parse_post_other(group_name, post_text, expected):
+    assert _parse_post_other(
+        splitted_text=_split_paragraphs(
+            group_name=group_name,
+            text=post_text)) == expected
 
 
 A_PREVIEW_DATES_EXP: list[str] = [
