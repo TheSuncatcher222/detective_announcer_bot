@@ -26,9 +26,6 @@ from vk_wall_examples import (
 
 NL: str = '\n'
 
-"""The test test_split_paragraphs should go first, because the are other
-tests depended on it!"""
-
 
 @pytest.mark.dependency(name="test_split_paragraphs")
 @pytest.mark.parametrize('group_name, text, splitted_text', [
@@ -230,11 +227,44 @@ def test_parse_message(group_name, message, parsed_message):
         group_name=group_name,
         message={'items': [{'text': message}]}) == parsed_message
 
+A_RATING_EXP: list[str] = [
+    '🟣 Alibi',
+    'Детективы, самая первая серия игр Alibi окончена! Спасибо, что остаетесь '
+    'с нами. Рады видеть тех, кто с нами давно, и тех, кто впервые открыл с '
+    'нами формат детективных расследований.',
+    'И публикуем сводную таблицу рейтинга команд за все игровые дни. '
+    'Ищите себя и гордитесь своими результатами — какими бы они ни были 😌',
+    'https://vk.com/alibigames?w=wall-40914100_1']
+A_TASKS_EXP: list[str] = [
+    '🟣 Alibi',
+    'Детективы, продолжаем нашу рубрику #alibitasks и у нас для вас новое '
+    'задание. ',
+    'Ваша задача: угадать фильм по альтернативному ',
+    'постеру. ',
+    'Ждем ваши варианты в комментариях! ',
+    'https://vk.com/alibigames?w=wall-40914100_1']
+D_PHOTOS_EXP: list[str] = [
+    '⚫️ Detectit',
+    'Полагаем, не так-то просто одновременно распутывать шифры, пить чай или '
+    'пиво и позировать фотографу, очаровательно улыбаясь в камеру. Но '
+    'многозадачность отличает хорошего детектива, так что вы прекрасно '
+    'справляетесь 🙂 ',
+    'Ph: [club212797879|Вова] 📸 ',
+    'https://vk.com/detectitspb?w=wall-219311078_1']
 
-@pytest.mark.skip(reason='Coming soon..')
-def test_parse_post():
-    """Test parse_post func from app_vk."""
-    pass
+
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
+@pytest.mark.parametrize('group_name, post_text, expected', [
+    ('Alibi', A_EXAMPLE_RATING['text'], A_RATING_EXP),
+    ('Alibi', A_EXAMPLE_TASKS['text'], A_TASKS_EXP),
+    ('Detectit', D_EXAMPLE_PHOTOS['text'], D_PHOTOS_EXP)])
+def test_parse_post_add_link(group_name, post_text, expected):
+    assert _parse_post_add_link(
+        group_name=group_name,
+        post_id=1,
+        splitted_text=_split_paragraphs(
+            group_name=group_name,
+            text=post_text)) == expected
 
 
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
@@ -367,6 +397,13 @@ def test_parse_post_stop_list():
                 ['⚫️ Detectit', (f"✅ Команда '{TEAM_NAME}' допущена к "
                                  "регистрации на серию игр!")
                  ] + D_STOP_LIST_TEXT_EXP)
+
+
+@pytest.mark.dependency(depends=[])
+@pytest.mark.skip(reason='Coming soon..')
+def test_parse_post():
+    """Test parse_post func from app_vk."""
+    pass
 
 
 """
