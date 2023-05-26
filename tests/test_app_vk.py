@@ -437,6 +437,19 @@ def test_parse_post_stop_list():
                  ] + D_STOP_LIST_TEXT_EXP)
 
 
+A_TEAMS_EXP: list[str] = ['🟣 Alibi', '🖇Списки команд🖇 ']
+
+
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
+@pytest.mark.parametrize('group_name, post_text, expected', [
+    ('Alibi', A_EXAMPLE_TEAMS['text'], A_TEAMS_EXP),])
+def test_parse_post_teams(group_name, post_text, expected):
+    assert _parse_post_teams(
+        splitted_text=_split_paragraphs(
+            group_name=group_name,
+            text=post_text)) == expected
+
+
 @pytest.mark.dependency(depends=[])
 @pytest.mark.skip(reason='Coming soon..')
 def test_parse_post():
