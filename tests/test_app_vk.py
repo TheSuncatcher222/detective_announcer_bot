@@ -144,7 +144,7 @@ def test_get_vk_wall_update(last_wall_id, expected, mocker):
     assert _get_vk_wall_update(
         last_wall_id=last_wall_id,
         vk_bot=vk_bot_mock,
-        vk_group=0) == expected
+        vk_group_id=0) == expected
 
 
 @pytest.mark.parametrize('group_name, expected', [
@@ -341,7 +341,7 @@ def test_parse_post_stop_list():
     """Test _parse_post_stop_list func from app_vk."""
     assert _parse_post_stop_list(
         post=D_EXAMPLE_STOP_LIST,
-        split_text=_split_paragraphs(
+        splitted_text=_split_paragraphs(
             group_name='Detectit',
             text=D_EXAMPLE_STOP_LIST['text'])) == (
                 ['⚫️ Detectit', (f"✅ Команда '{TEAM_NAME}' допущена к "
