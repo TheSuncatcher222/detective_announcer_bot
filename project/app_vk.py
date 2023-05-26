@@ -156,9 +156,8 @@ def parse_post(
     parsed_post: dict[str, any] = {
         'post_id': post_id,
         'post_image_url': post_image_url,
-        'post_text': post_text}
-    if 'game_dates':
-        parsed_post['game_dates'] = game_dates
+        'post_text': post_text,
+        'game_dates': game_dates}
     return parsed_post
 
 
