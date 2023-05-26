@@ -38,6 +38,7 @@ def test_split_paragraphs(group_name, text, splitted_text):
     assert _split_paragraphs(group_name=group_name, text=text) == splitted_text
 
 
+@pytest.mark.dependency(name="test_define_post_topic")
 @pytest.mark.parametrize('post_example, expected_topic', [
     (A_EXAMPLE_CHECKIN, 'checkin'),
     (A_EXAMPLE_GAME_RESULTS, 'game_results'),
@@ -64,6 +65,7 @@ def test_define_post_topic(post_example, expected_topic) -> None:
     assert define_post_topic(post_example) == expected_topic
 
 
+@pytest.mark.dependency(name="test_game_dates_add_weekday_place")
 @pytest.mark.parametrize('game_date, expected', [
     ('1 июня, 19:00 — секретное место на Василеостровской',
      '1 июня (ЧТ), 19:00 — ресторан Цинь (16-я лин. B.O., 83)'),
@@ -89,6 +91,7 @@ def test_game_dates_add_weekday_place(game_date, expected):
         'date in game_date.')
 
 
+@pytest.mark.dependency(name="test_get_post_image_url")
 @pytest.mark.parametrize('block, group_name, post, expected_url', [
     # Correct case: photo
     ('photo',
@@ -254,12 +257,14 @@ D_PHOTOS_EXP: list[str] = [
     'https://vk.com/detectitspb?w=wall-219311078_1']
 
 
+@pytest.mark.dependency(name="test_parse_post_add_link")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
     ('Alibi', A_EXAMPLE_RATING['text'], A_RATING_EXP),
     ('Alibi', A_EXAMPLE_TASKS['text'], A_TASKS_EXP),
     ('Detectit', D_EXAMPLE_PHOTOS['text'], D_PHOTOS_EXP)])
 def test_parse_post_add_link(group_name, post_text, expected):
+    """Test _parse_post_add_link func from app_vk."""
     assert _parse_post_add_link(
         group_name=group_name,
         post_id=1,
@@ -268,6 +273,7 @@ def test_parse_post_add_link(group_name, post_text, expected):
             text=post_text)) == expected
 
 
+@pytest.mark.dependency(name="test_parse_post_checkin")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 def test_parse_post_checkin():
     """Test _parse_post_checkin func from app_vk."""
@@ -288,6 +294,7 @@ def test_parse_post_checkin():
                 'Результаты будут в ночь с 26 на 27 марта.']
 
 
+@pytest.mark.dependency(name="test_parse_post_game_results")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('team_name, expected_medals', [
     ('Речевые аутисты', '#medal #wood_medal'),
@@ -330,10 +337,12 @@ A_OTHER_EXP: list[str] = [
     'Новый формат уже в следующей серии игр.']
 
 
+@pytest.mark.dependency(name="test_parse_post_other")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
     ('Alibi', A_EXAMPLE_OTHER['text'], A_OTHER_EXP),])
 def test_parse_post_other(group_name, post_text, expected):
+    """Test _parse_post_other func from app_vk."""
     assert _parse_post_other(
         splitted_text=_split_paragraphs(
             group_name=group_name,
@@ -375,7 +384,10 @@ D_PREVIEW_TEXT_EXP: list[str] = [
     'Старт регистрации 25 мая в 12:05. ']
 
 
-@pytest.mark.dependency(depends=["test_split_paragraphs"])
+@pytest.mark.dependency(name="test_parse_post_preview")
+@pytest.mark.dependency(depends=[
+    "test_game_dates_add_weekday_place",
+    "test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
     ('Alibi', A_EXAMPLE_PREVIEW['text'],
      (A_PREVIEW_DATES_EXP, A_PREVIEW_TEXT_EXP)),
@@ -411,7 +423,8 @@ D_PRIZE_RESULTS_EXP: list[str] = [
     'выигрышем!']
 
 
-#@pytest.mark.dependency(depends=["test_split_paragraphs"])
+@pytest.mark.dependency(name="test_parse_post_prize_results")
+@pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
     ('Alibi', A_EXAMPLE_PRIZE_RESULTS['text'], A_PRIZE_RESULTS_EXP),
     ('Detectit', D_EXAMPLE_PRIZE_RESULTS['text'], D_PRIZE_RESULTS_EXP)])
@@ -434,6 +447,7 @@ D_STOP_LIST_TEXT_EXP: list[str] = [
     'Detectit-Online, а также в 2021 году 12 и 14 октября). ']
 
 
+@pytest.mark.dependency(name="test_parse_post_stop_list")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 def test_parse_post_stop_list():
     """Test _parse_post_stop_list func from app_vk."""
@@ -451,19 +465,30 @@ A_TEAMS_EXP: list[str] = ['🟣 Alibi', '🖇Списки команд🖇 ']
 D_TEAMS_EXP: list[str] = ['⚫️ Detectit', '🖇Списки команд🖇 ']
 
 
+@pytest.mark.dependency(name="test_parse_post_teams")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
 @pytest.mark.parametrize('group_name, post_text, expected', [
     ('Alibi', A_EXAMPLE_TEAMS['text'], A_TEAMS_EXP),
     ('Detectit', D_EXAMPLE_TEAMS['text'], D_TEAMS_EXP)])
 def test_parse_post_teams(group_name, post_text, expected):
+    """Test _parse_post_teams func from app_vk."""
     assert _parse_post_teams(
         splitted_text=_split_paragraphs(
             group_name=group_name,
             text=post_text)) == expected
 
 
-@pytest.mark.dependency(depends=[])
-@pytest.mark.skip(reason='Coming soon..')
+@pytest.mark.dependency(depends=[
+    "test_define_post_topic",
+    "test_get_post_image_url",
+    "test_parse_post_add_link",
+    "test_parse_post_checkin",
+    "test_parse_post_game_results",
+    "test_parse_post_other",
+    "test_parse_post_preview",
+    "test_parse_post_prize_results",
+    "test_parse_post_stop_list",
+    "test_parse_post_teams"])
 def test_parse_post():
     """Test parse_post func from app_vk."""
     pass
