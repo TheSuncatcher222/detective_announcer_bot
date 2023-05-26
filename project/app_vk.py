@@ -271,7 +271,7 @@ def _parse_post_add_link(
         splitted_text: list[str],
         **kwargs) -> list[str]:
     """Parse post's text if the topic is 'photos' or 'rating' or 'tasks'."""
-    return (splitted_text[-1:]
+    return (splitted_text[:-1]
             + [_make_link_to_post(group_name=group_name, post_id=post_id)])
 
 
