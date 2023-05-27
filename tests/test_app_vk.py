@@ -17,10 +17,10 @@ from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
 from vk_wall_examples import (
     A_EXAMPLE_CHECKIN, A_EXAMPLE_GAME_RESULTS, A_EXAMPLE_OTHER,
-    A_EXAMPLE_PHOTOS, A_EXAMPLE_PREVIEW, A_EXAMPLE_PRIZE_RESULTS,
+    A_EXAMPLE_PREVIEW, A_EXAMPLE_PRIZE_RESULTS,
     A_EXAMPLE_RATING, A_EXAMPLE_TASKS, A_EXAMPLE_TEAMS,
 
-    D_EXAMPLE_CHECKIN, D_EXAMPLE_GAME_RESULTS, D_EXAMPLE_OTHER,
+    D_EXAMPLE_CHECKIN, D_EXAMPLE_GAME_RESULTS,
     D_EXAMPLE_PHOTOS, D_EXAMPLE_PREVIEW, D_EXAMPLE_PRIZE_RESULTS,
     D_EXAMPLE_STOP_LIST, D_EXAMPLE_TEAMS)
 
@@ -238,7 +238,7 @@ A_RATING_EXP: list[str] = [
     'нами формат детективных расследований.',
     'И публикуем сводную таблицу рейтинга команд за все игровые дни. '
     'Ищите себя и гордитесь своими результатами — какими бы они ни были 😌',
-    'https://vk.com/alibigames?w=wall-40914100_1']
+    'https://vk.com/alibigames?w=wall-40914100_13243']
 A_TASKS_EXP: list[str] = [
     '🟣 Alibi',
     'Детективы, продолжаем нашу рубрику #alibitasks и у нас для вас новое '
@@ -246,7 +246,7 @@ A_TASKS_EXP: list[str] = [
     'Ваша задача: угадать фильм по альтернативному ',
     'постеру. ',
     'Ждем ваши варианты в комментариях! ',
-    'https://vk.com/alibigames?w=wall-40914100_1']
+    'https://vk.com/alibigames?w=wall-40914100_13380']
 D_PHOTOS_EXP: list[str] = [
     '⚫️ Detectit',
     'Полагаем, не так-то просто одновременно распутывать шифры, пить чай или '
@@ -254,23 +254,23 @@ D_PHOTOS_EXP: list[str] = [
     'многозадачность отличает хорошего детектива, так что вы прекрасно '
     'справляетесь 🙂 ',
     'Ph: [club212797879|Вова] 📸 ',
-    'https://vk.com/detectitspb?w=wall-219311078_1']
+    'https://vk.com/detectitspb?w=wall-219311078_13052']
 
 
 @pytest.mark.dependency(name="test_parse_post_add_link")
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
-@pytest.mark.parametrize('group_name, post_text, expected', [
-    ('Alibi', A_EXAMPLE_RATING['text'], A_RATING_EXP),
-    ('Alibi', A_EXAMPLE_TASKS['text'], A_TASKS_EXP),
-    ('Detectit', D_EXAMPLE_PHOTOS['text'], D_PHOTOS_EXP)])
-def test_parse_post_add_link(group_name, post_text, expected):
+@pytest.mark.parametrize('group_name, post, expected', [
+    ('Alibi', A_EXAMPLE_RATING, A_RATING_EXP),
+    ('Alibi', A_EXAMPLE_TASKS, A_TASKS_EXP),
+    ('Detectit', D_EXAMPLE_PHOTOS, D_PHOTOS_EXP)])
+def test_parse_post_add_link(group_name, post, expected):
     """Test _parse_post_add_link func from app_vk."""
     assert _parse_post_add_link(
         group_name=group_name,
-        post_id=1,
+        post_id=post['id'],
         splitted_text=_split_paragraphs(
             group_name=group_name,
-            text=post_text)) == expected
+            text=post['text'])) == expected
 
 
 A_CHECKIN_EXP: list[str] = [
@@ -440,7 +440,9 @@ def test_parse_post_prize_results(group_name, post_text, expected):
             text=post_text)) == expected
 
 
-D_STOP_LIST_TEXT_EXP: list[str] = [
+D_STOP_LIST_EXP: list[str] = [
+    '⚫️ Detectit',
+    f"✅ Команда '{TEAM_NAME}' допущена к регистрации на серию игр!",
     '⛔ Stop-list ⛔ ',
     'Представляем вашему вниманию список команд (в прикреплённом документе), '
     'которые уже расследовали дела 18 серии Detectit! 5, 6 и 7 февраля они не '
@@ -459,10 +461,7 @@ def test_parse_post_stop_list():
         post=D_EXAMPLE_STOP_LIST,
         splitted_text=_split_paragraphs(
             group_name='Detectit',
-            text=D_EXAMPLE_STOP_LIST['text'])) == (
-                ['⚫️ Detectit', (f"✅ Команда '{TEAM_NAME}' допущена к "
-                                 "регистрации на серию игр!")
-                 ] + D_STOP_LIST_TEXT_EXP)
+            text=D_EXAMPLE_STOP_LIST['text'])) == D_STOP_LIST_EXP
 
 
 A_TEAMS_EXP: list[str] = ['🟣 Alibi', '🖇Списки команд🖇 ']
@@ -481,18 +480,20 @@ def test_parse_post_teams(group_name, post_text, expected):
             group_name=group_name,
             text=post_text)) == expected
 
-
-# @pytest.mark.dependency(depends=[
-#     "test_define_post_topic",
-#     "test_get_post_image_url",
-#     "test_parse_post_add_link",
-#     "test_parse_post_checkin",
-#     "test_parse_post_game_results",
-#     "test_parse_post_other",
-#     "test_parse_post_preview",
-#     "test_parse_post_prize_results",
-#     "test_parse_post_stop_list",
-#     "test_parse_post_teams"])
+# For some reason tests with both @pytest.mark.dependency and
+# @pytest.mark.parametrize cause tests to be skipped
+@pytest.mark.dependency(depends=[
+    "test_define_post_topic",
+    "test_get_post_image_url",
+    # "test_parse_post_add_link",
+    # "test_parse_post_checkin",
+    # "test_parse_post_game_results",
+    # "test_parse_post_other",
+    # "test_parse_post_preview",
+    # "test_parse_post_prize_results",
+    # "test_parse_post_stop_list",
+    # "test_parse_post_teams"
+    ])
 @pytest.mark.parametrize('group_name, post, expected', [
     ('Alibi', A_EXAMPLE_CHECKIN, {
         'post_id': A_EXAMPLE_CHECKIN['id'],
@@ -504,7 +505,88 @@ def test_parse_post_teams(group_name, post_text, expected):
         'game_dates': None}),
     # Указанная в .env команда (team_name) отсутствует в списке победителей.
     ('Alibi', A_EXAMPLE_GAME_RESULTS, None),
-    ])
+    ('Alibi', A_EXAMPLE_OTHER, {
+        'post_id': A_EXAMPLE_OTHER['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Alibi',
+            post=A_EXAMPLE_OTHER),
+        'post_text': A_OTHER_EXP,
+        'game_dates': None}),
+    ('Alibi', A_EXAMPLE_PRIZE_RESULTS, {
+        'post_id': A_EXAMPLE_PRIZE_RESULTS['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Alibi',
+            post=A_EXAMPLE_PRIZE_RESULTS),
+        'post_text': A_PRIZE_RESULTS_EXP,
+        'game_dates': None}),
+    ('Alibi', A_EXAMPLE_PREVIEW, {
+        'post_id': A_EXAMPLE_PREVIEW['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Alibi',
+            post=A_EXAMPLE_PREVIEW),
+        'post_text': A_PREVIEW_TEXT_EXP,
+        'game_dates': A_PREVIEW_DATES_EXP}),
+    ('Alibi', A_EXAMPLE_RATING, {
+        'post_id': A_EXAMPLE_RATING['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Alibi',
+            post=A_EXAMPLE_RATING),
+        'post_text': A_RATING_EXP,
+        'game_dates': None}),
+    ('Alibi', A_EXAMPLE_TASKS, {
+        'post_id': A_EXAMPLE_TASKS['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Alibi',
+            post=A_EXAMPLE_TASKS),
+        'post_text': A_TASKS_EXP,
+        'game_dates': None}),
+    # The team TEAM_NAME is not in the top five
+    ('Detectit', D_EXAMPLE_GAME_RESULTS, None),
+    ('Detectit', D_EXAMPLE_PHOTOS, {
+        'post_id': D_EXAMPLE_PHOTOS['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Detectit',
+            post=D_EXAMPLE_PHOTOS),
+        'post_text': D_PHOTOS_EXP,
+        'game_dates': None}),
+    ('Detectit', D_EXAMPLE_PREVIEW, {
+        'post_id': D_EXAMPLE_PREVIEW['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Detectit',
+            post=D_EXAMPLE_PREVIEW),
+        'post_text': D_PREVIEW_TEXT_EXP,
+        'game_dates': D_PREVIEW_DATES_EXP}),
+    ('Detectit', D_EXAMPLE_PRIZE_RESULTS, {
+        'post_id': D_EXAMPLE_PRIZE_RESULTS['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Detectit',
+            post=D_EXAMPLE_PRIZE_RESULTS),
+        'post_text': D_PRIZE_RESULTS_EXP,
+        'game_dates': None}),
+    ('Detectit', D_EXAMPLE_STOP_LIST, {
+        'post_id': D_EXAMPLE_STOP_LIST['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Detectit',
+            post=D_EXAMPLE_STOP_LIST),
+        'post_text': D_STOP_LIST_EXP,
+        'game_dates': None}),
+    ('Detectit', D_EXAMPLE_TEAMS, {
+        'post_id': D_EXAMPLE_TEAMS['id'],
+        'post_image_url': _get_post_image_url(
+            block='photo',
+            group_name='Detectit',
+            post=D_EXAMPLE_TEAMS),
+        'post_text': D_TEAMS_EXP,
+        'game_dates': None})])
 def test_parse_post(group_name, post, expected):
     """Test parse_post func from app_vk."""
     assert parse_post(
