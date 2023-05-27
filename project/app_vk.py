@@ -137,7 +137,9 @@ def parse_post(
             splitted_text=splitted_text)
     elif post_topic == 'preview':
         game_dates, post_text = _parse_post_preview(
-            post_text=post['text'], splitted_text=splitted_text)
+            group_name=group_name,
+            post_text=post['text'],
+            splitted_text=splitted_text)
     if post_text is None:
         """Nothing to send to telegram chat. Exit."""
         return None
