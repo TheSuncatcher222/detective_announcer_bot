@@ -60,7 +60,7 @@ EMOJI_SYMBOLS: dict[int, str] = {
     DETECTIT: {
         'true': '❇️',
         'false': '⭕️',
-        'deny': '⛔️',
+        'skip': '⛔️',
         'pref': DETECTIT}}
 
 CALLBACK_DATA_NONE: str = 'None'
