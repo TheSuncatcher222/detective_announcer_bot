@@ -9,10 +9,26 @@ from project.app_telegram import (
     form_game_dates_text, rebuild_team_config,
     _create_new_team_config_game_dates)
 
+GAME_DATES: list[str] = ['Игра №1', 'Игра №2', 'Игра №3']
+TEAM_CONFIG_EXP: dict[int, dict] = {
+    1: {
+        'date_location': 'Игра №1',
+        'teammates': {}},
+    2: {
+        'date_location': 'Игра №2',
+        'teammates': {}},
+    3: {
+        'date_location': 'Игра №3',
+        'teammates': {}},
+    0: {
+        'date_location': 'Не смогу быть',
+        'teammates': {}}}
+
 
 def test_create_new_team_config_game_dates():
     """Test _create_new_team_config_game_dates func from app_telegram."""
-    pass
+    assert _create_new_team_config_game_dates(
+        game_dates=GAME_DATES) == TEAM_CONFIG_EXP
 
 
 def test_form_game_dates_text():
