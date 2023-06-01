@@ -45,7 +45,7 @@ logger: logging.Logger = app_logger.get_logger(__name__)
 
 def check_env(data: tuple[str, int]) -> None:
     """Check env data."""
-    if not all(data):
+    if type(data) is not tuple or len(data) == 0 or not all(data):
         logger.critical('Env data is not full! Check "project/data/.env"!')
         raise SystemExit
     return
