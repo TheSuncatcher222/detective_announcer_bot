@@ -41,15 +41,15 @@ def edit_message(
     return
 
 
-def form_game_dates_text(group_name: str, game_dates: dict) -> str:
+def form_game_dates_text(group_name: str, team_config: dict[int, dict]) -> str:
     """Form text message from game_dates."""
     if group_name == ALIBI:
         tag: str = ALIBI_TAG
     else:
         tag = DETECTIT_TAG
     abstracts: list[str] = [tag, '']
-    for num in game_dates:
-        date_location, teammates = game_dates[num].values()
+    for num in team_config:
+        date_location, teammates = team_config[num].values()
         if num != 0:
             symbol: str = EMOJI_SYMBOLS[num]
         else:
@@ -80,23 +80,20 @@ def rebuild_team_config(
     game_num: int = teammate_decision['game_num']
     decision: int = teammate_decision['decision']
     if decision == 1:
-        if game_num == 0 and teammate not in team_config[
-                'game_dates'][game_num]['teammates']:
-            team_config['game_dates'][game_num]['teammates'][teammate] = 1
-            for i in range(1, team_config['game_count']):
-                team_config['game_dates'][i]['teammates'].pop(teammate, None)
+        if game_num == 0 and teammate not in team_config[0]['teammates']:
+            team_config[0]['teammates'][teammate] = 1
+            for i in range(1, len(team_config)):
+                team_config[i]['teammates'].pop(teammate, None)
         elif game_num != 0:
-            team_config['game_dates'][0]['teammates'].pop(teammate, None)
-            if teammate not in team_config[
-                    'game_dates'][game_num]['teammates']:
-                team_config[
-                    'game_dates'][game_num]['teammates'][teammate] = 0
-            team_config['game_dates'][game_num]['teammates'][teammate] += 1
+            team_config[0]['teammates'].pop(teammate, None)
+            if teammate not in team_config[game_num]['teammates']:
+                team_config[game_num]['teammates'][teammate] = 0
+            team_config[game_num]['teammates'][teammate] += 1
     else:
-        if teammate in team_config['game_dates'][game_num]['teammates']:
-            team_config['game_dates'][game_num]['teammates'][teammate] -= 1
-            if team_config['game_dates'][game_num]['teammates'][teammate] == 0:
-                del team_config['game_dates'][game_num]['teammates'][teammate]
+        if teammate in team_config[game_num]['teammates']:
+            team_config[game_num]['teammates'][teammate] -= 1
+            if team_config[game_num]['teammates'][teammate] == 0:
+                del team_config[game_num]['teammates'][teammate]
     return team_config
 
 
