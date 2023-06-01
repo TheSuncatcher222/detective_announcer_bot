@@ -5,7 +5,10 @@ from telegram import (
     TelegramError, InlineKeyboardMarkup, InlineKeyboardButton)
 
 from project.data.app_data import (
-    ALIBI, BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
+    ALIBI, ALIBI_TAG, DETECTIT_TAG,
+
+    BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
+
     DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_TEAM_CHAT)
 
 
@@ -38,13 +41,21 @@ def edit_message(
     return
 
 
-def form_game_dates_text(game_dates: dict) -> str:
+def form_game_dates_text(group_name: str, game_dates: dict) -> str:
     """Form text message from game_dates."""
-    abstracts: list[str] = []
+    if group_name == ALIBI:
+        tag: str = ALIBI_TAG
+    else:
+        tag = DETECTIT_TAG
+    abstracts: list[str] = [tag, '']
     for num in game_dates:
         date_location, teammates = game_dates[num].values()
+        if num != 0:
+            symbol: str = EMOJI_SYMBOLS[num]
+        else:
+            symbol: str = EMOJI_SYMBOLS[group_name]['skip']
         abstracts.append(DATE_HEADLIGHT.format(
-            number=EMOJI_SYMBOLS[num],
+            number=symbol,
             date_location=date_location))
         for teammate, count in teammates.items():
             abstracts.append(f'• {teammate}')
