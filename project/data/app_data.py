@@ -168,10 +168,6 @@ TEAM_REGISTER_TEXT: str = (
 
 """JSON settings."""
 
-TEAM_CONFIG_DEFAULT: dict[str, any] = {
-    'pinned_telegram_message_id': None,
-    'game_dates': {}}
-
 DATA_FOLDER: str = 'project/data/'
 SAVED_DATA_JSON_NAME: str = 'saved_data.json'
 SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
@@ -179,10 +175,12 @@ SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
     'last_vk_message_id_detectit': 0,
     'last_vk_wall_id_alibi': 0,
     'last_vk_wall_id_detectit': 0,
+    'pinned_telegram_message_id_alibi': 0,
+    'pinned_telegram_message_id_detectit': 0,
     'pinned_vk_message_id_alibi': 0,
     'pinned_vk_message_id_detectit': 0,
-    'team_config_alibi': TEAM_CONFIG_DEFAULT,
-    'team_config_detectit': TEAM_CONFIG_DEFAULT}
+    'team_config_alibi': {},
+    'team_config_detectit': {}}
 
 STOP_LIST_ACCEPT: str = (
     f"✅ Команда '{TEAM_NAME}' допущена к регистрации на серию игр!")
