@@ -145,7 +145,7 @@ def test_get_vk_chat_update(last_message_id, expected, mocker):
         vk_group_id=0) == expected
 
 
-POSTS_GET_VK_WALL_UPDATE: dict = {'items': [{'id': 3}, {'id': 2}]}
+POSTS_GET_VK_WALL_UPDATE: dict[str, list] = {'items': [{'id': 3}, {'id': 2}]}
 
 
 @pytest.mark.parametrize('last_wall_id, expected', [
@@ -479,6 +479,7 @@ def test_parse_post_teams(group_name, post_text, expected):
         splitted_text=_split_paragraphs(
             group_name=group_name,
             text=post_text)) == expected
+
 
 # For some reason tests with both @pytest.mark.dependency and
 # @pytest.mark.parametrize cause tests to be skipped

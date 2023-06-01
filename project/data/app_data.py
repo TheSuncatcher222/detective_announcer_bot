@@ -145,7 +145,7 @@ POST_TOPICS: dict[str, str] = {
     'teams': 'teams',
     'Итоги розыгрыша': 'prize_results',
     'Результаты розыгрыша': 'prize_results',
-    'Отзыв от команды': 'feedback',}
+    'Отзыв от команды': 'feedback'}
 
 TEAM_GUEST: str = '(гость)'
 
