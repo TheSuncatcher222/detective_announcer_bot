@@ -9,9 +9,20 @@ from main import (
     check_env, file_read, file_write, file_remove, saved_data_check, )
 
 
-def test_check_env():
+@pytest.mark.parametrize('data, expected', [
+    ((True, 13, 'adasd'), None),
+    ((True, False, '1'), 'SystemExit'),
+    ('', 'SystemExit'),
+    ('13', 'SystemExit'),
+    (None, 'SystemExit'),
+    ((None, None, None, True), 'SystemExit')])
+def test_check_env(data, expected):
     """Test check_env func from main."""
-    pass
+    try:
+        result = check_env(data)
+    except SystemExit:
+        result = 'SystemExit'
+    assert result == expected
 
 
 def test_file_read():
