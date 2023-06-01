@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from main import (
-    check_env, file_read, file_write, file_remove, saved_data_check, )
+    check_env, file_read, file_write, file_remove, saved_data_check)
 
 
 @pytest.mark.parametrize('data, expected', [
@@ -25,19 +25,19 @@ def test_check_env(data, expected):
     assert result == expected
 
 
-def test_file_read():
-    """Test file_read func from main."""
-    pass
-
-
-def test_file_write():
-    """Test file_write func from main."""
-    pass
-
-
-def test_file_remove():
-    """Test file_remove func from main."""
-    pass
+def test_file_read_write_remove():
+    """Test file_read, file_write, file_remove functions from main."""
+    FILE_NAME: str = 'tests/TEST_FAKE_FILE.json'
+    assert not os.path.exists(FILE_NAME)
+    assert file_read(file_name=FILE_NAME) is None
+    assert file_write(file_name=FILE_NAME, write_data={1: 'Data'}) is None
+    assert os.path.exists(FILE_NAME)
+    assert file_read(file_name=FILE_NAME) == {'1': 'Data'}
+    assert file_write(
+        file_name=FILE_NAME, write_data={'text': 'NewData'}) is None
+    assert file_read(file_name=FILE_NAME) == {'text': 'NewData'}
+    assert file_remove(file_name=FILE_NAME) is None
+    assert not os.path.exists(FILE_NAME)
 
 
 SAVED_DATA_1: dict = {}
