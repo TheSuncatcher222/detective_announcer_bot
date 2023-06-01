@@ -97,6 +97,12 @@ def _create_inline_buttons(
             buttons_row.append(buttons)
             buttons: list[InlineKeyboardButton] = [
                 InlineKeyboardButton(
+                    text=' ', callback_data=CALLBACK_DATA_NONE),
+                InlineKeyboardButton(
+                    text=' ', callback_data=CALLBACK_DATA_NONE),
+                InlineKeyboardButton(
+                    text=' ', callback_data=CALLBACK_DATA_NONE),
+                InlineKeyboardButton(
                     text=but_deny,
                     callback_data=f'0 +1 {pref}')]
         buttons_row.append(buttons)
