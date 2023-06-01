@@ -77,11 +77,12 @@ def file_remove(file_name: str) -> None:
     return
 
 
-def saved_data_check() -> dict[str, int | dict[str, any]]:
+def saved_data_check(saved_data: any) -> dict[str, int | dict[str, any]]:
     """Check saved data in json file. if some data is missing - assigns a
     default value to them."""
-    saved_data: any = file_read(
-        file_name=f'{DATA_FOLDER}{SAVED_DATA_JSON_NAME}')
+    if saved_data is None:
+        saved_data: any = file_read(
+            file_name=f'{DATA_FOLDER}{SAVED_DATA_JSON_NAME}')
     if saved_data is None:
         return SAVED_DATA_JSON_DEFAULT
     for key in (
@@ -89,6 +90,8 @@ def saved_data_check() -> dict[str, int | dict[str, any]]:
             'last_vk_message_id_detectit',
             'last_vk_wall_id_alibi',
             'last_vk_wall_id_detectit',
+            'pinned_telegram_message_id_alibi',
+            'pinned_telegram_message_id_detectit',
             'pinned_vk_message_id_alibi',
             'pinned_vk_message_id_detectit',
             'team_config_alibi',
@@ -96,9 +99,8 @@ def saved_data_check() -> dict[str, int | dict[str, any]]:
         if key not in saved_data:
             saved_data[key] = SAVED_DATA_JSON_DEFAULT[key]
     for key in ('team_config_alibi', 'team_config_detectit'):
-        saved_data[key]['game_dates'] = {
-            int(num): data for num, data in saved_data[
-                key]['game_dates'].items()}
+        saved_data[key] = {
+            int(num): data for num, data in saved_data[key].items()}
     return saved_data
 
 
