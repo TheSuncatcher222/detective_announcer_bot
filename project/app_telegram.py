@@ -2,7 +2,7 @@ from http import HTTPStatus
 import requests
 from telegram import (
     Bot as TelegramBot,
-    TelegramError, InlineKeyboardMarkup, InlineKeyboardButton)
+    error, TelegramError, InlineKeyboardMarkup, InlineKeyboardButton)
 
 from project.data.app_data import (
     ALIBI, ALIBI_TAG, DETECTIT_TAG,
@@ -198,10 +198,14 @@ def _pin_message(
         chat_id: int = TELEGRAM_TEAM_CHAT,
         unpin: bool = False) -> None:
     """Pin / unpin message in telegram chat."""
-    if not unpin:
-        bot.pinChatMessage(chat_id=chat_id, message_id=message_id)
-    else:
-        bot.unpinChatMessage(chat_id=chat_id, message_id=message_id)
+    try:
+        if not unpin:
+            bot.pinChatMessage(chat_id=chat_id, message_id=message_id)
+        else:
+            bot.unpinChatMessage(chat_id=chat_id, message_id=message_id)
+    except error.BadRequest:
+        pass
+    return
 
 
 def _send_message_for_game_dates(
