@@ -117,7 +117,7 @@ def vk_listen_message(
         vk_bot=vk_bot)
     if not message:
         return
-    logger.info('New message available!')
+    logger.info(f'New message available from {group_name}!')
     parsed_message: str = parse_message(group_name=group_name, message=message)
     if parsed_message:
         logger.info('Sending message update to telegram.')
@@ -151,7 +151,7 @@ def vk_listen_wall(
         vk_bot=vk_bot)
     if not update:
         return
-    logger.info('New post available!')
+    logger.info(f'New post available from {group_name}!')
     topic: str = define_post_topic(post=update)
     logger.info(f"Post's topic is: '{topic}'")
     parsed_post: dict[str, any] = parse_post(
