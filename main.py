@@ -10,6 +10,7 @@ from project.data.app_data import (
     InlineKeyboardButton,
 
     API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, LAST_API_ERR_DEL_SEC,
+    SKIP_IF_NOT_IMPORTANT, SKIP_WHITE_LIST,
 
     TELEGRAM_BOT_TOKEN, TELEGRAM_TEAM_CHAT, TELEGRAM_USER,
     VK_TOKEN_ADMIN, VK_USER,
@@ -77,7 +78,8 @@ def file_remove(file_name: str) -> None:
     return
 
 
-def saved_data_check(saved_data: any = None) -> dict[str, int | dict[str, any]]:
+def saved_data_check(
+        saved_data: any = None) -> dict[str, int | dict[str, any]]:
     """Check saved data in json file. if some data is missing - assigns a
     default value to them."""
     if saved_data is None:
@@ -154,17 +156,19 @@ def vk_listen_wall(
     logger.info(f'New post available from {group_name}!')
     topic: str = define_post_topic(post=update)
     logger.info(f"Post's topic is: '{topic}'")
-    parsed_post: dict[str, any] = parse_post(
-        group_name=group_name,
-        post=update,
-        post_topic=topic)
-    if parsed_post:
-        logger.info('Sending wall update to telegram.')
-        send_update_wall(
+    if (not SKIP_IF_NOT_IMPORTANT
+            or SKIP_IF_NOT_IMPORTANT and topic in SKIP_WHITE_LIST):
+        parsed_post: dict[str, any] = parse_post(
             group_name=group_name,
-            parsed_post=parsed_post,
-            saved_data=saved_data,
-            telegram_bot=telegram_bot)
+            post=update,
+            post_topic=topic)
+        if parsed_post:
+            logger.info('Sending wall update to telegram.')
+            send_update_wall(
+                group_name=group_name,
+                parsed_post=parsed_post,
+                saved_data=saved_data,
+                telegram_bot=telegram_bot)
     if group_name == ALIBI:
         key_group: str = 'last_vk_wall_id_alibi'
     else:

@@ -21,6 +21,12 @@ API_VK_UPDATE_SEC: int = 60
 
 LAST_API_ERR_DEL_SEC: int = 60 * 60
 
+# If true bot will send only posts in white list below
+SKIP_IF_NOT_IMPORTANT: bool = False
+SKIP_WHITE_LIST: list[str] = [
+    'checkin', 'game_results', 'preview',
+    'prize_results', 'stop-list', 'teams']
+
 """Groups main info data."""
 
 ALIBI: str = 'Alibi'
