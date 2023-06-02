@@ -33,11 +33,14 @@ def edit_message(
         reply_markup: bool = None) -> None:
     """Edit target message in the telegram chat.
     Add reply_markup to the message if reply_markup is not None."""
-    bot.edit_message_text(
-        chat_id=chat_id,
-        message_id=message_id,
-        text=new_text,
-        reply_markup=reply_markup)
+    try:
+        bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,
+            text=new_text,
+            reply_markup=reply_markup)
+    except error.BadRequest:
+        pass
     return
 
 
