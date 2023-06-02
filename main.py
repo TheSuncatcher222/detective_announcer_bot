@@ -205,24 +205,27 @@ async def telegram_listener(
         if pref == ALIBI:
             buttons: dict[int, list[list[InlineKeyboardButton]]] = (
                 BUTTONS_TEAM_CONFIG_ALIBI)
-            key_team: str = 'team_config_alibi'
+            key_team_config: str = 'team_config_alibi'
+            key_pinned_message_id: str = 'pinned_telegram_message_id_alibi'
         else:
             buttons: dict[int, list[list[InlineKeyboardButton]]] = (
                 BUTTONS_TEAM_CONFIG_DETECTIT)
-            key_team: str = 'team_config_detectit'
-        saved_data[key_team] = rebuild_team_config(
-            team_config=saved_data[key_team],
+            key_team_config: str = 'team_config_detectit'
+            key_pinned_message_id: str = 'pinned_telegram_message_id_detectit'
+        saved_data[key_team_config] = rebuild_team_config(
+            team_config=saved_data[key_team_config],
             teammate_decision={
                 'teammate': username,
                 'game_num': int(game_num),
                 'decision': int(decision)})
         edit_message(
             bot=telegram_bot,
-            message_id=saved_data[key_team]['pinned_telegram_message_id'],
+            message_id=key_pinned_message_id,
             new_text=form_game_dates_text(
-                game_dates=saved_data[key_team]['game_dates']),
+                group_name=pref,
+                team_config=saved_data[key_team_config]),
             reply_markup=buttons.get(
-                len(saved_data[key_team]['game_dates']), None))
+                len(saved_data[key_team_config]['game_dates']), None))
         return
 
     try:
