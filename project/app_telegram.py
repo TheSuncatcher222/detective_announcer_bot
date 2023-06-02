@@ -153,32 +153,35 @@ def send_update_wall(
         return
     if group_name == ALIBI:
         buttons = BUTTONS_TEAM_CONFIG_ALIBI
-        key_team: str = 'team_config_alibi'
+        key_team_config: str = 'team_config_alibi'
         key_pinned_message_id: str = 'pinned_telegram_message_id_alibi'
     else:
         buttons = BUTTONS_TEAM_CONFIG_DETECTIT
-        key_team: str = 'team_config_detectit'
+        key_team_config: str = 'team_config_detectit'
         key_pinned_message_id: str = 'pinned_telegram_message_id_detectit'
     pinned_message_id: int = saved_data.get(key_pinned_message_id, False)
     edit_message(
         bot=telegram_bot,
         message_id=pinned_message_id,
         new_text=form_game_dates_text(
-            game_dates=saved_data[key_team]))
+            group_name=group_name,
+            team_config=saved_data[key_team_config]))
     _pin_message(
         bot=telegram_bot,
         message_id=pinned_message_id,
         unpin=True)
-    new_game_dates: dict[int, dict[str, any]] = (
+    new_team_config: dict[int, dict[str, any]] = (
         _create_new_team_config_game_dates(
             game_dates=parsed_post['game_dates']))
-    new_pinned_message: int = _send_message_for_game_dates(
+    new_message_id: int = _send_message_for_game_dates(
         bot=telegram_bot,
-        message=form_game_dates_text(game_dates=new_game_dates),
-        keyboard=buttons.get(len(new_game_dates), None))
-    _pin_message(bot=telegram_bot, message_id=new_pinned_message)
-    saved_data[key_team] = new_game_dates
-    saved_data[key_pinned_message_id] = new_pinned_message
+        message=form_game_dates_text(
+            group_name=group_name,
+            team_config=new_team_config),
+        keyboard=buttons.get(len(new_team_config), None))
+    _pin_message(bot=telegram_bot, message_id=new_message_id)
+    saved_data[key_team_config] = new_team_config
+    saved_data[key_pinned_message_id] = new_message_id
     return
 
 
