@@ -102,8 +102,8 @@ def test_game_dates_add_weekday_place(game_date, expected):
     # Correct case: album
     ('album',
      'Alibi',
-     {'attachments': [{'photo': {'sizes': [0, 1, 2, {
-         'url': 'http://url_2/'}]}}]},
+     {'attachments': [{'album': {'thumb': {'sizes': [0, 1, 2, 3, {
+         'url': 'http://url_2/'}]}}}]},
      'http://url_2/'),
     # Incorrect case: AttributeError (Alibi default photo used)
     # post_image_url = '' - because 'block' has unexpected value
@@ -249,12 +249,11 @@ A_TASKS_EXP: list[str] = [
     'https://vk.com/alibigames?w=wall-40914100_13380']
 D_PHOTOS_EXP: list[str] = [
     '⚫️ Detectit',
-    'Полагаем, не так-то просто одновременно распутывать шифры, пить чай или '
-    'пиво и позировать фотографу, очаровательно улыбаясь в камеру. Но '
-    'многозадачность отличает хорошего детектива, так что вы прекрасно '
-    'справляетесь 🙂 ',
-    'Ph: [club212797879|Вова] 📸 ',
-    'https://vk.com/detectitspb?w=wall-219311078_13052']
+    'Иллюстрации к нашей детективной истории всегда получаются самыми яркими. '
+    'Ведь главными героями являетесь вы!',
+    'Фотокарточки с расследования дела Сюзен Блант 23 мая в Парккинге в '
+    'альбомах группы😉',
+    'https://vk.com/detectitspb?w=wall-219311078_391']
 
 
 @pytest.mark.dependency(name="test_parse_post_add_link")
@@ -551,7 +550,7 @@ def test_parse_post_teams(group_name, post_text, expected):
     ('Detectit', D_EXAMPLE_PHOTOS, {
         'post_id': D_EXAMPLE_PHOTOS['id'],
         'post_image_url': _get_post_image_url(
-            block='photo',
+            block='album',
             group_name='Detectit',
             post=D_EXAMPLE_PHOTOS),
         'post_text': D_PHOTOS_EXP,

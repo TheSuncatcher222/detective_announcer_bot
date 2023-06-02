@@ -199,7 +199,7 @@ def _get_post_image_url(
                 post['attachments'][0]['photo']['sizes'][4]['url'])
         elif block == 'album':
             post_image_url: str = (
-                post['attachments'][0]['photo']['sizes'][3]['url'])
+                post['attachments'][0]['album']['thumb']['sizes'][4]['url'])
         else:
             raise ValueError
         if not post_image_url.startswith('http'):
