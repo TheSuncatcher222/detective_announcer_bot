@@ -77,7 +77,7 @@ def file_remove(file_name: str) -> None:
     return
 
 
-def saved_data_check(saved_data: any) -> dict[str, int | dict[str, any]]:
+def saved_data_check(saved_data: any = None) -> dict[str, int | dict[str, any]]:
     """Check saved data in json file. if some data is missing - assigns a
     default value to them."""
     if saved_data is None:
