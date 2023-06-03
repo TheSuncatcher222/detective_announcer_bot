@@ -30,15 +30,21 @@ def edit_message(
         message_id: int,
         new_text: str,
         chat_id: str = TELEGRAM_TEAM_CHAT,
-        reply_markup: bool = None) -> None:
+        keyboard: list[list[InlineKeyboardButton]] = None) -> None:
     """Edit target message in the telegram chat.
     Add reply_markup to the message if reply_markup is not None."""
     try:
-        bot.edit_message_text(
-            chat_id=chat_id,
-            message_id=message_id,
-            text=new_text,
-            reply_markup=reply_markup)
+        if keyboard is not None:
+            bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=new_text,
+                reply_markup=InlineKeyboardMarkup(keyboard))
+        else:
+            bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=new_text)
     except error.BadRequest:
         pass
     return
@@ -175,10 +181,10 @@ def send_update_wall(
             game_dates=parsed_post['game_dates']))
     new_message_id: int = _send_message_for_game_dates(
         bot=telegram_bot,
+        keyboard=buttons.get(len(new_team_config) - 1, None),
         message=form_game_dates_text(
             group_name=group_name,
-            team_config=new_team_config),
-        keyboard=buttons.get(len(new_team_config), None))
+            team_config=new_team_config))
     _pin_message(bot=telegram_bot, message_id=new_message_id)
     saved_data[key_team_config] = new_team_config
     saved_data[key_pinned_message_id] = new_message_id

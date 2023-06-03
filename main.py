@@ -220,12 +220,11 @@ async def telegram_listener(
                 'decision': int(decision)})
         edit_message(
             bot=telegram_bot,
-            message_id=key_pinned_message_id,
+            keyboard=buttons.get(len(saved_data[key_team_config]) - 1, None),
+            message_id=saved_data[key_pinned_message_id],
             new_text=form_game_dates_text(
                 group_name=pref,
-                team_config=saved_data[key_team_config]),
-            reply_markup=buttons.get(
-                len(saved_data[key_team_config]['game_dates']), None))
+                team_config=saved_data[key_team_config]))
         return
 
     try:
