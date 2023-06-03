@@ -143,14 +143,13 @@ def parse_post(
     if post_text is None:
         """Nothing to send to telegram chat. Exit."""
         return None
-    # if video in: # Или в _get_post_image_url это
-    #     block: str = 'video'
-    # https://vk.com/detectitspb?w=wall-219311078_373 - тут как буд-то история
-    #   '(<iframe src="https://vk.com/video_ext.php?oid='
-    #   '-219311078&id=456239024&hash=370738d6e6ed0137"'
-    # https://vk.com/detectitspb?w=wall-219311078_312 - сравнить с этим
     if post_topic == 'photos':
         block: str = 'album'
+    elif 'video' in post['attachments'][0]:
+        block: str = 'video'
+        post_text.append(
+            'Запись содержит видеоролик:\n'
+            + _make_link_to_post(group_name=group_name, post_id=post_id))
     else:
         block: str = 'photo'
     post_image_url: str = _get_post_image_url(
@@ -194,12 +193,15 @@ def _get_post_image_url(
     """Get image URL from the given post."""
     try:
         post_image_url = ''
-        if block == 'photo':
-            post_image_url: str = (
-                post['attachments'][0]['photo']['sizes'][4]['url'])
-        elif block == 'album':
+        if block == 'album':
             post_image_url: str = (
                 post['attachments'][0]['album']['thumb']['sizes'][4]['url'])
+        elif block == 'photo':
+            post_image_url: str = (
+                post['attachments'][0]['photo']['sizes'][4]['url'])
+        elif block == 'video':
+            post_image_url: str = (
+                post['attachments'][0]['video']['first_frame_1280'])
         else:
             raise ValueError
         if not post_image_url.startswith('http'):
