@@ -6,12 +6,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from project.app_vk import (
-    define_post_topic, parse_message, parse_post,
+    define_post_topic, make_link_to_post, parse_message, parse_post,
     _game_dates_add_weekday_place, _get_post_image_url, _get_vk_chat_update,
-    _get_vk_wall_update, _make_link_to_post, _parse_post_add_link,
-    _parse_post_checkin, _parse_post_game_results, _parse_post_other,
-    _parse_post_preview, _parse_post_prize_results, _parse_post_teams,
-    _parse_post_stop_list, _split_paragraphs)
+    _get_vk_wall_update, _parse_post_add_link, _parse_post_checkin,
+    _parse_post_game_results, _parse_post_other, _parse_post_preview,
+    _parse_post_prize_results, _parse_post_teams, _parse_post_stop_list,
+    _split_paragraphs)
 
 from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
 
@@ -167,8 +167,8 @@ def test_get_vk_wall_update(last_wall_id, expected, mocker):
     ('Detectit', 'https://vk.com/detectitspb?w=wall-219311078_0')
 ])
 def test_make_link_to_post(group_name, expected):
-    """Test _make_link_to_post func from app_vk."""
-    assert _make_link_to_post(group_name=group_name, post_id=0) == expected
+    """Test make_link_to_post func from app_vk."""
+    assert make_link_to_post(group_name=group_name, post_id=0) == expected
 
 
 MESSAGE_NO_LOOKUP: str = 'Просто сообщение.'
@@ -513,7 +513,7 @@ def test_parse_post_teams(group_name, post_text, expected):
             post=A_EXAMPLE_OTHER),
         'post_text': A_OTHER_EXP + [
             'Запись содержит видеоролик:\n'
-            + _make_link_to_post(
+            + make_link_to_post(
                 group_name='Alibi', post_id=A_EXAMPLE_OTHER['id'])],
         'game_dates': None}),
     ('Alibi', A_EXAMPLE_PRIZE_RESULTS, {
@@ -524,7 +524,7 @@ def test_parse_post_teams(group_name, post_text, expected):
             post=A_EXAMPLE_PRIZE_RESULTS),
         'post_text': A_PRIZE_RESULTS_EXP + [
             'Запись содержит видеоролик:\n'
-            + _make_link_to_post(
+            + make_link_to_post(
                 group_name='Alibi', post_id=A_EXAMPLE_PRIZE_RESULTS['id'])],
         'game_dates': None}),
     ('Alibi', A_EXAMPLE_PREVIEW, {
@@ -577,7 +577,7 @@ def test_parse_post_teams(group_name, post_text, expected):
             post=D_EXAMPLE_PRIZE_RESULTS),
         'post_text': D_PRIZE_RESULTS_EXP + [
             'Запись содержит видеоролик:\n'
-            + _make_link_to_post(
+            + make_link_to_post(
                 group_name='Detectit', post_id=D_EXAMPLE_PRIZE_RESULTS['id'])],
         'game_dates': None}),
     ('Detectit', D_EXAMPLE_STOP_LIST, {

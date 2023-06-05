@@ -85,6 +85,17 @@ def get_vk_wall_update_groups(
     return group_name, update_wall
 
 
+def make_link_to_post(group_name: str, post_id: int) -> str:
+    """Return link to the vk post with given post_id of target group."""
+    if group_name == ALIBI:
+        group_id: str = ALIBI_GROUP_ID
+        group_post_link: str = ALIBI_POST_LINK
+    else:
+        group_id: str = DETECTIT_GROUP_ID
+        group_post_link: str = DETECTIT_POST_LINK
+    return f'{group_post_link}{group_id}_{post_id}'
+
+
 def parse_message(group_name: str, message: dict[any]) -> str | None:
     """Check if lookup in message text. If true return complete message text to
     send to the telegram chat. If not return None."""
@@ -149,7 +160,7 @@ def parse_post(
         block: str = 'video'
         post_text.append(
             'Запись содержит видеоролик:\n'
-            + _make_link_to_post(group_name=group_name, post_id=post_id))
+            + make_link_to_post(group_name=group_name, post_id=post_id))
     else:
         block: str = 'photo'
     post_image_url: str = _get_post_image_url(
@@ -258,17 +269,6 @@ def _get_vk_wall_update(
     return None
 
 
-def _make_link_to_post(group_name: str, post_id: int) -> str:
-    """Return link to the vk post with given post_id of target group."""
-    if group_name == ALIBI:
-        group_id: str = ALIBI_GROUP_ID
-        group_post_link: str = ALIBI_POST_LINK
-    else:
-        group_id: str = DETECTIT_GROUP_ID
-        group_post_link: str = DETECTIT_POST_LINK
-    return f'{group_post_link}{group_id}_{post_id}'
-
-
 def _parse_post_add_link(
         group_name: str,
         post_id: int,
@@ -276,7 +276,7 @@ def _parse_post_add_link(
         **kwargs) -> list[str]:
     """Parse post's text if the topic is 'photos' or 'rating' or 'tasks'."""
     return (splitted_text[:-1]
-            + [_make_link_to_post(group_name=group_name, post_id=post_id)])
+            + [make_link_to_post(group_name=group_name, post_id=post_id)])
 
 
 def _parse_post_checkin(
@@ -291,7 +291,7 @@ def _parse_post_checkin(
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:',
-        _make_link_to_post(group_name=group_name, post_id=post_id),
+        make_link_to_post(group_name=group_name, post_id=post_id),
         search(
             r'Результаты будут в ночь с \d+ на \d+ \w+\.',
             splitted_text[-2]).group(0)]
