@@ -252,6 +252,7 @@ def _get_vk_wall_update(
             pass
         except KeyError:
             raise Exception(
+                'From app_vk._get_vk_wall_update: '
                 "Post's json from VK wall has unknown structure!"
                 f"Try ['items'][{num}]['id'].")
     return None
@@ -356,6 +357,7 @@ def _parse_post_stop_list(
         response: requests = requests.get(post['attachments'][1]['doc']['url'])
     except (KeyError, IndexError):
         raise Exception(
+            'From app_vk._parse_post_stop_list: '
             "Post's json from VK wall has unknown structure!"
             "Try ['items'][0]['attachments'][1]['doc']['url'].")
     filename: str = f'{DATA_FOLDER}stop-list.pdf'
