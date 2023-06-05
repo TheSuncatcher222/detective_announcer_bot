@@ -9,7 +9,11 @@ from project.data.app_data import (
 
     BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
 
-    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_TEAM_CHAT)
+    DATE_HEADLIGHT, EMOJI_SYMBOLS, TEAM_GUEST, TELEGRAM_TEAM_CHAT,
+
+    MAX_CAPTION_LENGTH, MAX_LINK_LENGTH)
+
+from project.app_vk import make_link_to_post
 
 
 def check_telegram_bot_response(token: str) -> None:
@@ -153,9 +157,17 @@ def send_update_wall(
         saved_data: dict[str, int | dict[str, any]],
         telegram_bot) -> None:
     """Send update from VK group wall to the telegram chat."""
+    message: str = '\n\n'.join(
+        abstract for abstract in parsed_post['post_text'])
+    if len(message) > MAX_CAPTION_LENGTH:
+        message: str = (
+            message[:MAX_CAPTION_LENGTH-MAX_LINK_LENGTH]
+            + '...\n\n(сообщение слишком длинное)\n\n'
+            + make_link_to_post(
+                group_name=group_name, post_id=parsed_post['post_id']))
     _send_photo(
         bot=telegram_bot,
-        message='\n\n'.join(abstract for abstract in parsed_post['post_text']),
+        message=message,
         photo_url=parsed_post['post_image_url'])
     if not parsed_post['game_dates']:
         return
@@ -249,8 +261,8 @@ def _send_photo(
     """Send photo with optional message to target telegram chat."""
     try:
         bot.send_photo(
-            caption=message if len(message) < 1024 else (
-                message[:1000] + ' ... (сообщение слишком длинное)'),
+            caption=message if len(message) <= MAX_CAPTION_LENGTH else (
+                message[:992] + ' ... (сообщение слишком длинное)'),
             chat_id=chat_id,
             photo=photo_url)
         return
