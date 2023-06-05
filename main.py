@@ -22,11 +22,13 @@ from project.data.app_data import (
     TEAM_NAME, TEAM_CAPITAN_PROP)
 
 import project.app_logger as app_logger
+
 from project.app_telegram import (
     TelegramBot,
     check_telegram_bot_response, edit_message, init_telegram_bot,
     form_game_dates_text, rebuild_team_config, send_message,
     send_update_message, send_update_wall)
+
 from project.app_vk import (
     VkApi,
     define_post_topic, get_vk_chat_update_groups, get_vk_wall_update_groups,
