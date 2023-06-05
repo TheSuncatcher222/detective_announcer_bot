@@ -118,8 +118,10 @@ def send_message(
         if return_message_id:
             return message.message_id
         return
-    except TelegramError:
-        raise Exception("Bot can't send the message!")
+    except TelegramError as err:
+        raise Exception(
+            'From app_telegram.send_message: '
+            f"Bot can't send the message! Error: \"{err}\"")
 
 
 def send_update_message(
@@ -234,7 +236,9 @@ def _send_message_for_game_dates(
             text=message)
         return message.message_id
     except TelegramError as err:
-        raise Exception(f"Bot can't send the message! {err}")
+        raise Exception(
+            'From app_telegram._send_message_for_game_dates: '
+            f"Bot can't send the message! {err}")
 
 
 def _send_photo(
@@ -251,4 +255,6 @@ def _send_photo(
             photo=photo_url)
         return
     except TelegramError as err:
-        raise Exception(f'Bot failed to send photo-message! Error: "{err}"')
+        raise Exception(
+            'From app_telegram._send_photo: '
+            f'Bot failed to send photo-message! Error: "{err}"')
