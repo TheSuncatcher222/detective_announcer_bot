@@ -514,7 +514,7 @@ def test_parse_post_teams(group_name, post_text, expected):
         'post_text': A_OTHER_EXP + [
             'Запись содержит видеоролик:\n'
             + _make_link_to_post(
-                group_name='Alibi',post_id=A_EXAMPLE_OTHER['id'])],
+                group_name='Alibi', post_id=A_EXAMPLE_OTHER['id'])],
         'game_dates': None}),
     ('Alibi', A_EXAMPLE_PRIZE_RESULTS, {
         'post_id': A_EXAMPLE_PRIZE_RESULTS['id'],
@@ -525,7 +525,7 @@ def test_parse_post_teams(group_name, post_text, expected):
         'post_text': A_PRIZE_RESULTS_EXP + [
             'Запись содержит видеоролик:\n'
             + _make_link_to_post(
-                group_name='Alibi',post_id=A_EXAMPLE_PRIZE_RESULTS['id'])],
+                group_name='Alibi', post_id=A_EXAMPLE_PRIZE_RESULTS['id'])],
         'game_dates': None}),
     ('Alibi', A_EXAMPLE_PREVIEW, {
         'post_id': A_EXAMPLE_PREVIEW['id'],
@@ -578,7 +578,7 @@ def test_parse_post_teams(group_name, post_text, expected):
         'post_text': D_PRIZE_RESULTS_EXP + [
             'Запись содержит видеоролик:\n'
             + _make_link_to_post(
-                group_name='Detectit',post_id=D_EXAMPLE_PRIZE_RESULTS['id'])] ,
+                group_name='Detectit', post_id=D_EXAMPLE_PRIZE_RESULTS['id'])],
         'game_dates': None}),
     ('Detectit', D_EXAMPLE_STOP_LIST, {
         'post_id': D_EXAMPLE_STOP_LIST['id'],
