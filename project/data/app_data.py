@@ -49,6 +49,9 @@ DETECTIT_TAG: str = '⚫️ Detectit'
 PINNED_POST_ORDER: int = 0
 NON_PINNED_POST_ORDER: int = 1
 
+MAX_CAPTION_LENGTH: int = 1024
+MAX_LINK_LENGTH: int = 100
+
 """Data to text parsing."""
 
 EMOJI_SYMBOLS: dict[int, str] = {
