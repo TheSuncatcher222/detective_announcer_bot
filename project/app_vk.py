@@ -329,8 +329,12 @@ def _parse_post_preview(
                 post_text))
     else:
         game_dates = findall(
-            r'(\d{1,2} \w+ \(\w+\), \d{2}:\d{2}, [^\n\;]+)',
+            r'\d{1,2} \w+ \(\w+\), \d{2}:\d{2} \— [^\n\;]+',
             post_text)
+        if len(game_dates) == 0:
+            game_dates = findall(
+                r'\d{1,2} \w+ \(\w+\), \d{2}:\d{2}, [^\n\;]+',
+                post_text)
     post_text: list[str] = (
         splitted_text[0:len(splitted_text)-(4+len(game_dates))]
         + splitted_text[-3:-2])
