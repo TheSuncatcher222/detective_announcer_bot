@@ -285,16 +285,27 @@ def _parse_post_checkin(
         splitted_text: str,
         **kwargs) -> list[str]:
     """Parse post's text if the topic is 'checkin'."""
+    if group_name == ALIBI:
+        reg_link_from: int = -5
+        reg_link_to: int = -3
+        results_date: str = search(
+            r'Результаты будут в ночь с \d{1,2} на \d{1,2} \w+\.',
+            splitted_text[-2]).group(0)
+    else:
+        reg_link_from: int = -3
+        reg_link_to: int = -2
+        results_date: str = search(
+            r'в ночь на \d{1,2} \w+',
+            splitted_text[-2]).group(0)
+        results_date = f'Результаты будут {results_date}'
     return [
         *splitted_text[:2],
-        *splitted_text[-5:-3],
+        *splitted_text[reg_link_from:reg_link_to],
         'Действует розыгрыш бесплатного входа на всю команду! '
         'Чтобы принять в нем участие, нужно вступить в группу и сделать '
         'репост этой записи:',
         make_link_to_post(group_name=group_name, post_id=post_id),
-        search(
-            r'Результаты будут в ночь с \d+ на \d+ \w+\.',
-            splitted_text[-2]).group(0)]
+        results_date]
 
 
 def _parse_post_game_results(
