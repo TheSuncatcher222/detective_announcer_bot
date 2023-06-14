@@ -178,8 +178,11 @@ def vk_listen_wall(
     logger.info(f'New post available from {group_name}!')
     topic: str = define_post_topic(post=update)
     logger.info(f"Post's topic is: '{topic}'")
-    if (not SKIP_IF_NOT_IMPORTANT
-            or SKIP_IF_NOT_IMPORTANT and topic in SKIP_WHITE_LIST):
+    if (
+        (not SKIP_IF_NOT_IMPORTANT or topic in SKIP_WHITE_LIST)
+        and (topic != 'photos'
+             or saved_data[f'last_{group_name.lower()}_game']
+             in update['text'])):
         parsed_post: dict[str, any] = parse_post(
             group_name=group_name,
             post=update,
