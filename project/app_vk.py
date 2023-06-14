@@ -19,6 +19,14 @@ from project.data.app_data import (
     DATA_FOLDER, POST_TOPICS, PINNED_POST_ORDER, NON_PINNED_POST_ORDER)
 
 
+def define_message_topic(message: str) -> str | None:
+    """Define the topic of the given message."""
+    for lookup in (GAME_REMINDER_LOOKUP, TEAM_REGISTER_LOOKUP):
+        if lookup in message:
+            return lookup
+    return
+
+
 def define_post_topic(post: dict) -> str:
     """Define the topic of the given post."""
     try:
@@ -96,11 +104,11 @@ def make_link_to_post(group_name: str, post_id: int) -> str:
     return f'{group_post_link}{group_id}_{post_id}'
 
 
-def parse_message(group_name: str, message: dict[any]) -> str | None:
-    """Check if lookup in message text. If true return complete message text to
-    send to the telegram chat. If not return None."""
+def parse_message(
+        group_name: str, message: dict[any], topic: str) -> str:
+    """Return complete message text to send to the telegram chat."""
     message_text: str = message['items'][0]['text']
-    if TEAM_REGISTER_LOOKUP in message_text:
+    if topic == TEAM_REGISTER_LOOKUP:
         money_amount: str = search(
             r'Стоимость участия:(\s)?\d+', message_text).group(0)[-3:]
         splitted_text: list[str] = _split_paragraphs(
@@ -109,13 +117,11 @@ def parse_message(group_name: str, message: dict[any]) -> str | None:
             splitted_text[:1]
             + splitted_text[2:3]
             + [TEAM_REGISTER_TEXT.format(money_amount=money_amount)])
-        return '\n\n'.join(message_text)
-    elif GAME_REMINDER_LOOKUP in message_text:
+    else:
         splitted_text: list[str] = _split_paragraphs(
             group_name=group_name, text=message_text)
         message_text: list[str] = splitted_text[:1] + splitted_text[2:]
-        return '\n\n'.join(message_text)
-    return
+    return '\n\n'.join(message_text)
 
 
 def parse_post(
@@ -171,6 +177,17 @@ def parse_post(
         'post_text': post_text,
         'game_dates': game_dates}
     return parsed_post
+
+
+def update_last_game(
+        group_name: str, message: str, saved_data: dict[any]) -> None:
+    """Search for game date and write it into saved_data for given group."""
+    saved_data[f'last_{group_name.lower()}_game'] = search(
+        pattern=(
+            r'\d{1,2}\s(?:января|февраля|марта|апреля|мая|июня|июля|'
+            r'августа|сентября|октября|ноября|декабря)'),
+        string=message).group(0)
+    return
 
 
 def _game_dates_add_weekday_place(game_dates: list[str]) -> list[str]:
