@@ -37,7 +37,9 @@ from project.data.app_data import (
     CALLBACK_DATA_NONE,
 
     DATA_FOLDER, SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
-    TEAM_NAME, TEAM_CAPITAN_PROP)
+    TEAM_NAME, TEAM_CAPITAN_PROP,
+
+    GAME_REMINDER_LOOKUP)
 
 import project.app_logger as app_logger
 
@@ -49,8 +51,9 @@ from project.app_telegram import (
 
 from project.app_vk import (
     VkApi,
-    define_post_topic, get_vk_chat_update_groups, get_vk_wall_update_groups,
-    init_vk_bot, parse_message, parse_post)
+    define_message_topic, define_post_topic, get_vk_chat_update_groups,
+    get_vk_wall_update_groups, init_vk_bot, parse_message, parse_post,
+    update_last_game)
 
 ALL_DATA: tuple[str, int] = (
     TEAM_CAPITAN_PROP,
@@ -142,14 +145,23 @@ def vk_listen_message(
     if not message:
         return
     logger.info(f'New message available from {group_name}!')
-    parsed_message: str = parse_message(group_name=group_name, message=message)
-    if parsed_message:
+    topic: str = define_message_topic(message=message['items'][0]['text'])
+    if topic:
         logger.info('Sending message update to telegram.')
+        parsed_message: str = parse_message(
+            group_name=group_name,
+            message=message,
+            topic=topic)
         send_update_message(
             group_name=group_name,
             message=parsed_message,
             saved_data=saved_data,
             telegram_bot=telegram_bot)
+        if topic == GAME_REMINDER_LOOKUP:
+            update_last_game(
+                group_name=group_name,
+                saved_data=saved_data,
+                text=message['items'][0]['text'])
     if group_name == ALIBI:
         key_group: str = 'last_vk_message_id_alibi'
     else:
