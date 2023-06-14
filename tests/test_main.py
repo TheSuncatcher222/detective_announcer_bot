@@ -42,6 +42,8 @@ def test_file_read_write_remove():
 
 SAVED_DATA_1: dict = {}
 EXPECTED_1: dict = {
+    'last_alibi_game': 'NoData',
+    'last_detectit_game': 'NoData',
     'last_vk_message_id_alibi': 0,
     'last_vk_message_id_detectit': 0,
     'last_vk_wall_id_alibi': 0,
@@ -53,12 +55,15 @@ EXPECTED_1: dict = {
     'team_config_alibi': {},
     'team_config_detectit': {}}
 SAVED_DATA_2: dict = {
+    'last_alibi_game': '12 июня',
     'last_vk_message_id_alibi': 1,
     'last_vk_wall_id_detectit': 25,
     'pinned_telegram_message_id_alibi': -3,
     'pinned_telegram_message_id_detectit': 40,
     'team_config_detectit': {}}
 EXPECTED_2: dict = {
+    'last_alibi_game': '12 июня',
+    'last_detectit_game': 'NoData',
     'last_vk_message_id_alibi': 1,
     'last_vk_message_id_detectit': 0,
     'last_vk_wall_id_alibi': 0,
@@ -70,6 +75,8 @@ EXPECTED_2: dict = {
     'team_config_alibi': {},
     'team_config_detectit': {}}
 SAVED_DATA_3: dict = {
+    'last_alibi_game': '18 июня',
+    'last_detectit_game': '31 января',
     'last_vk_message_id_alibi': 465345,
     'last_vk_message_id_detectit': 2313,
     'last_vk_wall_id_alibi': 241515,
@@ -117,6 +124,8 @@ SAVED_DATA_3: dict = {
                 'Teammate_5': 1,
                 'Teammate_2': 1}}}}
 EXPECTED_3: dict = {
+    'last_alibi_game': '18 июня',
+    'last_detectit_game': '31 января',
     'last_vk_message_id_alibi': 465345,
     'last_vk_message_id_detectit': 2313,
     'last_vk_wall_id_alibi': 241515,
