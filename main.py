@@ -1,5 +1,23 @@
 # -*- coding: UTF-8 -*-
 
+"""
+=================
+Detective Announcer Bot
+=================
+The bot is designed to forward posts from the Alibi and Detectit community
+walls to a selected Telegram chat/channel, create a more convenient system
+for scheduling game days than Telegram can offer, and keep a chat record of
+the team's victories.
+=================
+Author: Svidunovich Kirill
+        Altaie21817@gmail.com
+        https://github.com/Altair21817
+=================
+Project description and instructions:
+https://github.com/Altair21817/Detective_Announcer_Bot
+=================
+"""
+
 import asyncio
 import json
 import logging
