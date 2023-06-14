@@ -186,8 +186,8 @@ TEAM_REGISTER_TEXT: str = (
 DATA_FOLDER: str = 'project/data/'
 SAVED_DATA_JSON_NAME: str = 'saved_data.json'
 SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
-    'last_alibi_game': [],
-    'last_detectit_game': [],
+    'last_alibi_game': 'NoData',
+    'last_detectit_game': 'NoData',
     'last_vk_message_id_alibi': 0,
     'last_vk_message_id_detectit': 0,
     'last_vk_wall_id_alibi': 0,
