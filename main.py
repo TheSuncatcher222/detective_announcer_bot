@@ -108,6 +108,8 @@ def saved_data_check(
     if saved_data is None:
         return SAVED_DATA_JSON_DEFAULT
     for key in (
+            'last_alibi_game',
+            'last_detectit_game',
             'last_vk_message_id_alibi',
             'last_vk_message_id_detectit',
             'last_vk_wall_id_alibi',
