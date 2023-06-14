@@ -385,7 +385,7 @@ def _parse_post_stop_list(
             text_verdict = STOP_LIST_DENY
             break
     os.remove(filename)
-    return splitted_text[:1] + [text_verdict] + splitted_text[1:3]
+    return splitted_text[:1] + [text_verdict]
 
 
 def _split_paragraphs(group_name: str, text: str) -> list[str]:
