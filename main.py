@@ -36,7 +36,7 @@ from project.data.app_data import (
     ALIBI, BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
     CALLBACK_DATA_NONE,
 
-    DATA_FOLDER, SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
+    API_ERROR_NAME, DATA_FOLDER, SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
     TEAM_NAME, TEAM_CAPITAN_PROP,
 
     GAME_REMINDER_LOOKUP)
@@ -221,7 +221,7 @@ def vk_listen_wall(
 async def last_api_error_delete() -> None:
     """Delete periodically the file 'last_api_error.json'."""
     while 1:
-        file_remove('last_api_error.json')
+        file_remove(f'{DATA_FOLDER}{API_ERROR_NAME}')
         await asyncio.sleep(LAST_API_ERR_DEL_SEC)
 
 
@@ -273,14 +273,14 @@ async def telegram_listener(
         """Error on the API side.
         The program will continue to run normally."""
         last_api_error: str = file_read(
-            file_name=f'{DATA_FOLDER}last_api_error.json')
+            file_name=f'{DATA_FOLDER}{API_ERROR_NAME}')
         err_str = f'From telegram_listener: {str(err)}'
         if err_str != last_api_error:
             logger.warning()
             send_message(
                 bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
             file_write(
-                file_name=f'{DATA_FOLDER}last_api_error.json',
+                file_name=f'{DATA_FOLDER}{API_ERROR_NAME}',
                 write_data=err_str)
 
 
@@ -304,14 +304,14 @@ async def vk_listener(
             """Error on the API side.
             The program will continue to run normally."""
             last_api_error: str = file_read(
-                file_name='last_api_error.json')
+                file_name=f'{DATA_FOLDER}{API_ERROR_NAME}')
             err_str: str = f'From vk_listener: {str(err)}'
             if err_str != last_api_error:
                 logger.warning(err_str)
                 send_message(
                     bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
             file_write(
-                file_name='last_api_error.json',
+                file_name=f'{DATA_FOLDER}{API_ERROR_NAME}',
                 write_data=err_str)
         logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
         await asyncio.sleep(API_VK_UPDATE_SEC)

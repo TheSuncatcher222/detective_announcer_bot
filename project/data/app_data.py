@@ -183,6 +183,8 @@ TEAM_REGISTER_TEXT: str = (
 
 """JSON settings."""
 
+API_ERROR_NAME: str = 'last_api_error.json'
+
 DATA_FOLDER: str = 'project/data/'
 SAVED_DATA_JSON_NAME: str = 'saved_data.json'
 SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
