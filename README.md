@@ -103,11 +103,11 @@ ___
 MIT 
 **Free Software, Hell Yeah!**
 
-Created by [TheSuncatcher222]
+Created by [TheSuncatcher222](https://github.com/TheSuncatcher222)
 
 Данный бот __не является__ официальным!
 
-[TheSuncatcher222]: <https://github.com/TheSuncatcher222>
+
 [Alibi]: <https://vk.com/alibigames>
 [Python]: <https://www.python.org/>
 [VK API]: <https://dev.vk.com/api/overview>
