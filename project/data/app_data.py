@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from telegram import InlineKeyboardButton
+from telegram import InlineKeyboardButton, ReplyKeyboardMarkup
 
 load_dotenv()
 
@@ -20,6 +20,12 @@ API_TELEGRAM_UPDATE_SEC: int = 1
 API_VK_UPDATE_SEC: int = 60
 
 LAST_API_ERR_DEL_SEC: int = 60 * 60
+
+REPLY_FATHER_BUTTONS: list[list[str]] = [['/forward', '/forward_abort']]
+REPLY_FATHER_MARKUP: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
+    REPLY_FATHER_BUTTONS, resize_keyboard=True)
+REPLY_TO_FORWARD_TEXT: str = 'Я готов, что нужно переслать?'
+REPLY_TO_FORWARD_ABORT_TEXT: str = 'Хорошо, ничего никуда не перешлю!'
 
 # If true bot will send only posts in white list below
 SKIP_IF_NOT_IMPORTANT: bool = False
@@ -199,7 +205,8 @@ SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
     'pinned_vk_message_id_alibi': 0,
     'pinned_vk_message_id_detectit': 0,
     'team_config_alibi': {},
-    'team_config_detectit': {}}
+    'team_config_detectit': {},
+    'father_forward': False}
 
 STOP_LIST_ACCEPT: str = (
     f"✅ Команда '{TEAM_NAME}' допущена к регистрации на серию игр!")
