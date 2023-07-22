@@ -22,12 +22,16 @@ import asyncio
 import json
 import logging
 import os
-from telegram.ext import Updater, CallbackQueryHandler
+from telegram.ext import (
+    Updater,
+    Filters,
+    CallbackQueryHandler, CommandHandler, MessageHandler)
 
 from project.data.app_data import (
     InlineKeyboardButton,
 
     API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, LAST_API_ERR_DEL_SEC,
+    REPLY_FATHER_MARKUP, REPLY_TO_FORWARD_ABORT_TEXT, REPLY_TO_FORWARD_TEXT,
     SKIP_IF_NOT_IMPORTANT, SKIP_WHITE_LIST,
 
     TELEGRAM_BOT_TOKEN, TELEGRAM_TEAM_CHAT, TELEGRAM_USER,
@@ -46,7 +50,7 @@ import project.app_logger as app_logger
 from project.app_telegram import (
     TelegramBot,
     check_telegram_bot_response, edit_message, init_telegram_bot,
-    form_game_dates_text, rebuild_team_config, send_message,
+    form_game_dates_text, rebuild_team_config, send_message, send_photo,
     send_update_message, send_update_wall)
 
 from project.app_vk import (
@@ -230,6 +234,10 @@ async def telegram_listener(
         telegram_bot: TelegramBot) -> None:
     """Use Telegram API for handle callback query from target chat."""
 
+    def __is_from_father(update) -> bool:
+        """Return True if from_user.id is TELEGRAM_USER."""
+        return str(update.message.from_user.id) == TELEGRAM_USER
+
     def __handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
         query: any = update.callback_query
@@ -264,10 +272,73 @@ async def telegram_listener(
                 team_config=saved_data[key_team_config]))
         return
 
+    def __handle_forward_command(update, context) -> None:
+        """Handle "/forward" command. Send confirm message.
+        Reply only if user is TELEGRAM_USER."""
+        __handle_forward(
+            update=update,
+            father_forward=True,
+            reply_text=REPLY_TO_FORWARD_TEXT)
+        return
+
+    def __handle_forward_abort_command(update, context) -> None:
+        """Handle "/forward_abort" command. Send confirm message.
+        Reply only if user is TELEGRAM_USER."""
+        __handle_forward(
+            update=update,
+            father_forward=False,
+            reply_text=REPLY_TO_FORWARD_ABORT_TEXT)
+        return
+
+    def __handle_forward(
+            update: any,
+            father_forward: bool,
+            reply_text: str) -> None:
+        """Change saved_data['father_forward'] state and make reply."""
+        if __is_from_father(update=update):
+            saved_data['father_forward'] = father_forward
+            update.message.reply_text(
+                reply_text,
+                reply_markup=REPLY_FATHER_MARKUP)
+        return
+
+    def __handle_forward_perform(update, context) -> None:
+        """Forward incoming message to TELEGRAM_TEAM_CHAT
+        if saved_data['father_forward'] = True.
+        Bot's forward method is not used due to the original author's mention.
+        Create new message instead.
+        Can handle both text and photo messages.
+        """
+        if (not __is_from_father(update=update) or
+                not saved_data['father_forward']):
+            return
+        if update.message.photo:
+            photos: list = update.message.photo
+            largest_photo: dict = max(photos, key=lambda p: p.width)
+            file_id: int = largest_photo.file_id
+            send_photo(
+                bot=telegram_bot,
+                photo_id=file_id,
+                message=update.message.caption)
+        else:
+            send_message(
+                bot=telegram_bot,
+                message=update.message.text)
+        saved_data['father_forward'] = False
+        return
+
     try:
         updater: Updater = Updater(token=TELEGRAM_BOT_TOKEN)
         dispatcher: Updater.dispatcher = updater.dispatcher
-        dispatcher.add_handler(CallbackQueryHandler(__handle_callback_query))
+        dispatcher.add_handler(
+            CallbackQueryHandler(__handle_callback_query))
+        dispatcher.add_handler(
+            CommandHandler("forward", __handle_forward_command))
+        dispatcher.add_handler(
+            CommandHandler("forward_abort", __handle_forward_abort_command))
+        dispatcher.add_handler(
+            MessageHandler(Filters.text | Filters.photo,
+                           __handle_forward_perform))
         updater.start_polling(poll_interval=API_TELEGRAM_UPDATE_SEC)
     except Exception as err:
         """Error on the API side.
