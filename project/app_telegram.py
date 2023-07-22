@@ -29,6 +29,15 @@ def check_telegram_bot_response(token: str) -> None:
         raise SystemExit('Telegram API is unavaliable!')
 
 
+def delete_message(bot, chat_id: int, message_id: int) -> None:
+    """Delete message with message_id from chat with chat_id."""
+    try:
+        bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except error.BadRequest as err:
+        print(err)
+    return
+
+
 def edit_message(
         bot,
         message_id: int,
