@@ -49,9 +49,9 @@ import project.app_logger as app_logger
 
 from project.app_telegram import (
     TelegramBot,
-    check_telegram_bot_response, edit_message, init_telegram_bot,
-    form_game_dates_text, rebuild_team_config, send_message, send_photo,
-    send_update_message, send_update_wall)
+    check_telegram_bot_response, delete_message, edit_message,
+    init_telegram_bot, form_game_dates_text, rebuild_team_config, send_message,
+    send_photo, send_update_message, send_update_wall)
 
 from project.app_vk import (
     VkApi,
@@ -308,6 +308,7 @@ async def telegram_listener(
         Bot's forward method is not used due to the original author's mention.
         Create new message instead.
         Can handle both text and photo messages.
+        Delete 3 last messages from father chat (clear command history).
         """
         if (not __is_from_father(update=update) or
                 not saved_data.get('father_forward', False)):
@@ -324,6 +325,12 @@ async def telegram_listener(
             send_message(
                 bot=telegram_bot,
                 message=update.message.text)
+        message_id: int = update.message.message_id
+        for i in range(3):
+            delete_message(
+                bot=telegram_bot,
+                chat_id=TELEGRAM_USER,
+                message_id=message_id-i)
         saved_data['father_forward'] = False
         return
 
