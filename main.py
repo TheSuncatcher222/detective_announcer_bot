@@ -310,7 +310,7 @@ async def telegram_listener(
         Can handle both text and photo messages.
         """
         if (not __is_from_father(update=update) or
-                not saved_data['father_forward']):
+                not saved_data.get('father_forward', False)):
             return
         if update.message.photo:
             photos: list = update.message.photo
