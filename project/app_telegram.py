@@ -165,7 +165,7 @@ def send_update_wall(
             + '...\n\n(сообщение слишком длинное)\n\n'
             + make_link_to_post(
                 group_name=group_name, post_id=parsed_post['post_id']))
-    _send_photo(
+    send_photo(
         bot=telegram_bot,
         message=message,
         photo_url=parsed_post['post_image_url'])
@@ -253,20 +253,33 @@ def _send_message_for_game_dates(
             f"Bot can't send the message! {err}")
 
 
-def _send_photo(
+def send_photo(
         bot,
-        photo_url: str,
+        photo_url: str = None,
+        photo_id: int = None,
         message: str = None,
         chat_id: int = TELEGRAM_TEAM_CHAT) -> None:
-    """Send photo with optional message to target telegram chat."""
+    """Send photo with optional message to target telegram chat.
+    If photo_id represented - use it instead photo_url."""
+    if photo_id:
+        photo: int = photo_id
+    elif photo_url:
+        photo: str = photo_url
+    else:
+        raise Exception(
+            'From app_telegram.send_photo: '
+            'Bot failed to send photo-message! Error: '
+            '"No photo url or id was attached!"')
+    if message:
+        message: str = message if len(message) <= MAX_CAPTION_LENGTH else (
+            message[:992] + ' ... (сообщение слишком длинное)')
     try:
         bot.send_photo(
-            caption=message if len(message) <= MAX_CAPTION_LENGTH else (
-                message[:992] + ' ... (сообщение слишком длинное)'),
+            caption=message,
             chat_id=chat_id,
-            photo=photo_url)
+            photo=photo)
         return
     except TelegramError as err:
         raise Exception(
-            'From app_telegram._send_photo: '
+            'From app_telegram.send_photo: '
             f'Bot failed to send photo-message! Error: "{err}"')
