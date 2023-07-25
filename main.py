@@ -236,7 +236,9 @@ async def telegram_listener(
 
     def __is_from_father(update) -> bool:
         """Return True if from_user.id is TELEGRAM_USER."""
-        return str(update.message.from_user.id) == TELEGRAM_USER
+        if update.message is not None:
+            return str(update.message.from_user.id) == TELEGRAM_USER
+        return None
 
     def __handle_callback_query(update, context) -> None:
         """Handle callback query. Initialize edit message with query."""
