@@ -15,7 +15,8 @@ from project.app_vk import (
     _parse_post_prize_results, _parse_post_teams, _parse_post_stop_list,
     _split_paragraphs)
 
-from project.data.app_data import TEAM_NAME, TEAM_CAPITAN_PROP
+from project.data.app_data import (
+    TEAM_NAME, TEAM_CAPITAN_PROP, TEAM_REGISTER_LOOKUP)
 
 from vk_wall_examples import (
     A_EXAMPLE_CHECKIN, A_EXAMPLE_GAME_RESULTS, A_EXAMPLE_OTHER,
@@ -215,22 +216,36 @@ PARSED_MESSAGE_TEAM_REGISTER: str = (
 
 
 @pytest.mark.dependency(depends=["test_split_paragraphs"])
-@pytest.mark.parametrize('group_name, message, parsed_message', [
-    ('Alibi', MESSAGE_NO_LOOKUP, None),
-    ('Alibi', MESSAGE_GAME_REMINDER_LOOKUP,
-     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_GAME_REMINDER}"),
-    ('Alibi', MESSAGE_TEAM_REGISTER_LOOKUP,
-     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}"),
-    ('Detectit', MESSAGE_NO_LOOKUP, None),
-    ('Detectit', MESSAGE_GAME_REMINDER_LOOKUP,
-     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_GAME_REMINDER}"),
+@pytest.mark.parametrize('group_name, message, parsed_message, topic', [
+    ('Alibi',
+     MESSAGE_NO_LOOKUP,
+     '🟣 Alibi',
+     1),
+    ('Alibi',
+     MESSAGE_GAME_REMINDER_LOOKUP,
+     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_GAME_REMINDER}",
+     None),
+    ('Alibi',
+     MESSAGE_TEAM_REGISTER_LOOKUP,
+     f"🟣 Alibi{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}",
+     TEAM_REGISTER_LOOKUP),
+    ('Detectit',
+     MESSAGE_NO_LOOKUP,
+     '⚫️ Detectit',
+     None),
+    ('Detectit',
+     MESSAGE_GAME_REMINDER_LOOKUP,
+     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_GAME_REMINDER}",
+     None),
     ('Detectit', MESSAGE_TEAM_REGISTER_LOOKUP,
-     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}")])
-def test_parse_message(group_name, message, parsed_message):
+     f"⚫️ Detectit{NL*2}{PARSED_MESSAGE_TEAM_REGISTER}",
+     TEAM_REGISTER_LOOKUP)])
+def test_parse_message(group_name, message, parsed_message, topic):
     """Test parse_message func from app_vk."""
     assert parse_message(
         group_name=group_name,
-        message={'items': [{'text': message}]}) == parsed_message
+        message={'items': [{'text': message}]},
+        topic=topic) == parsed_message
 
 
 A_RATING_EXP: list[str] = [
