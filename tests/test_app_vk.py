@@ -1,11 +1,13 @@
 import pytest
 import sys
 import os
+import unittest.mock
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 from project.app_vk import (
+    datetime,
     define_post_topic, make_link_to_post, parse_message, parse_post,
     _game_dates_add_weekday_place, _get_post_image_url, _get_vk_chat_update,
     _get_vk_wall_update, _parse_post_add_link, _parse_post_checkin,
@@ -68,7 +70,7 @@ def test_define_post_topic(post_example, expected_topic) -> None:
 @pytest.mark.dependency(name="test_game_dates_add_weekday_place")
 @pytest.mark.parametrize('game_date, expected', [
     ('1 июня, 19:00 — секретное место на Василеостровской',
-     '1 июня (ЧТ), 19:00 — ресторан Цинь (16-я лин. B.O., 83)'),
+     '1 июня (СБ), 19:00 — ресторан Цинь (16-я лин. B.O., 83)'),
     ('7 июля, 19:30 — секретное место на Горьковской',
      '7 июля (ПТ), 19:30 — ресторан Parkking (Александровский парк, 4)'),
     ('22 августа, 12:13 — секретное место на Петроградской',
@@ -82,13 +84,13 @@ def test_define_post_topic(post_example, expected_topic) -> None:
      '25 ноября (СБ), 11:11 — Дворец Олимпия (Литейный пр., 14)'),
     ('31 декабря, 23:59 — секретное место в нигде',
      '31 декабря (ВС), 23:59 — секретное место в нигде')])
-def test_game_dates_add_weekday_place(game_date, expected):
-    """Test _game_dates_add_weekday_place func from app_vk."""
-    assert _game_dates_add_weekday_place([game_date]) == [expected], (
-        'In tested func datetime.datetime.now() is used! '
-        'Due to this - if error caused by abbreviation for the day of the '
-        'week - correct data according calendar in expected value or change '
-        'date in game_date.')
+def test_game_dates_add_weekday_place(game_date, expected, monkeypatch):
+    """Test _game_dates_add_weekday_place func from app_vk.
+    In tested func datetime.datetime.now() is used! Due to this the date
+    "today" will be replaced with mock 01.01.2023."""
+    with unittest.mock.patch('datetime.datetime') as mock_datetime:
+        mock_datetime.now.return_value = datetime(2023, 1, 1)
+    assert _game_dates_add_weekday_place([game_date]) == [expected]
 
 
 @pytest.mark.dependency(name="test_get_post_image_url")
