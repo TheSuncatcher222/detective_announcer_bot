@@ -101,7 +101,7 @@ def rebuild_team_config(
     teammate: str = teammate_decision['teammate']
     game_num: int = teammate_decision['game_num']
     decision: int = teammate_decision['decision']
-    if not game_num in team_config:
+    if game_num not in team_config:
         return None
     if decision == 1:
         if game_num == 0 and teammate not in team_config[0]['teammates']:
