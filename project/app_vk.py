@@ -180,13 +180,13 @@ def parse_post(
 
 
 def update_last_game(
-        group_name: str, message: str, saved_data: dict[any]) -> None:
+        group_name: str, saved_data: dict[any], text: str) -> None:
     """Search for game date and write it into saved_data for given group."""
     saved_data[f'last_{group_name.lower()}_game'] = search(
         pattern=(
             r'\d{1,2}\s(?:января|февраля|марта|апреля|мая|июня|июля|'
             r'августа|сентября|октября|ноября|декабря)'),
-        string=message).group(0)
+        string=text).group(0)
     return
 
 
