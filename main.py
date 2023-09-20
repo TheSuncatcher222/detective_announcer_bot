@@ -32,7 +32,7 @@ from project.data.app_data import (
 
     API_TELEGRAM_UPDATE_SEC, API_VK_UPDATE_SEC, LAST_API_ERR_DEL_SEC,
     REPLY_FATHER_MARKUP, REPLY_TO_FORWARD_ABORT_TEXT, REPLY_TO_FORWARD_TEXT,
-    SKIP_IF_NOT_IMPORTANT, SKIP_WHITE_LIST,
+    SKIP_IF_NOT_IMPORTANT, TOPICS_BLACK_LIST,
 
     TELEGRAM_BOT_TOKEN, TELEGRAM_TEAM_CHAT, TELEGRAM_USER,
     VK_TOKEN_ADMIN, VK_USER,
@@ -194,11 +194,7 @@ def vk_listen_wall(
     logger.info(f'New post available from {group_name}!')
     topic: str = define_post_topic(post=update)
     logger.info(f"Post's topic is: '{topic}'")
-    if (
-        (not SKIP_IF_NOT_IMPORTANT or topic in SKIP_WHITE_LIST)
-        and (topic != 'photos'
-             or saved_data[f'last_{group_name.lower()}_game']
-             in update['text'])):
+    if SKIP_IF_NOT_IMPORTANT and topic not in TOPICS_BLACK_LIST:
         parsed_post: dict[str, any] = parse_post(
             group_name=group_name,
             post=update,

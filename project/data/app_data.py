@@ -27,11 +27,10 @@ REPLY_FATHER_MARKUP: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
 REPLY_TO_FORWARD_TEXT: str = 'Я готов, что нужно переслать?'
 REPLY_TO_FORWARD_ABORT_TEXT: str = 'Хорошо, ничего никуда не перешлю!'
 
-# If true bot will send only posts in white list below
-SKIP_IF_NOT_IMPORTANT: bool = False
-SKIP_WHITE_LIST: list[str] = [
-    'checkin', 'game_results', 'preview',
-    'prize_results', 'stop-list', 'teams']
+# If true bot will ignore posts in black list below
+SKIP_IF_NOT_IMPORTANT: bool = True
+TOPICS_BLACK_LIST: list[str] = [
+    'feedback', 'films', 'prize_results', 'rating']
 
 """Groups main info data."""
 
