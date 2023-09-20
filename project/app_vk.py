@@ -11,6 +11,8 @@ from project.data.app_data import (
     DETECTIT, DETECTIT_GROUP_ID, DETECTIT_GROUP_LOGO, DETECTIT_POST_LINK,
     DETECTIT_TAG,
 
+    CHECK_ALIBI, CHECK_DETECTIT,
+
     GAME_REMINDER_LOOKUP, TEAM_REGISTER_LOOKUP, TEAM_REGISTER_TEXT,
     STOP_LIST_ACCEPT, STOP_LIST_DENY,
 
@@ -79,12 +81,15 @@ def get_vk_wall_update_groups(
         vk_bot: VkApi.method) -> tuple[str, dict[str, any] | None]:
     """Manage get_vk_wall_update function: search vk groups for a new post and
     return the first one or None if there are no updates."""
-    group_name: str = ALIBI
-    update_wall: dict[str, any] | None = _get_vk_wall_update(
+    group_name: None = None
+    update_wall: None = None
+    if CHECK_ALIBI:
+        group_name: str = ALIBI
+        update_wall: dict[str, any] | None = _get_vk_wall_update(
             last_wall_id=last_wall_id_alibi,
             vk_bot=vk_bot,
             vk_group_id=ALIBI_GROUP_ID)
-    if update_wall is None:
+    if CHECK_DETECTIT and update_wall is None:
         group_name: str = DETECTIT
         update_wall: dict[str, any] | None = _get_vk_wall_update(
             last_wall_id=last_wall_id_detectit,
