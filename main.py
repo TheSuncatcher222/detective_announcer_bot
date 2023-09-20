@@ -10,11 +10,11 @@ for scheduling game days than Telegram can offer, and keep a chat record of
 the team's victories.
 =================
 Author: Svidunovich Kirill
-        Altaie21817@gmail.com
-        https://github.com/Altair21817
+        TheSuncatcher222@gmail.com
+        https://github.com/TheSuncatcher222
 =================
 Project description and instructions:
-https://github.com/Altair21817/Detective_Announcer_Bot
+https://github.com/TheSuncatcher222/detective_announcer_bot
 =================
 """
 
