@@ -138,6 +138,7 @@ def parse_post(
         text=post['text'])
     get_post_text: dict[str, callable] = {
         'checkin': _parse_post_checkin,
+        'films': _parse_post_films,
         'game_results': _parse_post_game_results,
         'other': _parse_post_other,
         'prize_results': _parse_post_prize_results,
@@ -323,6 +324,11 @@ def _parse_post_checkin(
         'репост этой записи:',
         make_link_to_post(group_name=group_name, post_id=post_id),
         results_date]
+
+
+def _parse_post_films(splitted_text: list[str], **kwargs) -> list[str]:
+    """Parse post's text if the topic is 'films'."""
+    return splitted_text[:-1]
 
 
 def _parse_post_game_results(
