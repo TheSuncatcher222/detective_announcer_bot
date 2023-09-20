@@ -19,6 +19,9 @@ VK_USER: str = os.getenv('VK_USER')
 API_TELEGRAM_UPDATE_SEC: int = 1
 API_VK_UPDATE_SEC: int = 60
 
+CHECK_ALIBI: bool = True
+CHECK_DETECTIT: bool = False
+
 LAST_API_ERR_DEL_SEC: int = 60 * 60
 
 REPLY_FATHER_BUTTONS: list[list[str]] = [['/forward', '/forward_abort']]
