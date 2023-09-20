@@ -40,6 +40,8 @@ from project.data.app_data import (
     ALIBI, BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
     CALLBACK_DATA_NONE,
 
+    CHECK_ALIBI, CHECK_DETECTIT,
+
     API_ERROR_NAME, DATA_FOLDER, SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
     TEAM_NAME, TEAM_CAPITAN_PROP,
 
@@ -69,6 +71,14 @@ ALL_DATA: tuple[str, int] = (
     VK_USER)
 
 logger: logging.Logger = app_logger.get_logger(__name__)
+
+
+def check_groups() -> None:
+    """Check if at least one check_group is True."""
+    if not CHECK_ALIBI and not CHECK_DETECTIT:
+        logger.critical('All groups check are disabled!')
+        raise SystemExit
+    return
 
 
 def check_env(data: tuple[str, int]) -> None:
@@ -397,6 +407,7 @@ async def main() -> None:
     """Check initial data. Manage asyncio tasks."""
     try:
         logger.info('Program is running.')
+        check_groups()
         check_env(data=ALL_DATA)
         check_telegram_bot_response(token=TELEGRAM_BOT_TOKEN)
         vk_bot: VkApi.method = init_vk_bot(
