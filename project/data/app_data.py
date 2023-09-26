@@ -36,7 +36,7 @@ REPLY_TO_FORWARD_ABORT_TEXT: str = 'Хорошо, ничего никуда не
 
 # If true bot will ignore posts in black list below
 SKIP_IF_NOT_IMPORTANT: bool = True
-TOPICS_BLACK_LIST: tuple(str) = (
+TOPICS_BLACK_LIST: tuple[str] = (
     'feedback', 'films', 'partners', 'prize_results', 'rating')
 
 
