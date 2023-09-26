@@ -146,6 +146,7 @@ def parse_post(
         'films': _parse_post_films,
         'game_results': _parse_post_game_results,
         'other': _parse_post_other,
+        'partners': _parse_post_partners, 
         'prize_results': _parse_post_prize_results,
         'photos': _parse_post_add_link,
         'rating': _parse_post_add_link,
@@ -352,6 +353,11 @@ def _parse_post_game_results(
 
 def _parse_post_other(splitted_text: list[str], **kwargs) -> list[str]:
     """Parse post's text if the topic is 'other'."""
+    return splitted_text[:-1]
+
+
+def _parse_post_partners(splitted_text: list[str], **kwargs) -> list[str]:
+    """Parse post's text if the topic is 'partners'."""
     return splitted_text[:-1]
 
 

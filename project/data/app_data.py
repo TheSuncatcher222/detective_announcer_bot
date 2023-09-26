@@ -4,7 +4,9 @@ from telegram import InlineKeyboardButton, ReplyKeyboardMarkup
 
 load_dotenv()
 
+
 """Env data."""
+
 
 TEAM_CAPITAN_PROP: str = os.getenv('TEAM_CAPITAN_PROP')
 TEAM_NAME: str = os.getenv('TEAM_NAME')
@@ -14,7 +16,9 @@ TELEGRAM_USER: str = os.getenv('TELEGRAM_USER')
 VK_TOKEN_ADMIN: str = os.getenv('VK_TOKEN_ADMIN')
 VK_USER: str = os.getenv('VK_USER')
 
+
 """App settings."""
+
 
 API_TELEGRAM_UPDATE_SEC: int = 1
 API_VK_UPDATE_SEC: int = 60
@@ -32,10 +36,12 @@ REPLY_TO_FORWARD_ABORT_TEXT: str = 'Хорошо, ничего никуда не
 
 # If true bot will ignore posts in black list below
 SKIP_IF_NOT_IMPORTANT: bool = True
-TOPICS_BLACK_LIST: list[str] = [
-    'feedback', 'films', 'prize_results', 'rating']
+TOPICS_BLACK_LIST: tuple(str) = (
+    'feedback', 'films', 'partners', 'prize_results', 'rating')
+
 
 """Groups main info data."""
+
 
 ALIBI: str = 'Alibi'
 ALIBI_GROUP_ID: int = 40914100
@@ -60,7 +66,9 @@ NON_PINNED_POST_ORDER: int = 1
 MAX_CAPTION_LENGTH: int = 1024
 MAX_LINK_LENGTH: int = 100
 
+
 """Data to text parsing."""
+
 
 EMOJI_SYMBOLS: dict[int, str] = {
     1: '1️⃣',
@@ -171,6 +179,7 @@ POST_TOPICS: dict[str, str] = {
     'Результаты розыгрыша': 'prize_results',
     'Отзыв от команды': 'feedback',
     'фото': 'photos',
+    'Наши партнеры': 'partners',
     'Кинопоиска': 'films',}
 
 TEAM_GUEST: str = '(гость)'
@@ -192,7 +201,9 @@ TEAM_REGISTER_TEXT: str = (
     '· 500 ₽ с человека — до дня игры,\n'
     '· 600 ₽ с человека — в день игры.')
 
+
 """JSON settings."""
+
 
 API_ERROR_NAME: str = 'last_api_error.json'
 
