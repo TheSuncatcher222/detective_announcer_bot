@@ -1,0 +1,12 @@
+version: '3.8'
+
+volumes:
+  detective_announcer_bot_database_volume:
+
+services:
+
+  detective_announcer_bot_backend:
+    image: thesuncatcher222/detective_announcer_bot:latest
+    env_file: .env
+    volumes:
+      - detective_announcer_bot_database_volume:/app/project/data/database
