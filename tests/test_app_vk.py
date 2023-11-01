@@ -68,6 +68,7 @@ def test_define_post_topic(post_example, expected_topic) -> None:
     assert define_post_topic(post_example) == expected_topic
 
 
+@pytest.mark.skip(reason="mock_datetime does't work")
 @pytest.mark.dependency(name="test_game_dates_add_weekday_place")
 @pytest.mark.parametrize('game_date, expected', [
     ('1 июня, 19:00 — секретное место на Василеостровской',
