@@ -42,7 +42,8 @@ from project.data.app_data import (
 
     CHECK_ALIBI, CHECK_DETECTIT,
 
-    API_ERROR_NAME, DATA_FOLDER, SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
+    API_ERROR_NAME, DATABASE_FOLDER,
+    SAVED_DATA_JSON_DEFAULT, SAVED_DATA_JSON_NAME,
     TEAM_NAME, TEAM_CAPITAN_PROP,
 
     GAME_REMINDER_LOOKUP)
@@ -83,6 +84,7 @@ def check_groups() -> None:
 
 def check_env(data: tuple[str, int]) -> None:
     """Check env data."""
+    print(data)
     if type(data) is not tuple or len(data) == 0 or not all(data):
         logger.critical('Env data is not full! Check "project/data/.env"!')
         raise SystemExit
@@ -121,7 +123,7 @@ def saved_data_check(
     default value to them."""
     if saved_data is None:
         saved_data: any = file_read(
-            file_name=f'{DATA_FOLDER}{SAVED_DATA_JSON_NAME}')
+            file_name=f'{DATABASE_FOLDER}{SAVED_DATA_JSON_NAME}')
     if saved_data is None:
         return SAVED_DATA_JSON_DEFAULT
     for key in (
@@ -182,7 +184,7 @@ def vk_listen_message(
         key_group: str = 'last_vk_message_id_detectit'
     saved_data[key_group] = message['items'][0]['id']
     file_write(
-        file_name=f'{DATA_FOLDER}{SAVED_DATA_JSON_NAME}',
+        file_name=f'{DATABASE_FOLDER}{SAVED_DATA_JSON_NAME}',
         write_data=saved_data)
     logger.info('Done!')
     return
@@ -222,7 +224,7 @@ def vk_listen_wall(
         key_group: str = 'last_vk_wall_id_detectit'
     saved_data[key_group] = update['id']
     file_write(
-        file_name=f'{DATA_FOLDER}{SAVED_DATA_JSON_NAME}',
+        file_name=f'{DATABASE_FOLDER}{SAVED_DATA_JSON_NAME}',
         write_data=saved_data)
     logger.info('Done!')
     return
@@ -231,7 +233,7 @@ def vk_listen_wall(
 async def last_api_error_delete() -> None:
     """Delete periodically the file 'last_api_error.json'."""
     while 1:
-        file_remove(f'{DATA_FOLDER}{API_ERROR_NAME}')
+        file_remove(f'{DATABASE_FOLDER}{API_ERROR_NAME}')
         await asyncio.sleep(LAST_API_ERR_DEL_SEC)
 
 
@@ -359,14 +361,14 @@ async def telegram_listener(
         """Error on the API side.
         The program will continue to run normally."""
         last_api_error: str = file_read(
-            file_name=f'{DATA_FOLDER}{API_ERROR_NAME}')
+            file_name=f'{DATABASE_FOLDER}{API_ERROR_NAME}')
         err_str = f'From telegram_listener: {str(err)}'
         if err_str != last_api_error:
             logger.warning()
             send_message(
                 bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
             file_write(
-                file_name=f'{DATA_FOLDER}{API_ERROR_NAME}',
+                file_name=f'{DATABASE_FOLDER}{API_ERROR_NAME}',
                 write_data=err_str)
 
 
@@ -390,14 +392,14 @@ async def vk_listener(
             """Error on the API side.
             The program will continue to run normally."""
             last_api_error: str = file_read(
-                file_name=f'{DATA_FOLDER}{API_ERROR_NAME}')
+                file_name=f'{DATABASE_FOLDER}{API_ERROR_NAME}')
             err_str: str = f'From vk_listener: {str(err)}'
             if err_str != last_api_error:
                 logger.warning(err_str)
                 send_message(
                     bot=telegram_bot, message=err_str, chat_id=TELEGRAM_USER)
             file_write(
-                file_name=f'{DATA_FOLDER}{API_ERROR_NAME}',
+                file_name=f'{DATABASE_FOLDER}{API_ERROR_NAME}',
                 write_data=err_str)
         logger.debug(f'vk_listener sleep for {API_VK_UPDATE_SEC} sec.')
         await asyncio.sleep(API_VK_UPDATE_SEC)

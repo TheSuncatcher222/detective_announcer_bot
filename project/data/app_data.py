@@ -208,6 +208,7 @@ TEAM_REGISTER_TEXT: str = (
 API_ERROR_NAME: str = 'last_api_error.json'
 
 DATA_FOLDER: str = 'project/data/'
+DATABASE_FOLDER: str = f'{DATA_FOLDER}database/'
 SAVED_DATA_JSON_NAME: str = 'saved_data.json'
 SAVED_DATA_JSON_DEFAULT: dict[str, int | dict[str, any]] = {
     'last_alibi_game': 'NoData',
