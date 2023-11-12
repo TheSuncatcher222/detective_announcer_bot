@@ -284,6 +284,16 @@ def send_photo(
     if message:
         message: str = message if len(message) <= MAX_CAPTION_LENGTH else (
             message[:992] + ' ... (сообщение слишком длинное)')
+    """
+    import textwrap as tw
+    dedented_text = tw.dedent(text)
+    short = tw.shorten(dedented_text, 100)
+    short_wrap = tw.fill(short, width=60)
+    print(short_wrap)
+    # Модуль `textwrap` может использоваться для форматирования
+    # текста в ситуациях, когда требуется [...]
+    Если текст без пробелов удаляется из исходного текста как часть усечения, он заменяется значением заполнителя. Значение по умолчанию [...] можно заменить, указав аргумент placeholder для функции shorten().
+    """ 
     try:
         bot.send_photo(
             caption=message,
