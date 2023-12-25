@@ -84,7 +84,6 @@ def check_groups() -> None:
 
 def check_env(data: tuple[str, int]) -> None:
     """Check env data."""
-    print(data)
     if type(data) is not tuple or len(data) == 0 or not all(data):
         logger.critical('Env data is not full! Check "project/data/.env"!')
         raise SystemExit
@@ -103,7 +102,7 @@ def file_read(file_name: str) -> any or None:
 
 def file_write(file_name: str, write_data: any) -> None:
     """Write given data to the file. If the file doesn't exists create new."""
-    with open(file_name, 'w') as write_file:
+    with open(file_name, 'w+') as write_file:
         json.dump(write_data, write_file)
     return
 
@@ -122,10 +121,10 @@ def saved_data_check(
     """Check saved data in json file. if some data is missing - assigns a
     default value to them."""
     if saved_data is None:
+        return SAVED_DATA_JSON_DEFAULT
+    if saved_data is not None:
         saved_data: any = file_read(
             file_name=f'{DATABASE_FOLDER}{SAVED_DATA_JSON_NAME}')
-    if saved_data is None:
-        return SAVED_DATA_JSON_DEFAULT
     for key in (
             'last_alibi_game',
             'last_detectit_game',
