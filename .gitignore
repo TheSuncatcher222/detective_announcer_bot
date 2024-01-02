@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 
 # json files
-last_api_error.json
-saved_data.json
+*.json
