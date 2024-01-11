@@ -22,6 +22,8 @@ import asyncio
 import json
 import logging
 import os
+import traceback
+
 from telegram.ext import (
     Updater,
     Filters,
@@ -202,6 +204,7 @@ def vk_listen_wall(
         vk_bot=vk_bot)
     if not update:
         return
+    # TODO: сгенерировать ссылку на пост.
     logger.info(f'New post available from {group_name}!')
     topic: str = define_post_topic(post=update)
     logger.info(f"Post's topic is: '{topic}'")
@@ -362,6 +365,11 @@ async def telegram_listener(
         last_api_error: str = file_read(
             file_name=f'{DATABASE_FOLDER}{API_ERROR_NAME}')
         err_str = f'From telegram_listener: {str(err)}'
+        err_str: str = (
+                f'From telegram_listener: {str(err)}'
+                '\n\n'
+                f'{traceback.format_exc()}'
+            )
         if err_str != last_api_error:
             logger.warning()
             send_message(
@@ -392,7 +400,11 @@ async def vk_listener(
             The program will continue to run normally."""
             last_api_error: str = file_read(
                 file_name=f'{DATABASE_FOLDER}{API_ERROR_NAME}')
-            err_str: str = f'From vk_listener: {str(err)}'
+            err_str: str = (
+                f'From vk_listener: {str(err)}'
+                '\n\n'
+                f'{traceback.format_exc()}'
+            )
             if err_str != last_api_error:
                 logger.warning(err_str)
                 send_message(
@@ -404,10 +416,17 @@ async def vk_listener(
         await asyncio.sleep(API_VK_UPDATE_SEC)
 
 
-async def main() -> None:
-    """Check initial data. Manage asyncio tasks."""
+def init_app_data(
+) -> tuple[VkApi.method, TelegramBot, dict[str, int | dict[str, any]]]:
+    """
+    Check settings, init vk and telegram bots and saved_data.
+    
+    Return data in this order:
+        - vk bot instance
+        - telegram bot instance
+        - saved_data dict
+    """
     try:
-        logger.info('Program is running.')
         check_groups()
         check_env(data=ALL_DATA)
         check_telegram_bot_response(token=TELEGRAM_BOT_TOKEN)
@@ -415,11 +434,18 @@ async def main() -> None:
             token=VK_TOKEN_ADMIN, user_id=VK_USER)
         telegram_bot: TelegramBot = init_telegram_bot(
             token=TELEGRAM_BOT_TOKEN)
+        saved_data: dict[str, int | dict[str, any]] = saved_data_check()
     except SystemExit as err:
         """Error in data. Program execution is not possible."""
         logger.critical(err)
         raise
-    saved_data: dict[str, int | dict[str, any]] = saved_data_check()
+    return vk_bot, telegram_bot, saved_data
+
+
+async def main() -> None:
+    """Check initial data. Manage asyncio tasks."""
+    logger.info('Program is running.')
+    vk_bot, telegram_bot, saved_data = init_app_data()
     logger.info('All data are available. Start asyncio API polling.')
     task_delete_last_api_error: asyncio.Task[None] = asyncio.create_task(
         last_api_error_delete())
