@@ -173,6 +173,7 @@ POST_TOPICS: dict[str, str] = {
     'preview': 'preview',
     'стоп_лист': 'stop-list',
     'Stop-list': 'stop-list',
+    'Do not cross': 'stop-list',
     'checkin': 'checkin',
     'teams': 'teams',
     'Итоги розыгрыша': 'prize_results',
