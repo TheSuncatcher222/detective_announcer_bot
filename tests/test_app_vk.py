@@ -18,7 +18,7 @@ from project.app_vk import (
 from project.data.app_data import (
     TEAM_NAME, TEAM_CAPITAN_PROP, TEAM_REGISTER_LOOKUP)
 
-from vk_wall_examples import (
+from tests.vk_wall_examples import (
     A_EXAMPLE_CHECKIN, A_EXAMPLE_GAME_RESULTS, A_EXAMPLE_OTHER,
     A_EXAMPLE_PREVIEW, A_EXAMPLE_PRIZE_RESULTS,
     A_EXAMPLE_RATING, A_EXAMPLE_TASKS, A_EXAMPLE_TEAMS,
