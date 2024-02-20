@@ -174,6 +174,7 @@ EXPECTED_3: dict = {
                 'Teammate_2': 1}}}}
 
 
+# TODO: починить тест.
 @pytest.mark.parametrize('saved_data, expected', [
     (SAVED_DATA_1, EXPECTED_1),
     (SAVED_DATA_2, EXPECTED_2),
