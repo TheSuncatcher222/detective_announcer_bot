@@ -1,7 +1,9 @@
 from datetime import datetime
+import logging
 import os
+from re import Match, findall, search, sub
+
 from PyPDF2 import PdfReader
-from re import findall, search, sub
 import requests
 from vk_api import VkApi
 from vk_api.exceptions import ApiError
@@ -19,6 +21,10 @@ from project.data.app_data import (
     LOCATIONS, MEDALS, TEAM_NAME,
 
     DATA_FOLDER, POST_TOPICS, PINNED_POST_ORDER, NON_PINNED_POST_ORDER)
+
+import project.app_logger as app_logger
+
+logger: logging.Logger = app_logger.get_logger(__name__)
 
 
 def define_message_topic(message: str) -> str | None:
@@ -312,16 +318,25 @@ def _parse_post_checkin(
     if group_name == ALIBI:
         reg_link_from: int = -5
         reg_link_to: int = -3
-        results_date: str = search(
-            r'Результаты будут в ночь с \d{1,2} на \d{1,2} \w+\.',
-            splitted_text[-2]).group(0)
+        results_date: Match[str] | None = search(
+            r'в ночь с \d{1,2} на \d{1,2} \w+\.',
+            splitted_text[-2])
+        if results_date is not None:
+            results_date: str = results_date.group(0)
+            results_date = f'Результаты будут {results_date}'
+        else:
+            results_date: str = 'Результаты будут объявлены позже.'
     else:
         reg_link_from: int = -3
         reg_link_to: int = -2
         results_date: str = search(
             r'в ночь на \d{1,2} \w+',
-            splitted_text[-2]).group(0)
-        results_date = f'Результаты будут {results_date}'
+            splitted_text[-2])
+        if results_date is not None:
+            results_date: str = results_date.group(0)
+            results_date = f'Результаты будут {results_date}'
+        else:
+            results_date: str = 'Результаты будут объявлены позже.'
     return [
         *splitted_text[:2],
         *splitted_text[reg_link_from:reg_link_to],
