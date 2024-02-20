@@ -6,7 +6,11 @@ volumes:
 services:
 
   detective_announcer_bot_backend:
-    image: thesuncatcher222/detective_announcer_bot:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python main.py
     env_file: .env
     volumes:
-      - detective_announcer_bot_database_volume:/app/project/data/database
+      - .:/app
+    restart: unless-stopped
