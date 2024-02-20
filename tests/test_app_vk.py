@@ -537,6 +537,7 @@ def test_parse_post_teams(group_name, post_text, expected):
             + make_link_to_post(
                 group_name='Alibi', post_id=A_EXAMPLE_PRIZE_RESULTS['id'])],
         'game_dates': None}),
+    # TODO. Исправить _parse_post_preview
     ('Alibi', A_EXAMPLE_PREVIEW, {
         'post_id': A_EXAMPLE_PREVIEW['id'],
         'post_image_url': _get_post_image_url(
