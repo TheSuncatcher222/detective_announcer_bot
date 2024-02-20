@@ -39,8 +39,9 @@ from project.data.app_data import (
     TELEGRAM_BOT_TOKEN, TELEGRAM_TEAM_CHAT, TELEGRAM_USER,
     VK_TOKEN_ADMIN, VK_USER,
 
-    ALIBI, BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT,
-    CALLBACK_DATA_NONE,
+    ALIBI, ALIBI_POST_LINK, DETECTIT_POST_LINK,
+    
+    BUTTONS_TEAM_CONFIG_ALIBI, BUTTONS_TEAM_CONFIG_DETECTIT, CALLBACK_DATA_NONE,
 
     CHECK_ALIBI, CHECK_DETECTIT,
 
@@ -118,15 +119,17 @@ def file_remove(file_name: str) -> None:
     return
 
 
-def saved_data_check(
-        saved_data: any = None) -> dict[str, int | dict[str, any]]:
-    """Check saved data in json file. if some data is missing - assigns a
-    default value to them."""
+def saved_data_check() -> dict[str, int | dict[str, any]]:
+    """
+    Check saved data in json file. if some data is missing - assigns a
+    default value to them.
+    """
+    saved_data: any = file_read(
+        file_name=f'{DATABASE_FOLDER}{SAVED_DATA_JSON_NAME}')
+    
     if saved_data is None:
         return SAVED_DATA_JSON_DEFAULT
-    if saved_data is not None:
-        saved_data: any = file_read(
-            file_name=f'{DATABASE_FOLDER}{SAVED_DATA_JSON_NAME}')
+        
     for key in (
             'last_alibi_game',
             'last_detectit_game',
@@ -205,7 +208,12 @@ def vk_listen_wall(
     if not update:
         return
     # TODO: сгенерировать ссылку на пост.
-    logger.info(f'New post available from {group_name}!')
+    # TODO: подправить ссылку.
+    if group_name == ALIBI:
+        link: str = f"{ALIBI_POST_LINK}40914100_{update['id']}"
+    else:
+        link: str = f"{DETECTIT_POST_LINK}40914100_{update['id']}"
+    logger.info(f'New post available from {group_name} ({link})!')
     topic: str = define_post_topic(post=update)
     logger.info(f"Post's topic is: '{topic}'")
     if SKIP_IF_NOT_IMPORTANT and topic not in TOPICS_BLACK_LIST:
